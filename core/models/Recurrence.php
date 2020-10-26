@@ -180,6 +180,10 @@ class Recurrence extends \yii\db\ActiveRecord
         return $this->hasOne(Transaction::class, ['id' => 'transaction_id']);
     }
 
+    public function extraFields()
+    {
+        return ['transaction'];
+    }
 
     /**
      * @return array
