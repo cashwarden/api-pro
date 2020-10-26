@@ -90,6 +90,7 @@ $config = [
                         'v1/record',
                         'v1/transaction',
                         'v1/recurrence',
+                        'v1/budget',
                     ]
                 ],
                 '<module>/<controller:\w+>/<action:\w+>/<id:\d+>' => '<module>/<controller>/<action>',

@@ -3,6 +3,7 @@
 namespace app\modules\v1\controllers;
 
 use app\core\actions\CreateAction;
+use app\core\actions\UpdateAction;
 use app\core\exceptions\InternalException;
 use app\core\exceptions\InvalidArgumentException;
 use app\core\helpers\SearchHelper;
@@ -72,6 +73,7 @@ class ActiveController extends \yii\rest\ActiveController
         $actions = parent::actions();
         $actions['index']['prepareDataProvider'] = [$this, 'prepareDataProvider'];
         $actions['create']['class'] = CreateAction::class;
+        $actions['update']['class'] = UpdateAction::class;
         return $actions;
     }
 
