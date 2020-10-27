@@ -96,14 +96,19 @@ class SiteController extends Controller
                             'icon' => 'anticon-database',
                         ],
                         [
-                            'text' => '定时',
-                            'link' => '/recurrence/index',
-                            'icon' => 'anticon-field-time',
-                        ],
-                        [
                             'text' => '分析',
                             'link' => '/analysis/index',
                             'icon' => 'anticon-area-chart',
+                        ],
+                        [
+                            'text' => '预算',
+                            'link' => '/budget/index',
+                            'icon' => 'anticon-area-chart',
+                        ],
+                        [
+                            'text' => '定时',
+                            'link' => '/recurrence/index',
+                            'icon' => 'anticon-field-time',
                         ],
                         [
                             'text' => '设置',
