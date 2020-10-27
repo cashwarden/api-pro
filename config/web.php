@@ -67,7 +67,14 @@ $config = [
                 "GET <module>/accounts/types" => '<module>/account/types',
                 "GET <module>/accounts/overview" => '<module>/account/overview',
                 "POST <module>/reset-token" => '<module>/user/reset-token',
+
                 "GET <module>/users/auth-clients" => '<module>/user/get-auth-clients',
+                'POST <module>/users/password-reset' => '<module>/user/password-reset',
+                'POST <module>/users/change-password' => '<module>/user/change-password',
+                'POST <module>/users/password-reset-token-verification' =>
+                    '<module>/user/password-reset-token-verification',
+                'POST <module>/users/password-reset-request' => '<module>/user/password-reset-request',
+
                 "GET <module>/transactions/<alias:types|export>" => '<module>/transaction/<alias>',
                 "POST <module>/transactions/upload" => '<module>/transaction/upload',
                 "GET <module>/records/overview" => '<module>/record/overview',

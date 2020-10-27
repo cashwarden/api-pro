@@ -55,4 +55,7 @@ return [
     'The {attribute} not found.' => '{attribute} 未找到。',
     'Upload file failed' => '上传文件失败',
     'Category not found.' => '分类未找到',
+    'Incorrect old password.' => '旧密码不正确。',
+    'Please email to activate your account first.' => '请先去邮件激活您的账号。',
+    'Incorrect password reset token.' => '密码重置令牌已失效或者不正确。',
 ];

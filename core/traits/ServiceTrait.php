@@ -11,6 +11,7 @@ namespace app\core\traits;
 use app\core\services\AccountService;
 use app\core\services\AnalysisService;
 use app\core\services\CategoryService;
+use app\core\services\MailerService;
 use app\core\services\RecurrenceService;
 use app\core\services\RuleService;
 use app\core\services\TagService;
@@ -33,6 +34,7 @@ use yii\base\InvalidConfigException;
  * @property TagService $tagService
  * @property RecurrenceService $recurrenceService
  * @property UploadService $uploadService
+ * @property MailerService $mailerService
  */
 trait ServiceTrait
 {
@@ -155,6 +157,18 @@ trait ServiceTrait
             return Yii::createObject(UploadService::class);
         } catch (InvalidConfigException $e) {
             return new UploadService();
+        }
+    }
+
+    /**
+     * @return MailerService|object
+     */
+    public function getMailerService()
+    {
+        try {
+            return Yii::createObject(MailerService::class);
+        } catch (InvalidConfigException $e) {
+            return new MailerService();
         }
     }
 }
