@@ -69,7 +69,7 @@ class User extends ActiveRecord implements IdentityInterface
     public static function findIdentity($id)
     {
         return static::find()
-            ->where(['id' => $id, 'status' => UserStatus::ACTIVE])
+            ->where(['id' => $id, 'status' => [UserStatus::ACTIVE, UserStatus::UNACTIVATED]])
             ->limit(1)
             ->one();
     }
@@ -164,14 +164,14 @@ class User extends ActiveRecord implements IdentityInterface
      * @param string $token password reset token
      * @return User|array|ActiveRecord|null
      */
-    public static function findByPasswordResetToken($token)
+    public static function findByPasswordResetToken(string $token)
     {
         if (!static::isPasswordResetTokenValid($token)) {
             return null;
         }
 
         return static::find()
-            ->where(['password_reset_token' => $token, 'status' => [UserStatus::ACTIVE]])
+            ->where(['password_reset_token' => $token, 'status' => [UserStatus::ACTIVE, UserStatus::UNACTIVATED]])
             ->one();
     }
 

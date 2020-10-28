@@ -69,6 +69,10 @@ $config = [
                 "POST <module>/reset-token" => '<module>/user/reset-token',
 
                 "GET <module>/users/auth-clients" => '<module>/user/get-auth-clients',
+                'POST <module>/users/confirm' => '<module>/user/confirm',
+                'POST <module>/users/send-confirmation' => '<module>/user/send-confirmation',
+                'POST <module>/users/me' => '<module>/user/me-update',
+                'GET <module>/users/me' => '<module>/user/me',
                 'POST <module>/users/password-reset' => '<module>/user/password-reset',
                 'POST <module>/users/change-password' => '<module>/user/change-password',
                 'POST <module>/users/password-reset-token-verification' =>

@@ -287,7 +287,9 @@ class UserService
         }
 
         if (!$user = User::findByPasswordResetToken($token)) {
-            throw new InvalidArgumentException('链接无效或者已失效，请重新操作。');
+            throw new InvalidArgumentException(
+                Yii::t('app', 'The link is invalid or has expired, please try again.')
+            );
         }
         return $user;
     }
