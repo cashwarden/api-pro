@@ -112,7 +112,7 @@ class MailerService
     public function sendConfirmationMessage(User $user)
     {
         $this->getUserService()->setPasswordResetToken($user);
-        $resetURL = params('frontendURL') . '#/confirm-email?token=' . $user->password_reset_token;
+        $resetURL = params('frontendURL') . '#/passport/confirm-email?token=' . $user->password_reset_token;
         $params = ['user' => $user, 'resetURL' => $resetURL];
         return $this->sendMessage($user->email, $this->getConfirmationSubject(), 'confirmation', $params);
     }
@@ -127,7 +127,7 @@ class MailerService
     public function sendPasswordResetMessage(User $user)
     {
         $email = $user->email;
-        $resetURL = params('frontendURL') . '#/password-reset?token=' . $user->password_reset_token;
+        $resetURL = params('frontendURL') . '#/passport/password-reset?token=' . $user->password_reset_token;
         $params = ['user' => $user, 'resetURL' => $resetURL];
         return $this->sendMessage($email, $this->getPasswordResetSubject(), 'password-reset-token', $params);
     }
