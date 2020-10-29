@@ -6,6 +6,7 @@ grumphp:
                 - ./web/*
                 - ./migrations/*,
                 - ./vendor/*
+                - ./mail/*
                 - ./runtime/*
                 - ./requirements.php
                 - ./_ide_helper.php
