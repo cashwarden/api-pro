@@ -55,4 +55,11 @@ return [
     'The {attribute} not found.' => '{attribute} 未找到。',
     'Upload file failed' => '上传文件失败',
     'Category not found.' => '分类未找到',
+    'Incorrect old password.' => '旧密码不正确。',
+    'Please email to activate your account first.' => '请先去邮件激活您的账号。',
+    'Incorrect password reset token.' => '密码重置令牌已失效或者不正确。',
+    'The link is invalid or has expired, please try again.' => '链接无效或者已失效，请重新操作。',
+    'The Token is not valid.' => '令牌无效。',
+    'This email address has already been taken.' => '该电子邮件地址已被使用。',
+    'This username has already been taken.' => '该用户名已经被使用。',
 ];
