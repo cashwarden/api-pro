@@ -104,6 +104,7 @@ class CreateUserCest
         $I->seeResponseCodeIs(HttpCode::OK); // 200
         $I->seeResponseIsJson();
         $I->seeResponseContainsJson(['code' => 0]);
-        $I->seeResponseJsonMatchesXpath('//data/username');
+        $I->seeResponseJsonMatchesXpath('//data/token');
+        $I->seeResponseJsonMatchesXpath('//data/user/username');
     }
 }
