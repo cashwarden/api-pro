@@ -189,6 +189,7 @@ class UserController extends ActiveController
         /** @var JoinConfirm $model */
         $model = $this->validate($model, Yii::$app->request->bodyParams);
         $user = $model->confirm();
+        Yii::$app->user->setIdentity($user);
         $token = $this->userService->getToken();
         return [
             'user' => $user,
