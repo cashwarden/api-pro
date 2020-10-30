@@ -62,4 +62,7 @@ return [
     'The Token is not valid.' => '令牌无效。',
     'This email address has already been taken.' => '该电子邮件地址已被使用。',
     'This username has already been taken.' => '该用户名已经被使用。',
+    'Your mailbox has been activated.' => '您的邮箱已经激活。',
+    'The activation email was sent successfully, please activate within 24 hours.' => '激活邮件发送成功，请在24小时内激活。',
+    'Updated successfully.' => '更新成功',
 ];
