@@ -37,8 +37,7 @@ class UserController extends ActiveController
 
     /**
      * @return User
-     * @throws InvalidArgumentException
-     * @throws \Throwable
+     * @throws InvalidArgumentException|\Throwable
      */
     public function actionJoin()
     {
@@ -50,8 +49,8 @@ class UserController extends ActiveController
             if (params('verificationEmail')) {
                 $this->mailerService->sendConfirmationMessage($user);
             }
+            Yii::$app->user->setIdentity($user);
             $token = $this->userService->getToken();
-            $user = Yii::$app->user->identity;
             return [
                 'user' => $user,
                 'token' => (string)$token,
