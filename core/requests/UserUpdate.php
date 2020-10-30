@@ -3,7 +3,6 @@
 namespace app\core\requests;
 
 use app\core\models\User;
-use app\core\services\MailerService;
 use app\core\types\UserStatus;
 use Yii;
 use yii\base\Model;
@@ -61,9 +60,7 @@ class UserUpdate extends Model
         /** @var User $user */
         $user = User::find()->where(['id' => $this->id])->one();
         $user->username = $this->username;
-        $emailChanged = false;
         if ($this->email && $user->email !== $this->email) {
-            $emailChanged = true;
             $user->email = $this->email;
             $user->status = UserStatus::UNACTIVATED;
         }
@@ -71,13 +68,13 @@ class UserUpdate extends Model
             throw new Exception(Setup::errorMessage($user->firstErrors));
         }
 
-        if ($emailChanged && params('verificationEmail')) {
-            try {
-                (new MailerService())->sendConfirmationMessage($user);
-            } catch (\Exception $e) {
-                throw new \Exception('您的邮箱地址有误，请重新输入');
-            }
-        }
+//        if ($this->emailChanged && params('verificationEmail')) {
+//            try {
+//                (new MailerService())->sendConfirmationMessage($user);
+//            } catch (\Exception $e) {
+//                throw new \Exception('您的邮箱地址有误，请重新输入');
+//            }
+//        }
         return $user;
     }
 }

@@ -123,7 +123,7 @@ class UserController extends ActiveController
     }
 
     /**
-     * @return bool
+     * @return string
      * @throws Exception
      * @throws \yii\base\InvalidConfigException
      */
@@ -132,9 +132,12 @@ class UserController extends ActiveController
         /** @var User $user */
         $user = User::find()->where(['id' => Yii::$app->user->id])->one();
         if ($user->status == UserStatus::ACTIVE) {
-            throw new InvalidArgumentException('您的邮箱已经激活');
+            throw new InvalidArgumentException(Yii::t('app', 'Your mailbox has been activated.'));
         }
-        return $this->mailerService->sendConfirmationMessage($user);
+        if ($this->mailerService->sendConfirmationMessage($user)) {
+            return Yii::t('app', 'The activation email was sent successfully, please activate within 24 hours.');
+        }
+        return '';
     }
 
     /**
