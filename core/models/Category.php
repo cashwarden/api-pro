@@ -14,6 +14,7 @@ use yiier\helpers\DateHelper;
  *
  * @property int $id
  * @property int $user_id
+ * @property int $ledger_id
  * @property int $transaction_type
  * @property string $name
  * @property string $color
@@ -57,8 +58,8 @@ class Category extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['transaction_type', 'name', 'icon_name'], 'required'],
-            [['user_id', 'status', 'default', 'sort'], 'integer'],
+            [['ledger_id', 'transaction_type', 'name', 'icon_name'], 'required'],
+            [['ledger_id', 'user_id', 'status', 'default', 'sort'], 'integer'],
             ['transaction_type', 'in', 'range' => TransactionType::names()],
             [['name', 'icon_name'], 'string', 'max' => 120],
             ['color', 'in', 'range' => ColorType::items()],
@@ -78,6 +79,7 @@ class Category extends \yii\db\ActiveRecord
     {
         return [
             'id' => Yii::t('app', 'ID'),
+            'ledger_id' => Yii::t('app', 'Ledger Id'),
             'user_id' => Yii::t('app', 'User ID'),
             'transaction_type' => Yii::t('app', 'Transaction Type'),
             'name' => Yii::t('app', 'Name'),

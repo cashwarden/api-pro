@@ -19,6 +19,7 @@ use yiier\validators\ArrayValidator;
  * @property int $user_id
  * @property string $name
  * @property string|array $if_keywords Multiple choice use,
+ * @property int $then_ledger_id
  * @property int $then_transaction_type
  * @property int|null $then_category_id
  * @property int|null $then_from_account_id
@@ -64,7 +65,10 @@ class Rule extends \yii\db\ActiveRecord
     {
         return [
             [['name', 'if_keywords', 'then_transaction_type'], 'required'],
-            [['user_id', 'then_category_id', 'then_from_account_id', 'then_to_account_id', 'sort'], 'integer'],
+            [
+                ['user_id', 'then_ledger_id', 'then_category_id', 'then_from_account_id', 'then_to_account_id', 'sort'],
+                'integer'
+            ],
             ['status', 'in', 'range' => RuleStatus::names()],
             ['then_transaction_type', 'in', 'range' => TransactionType::names()],
             ['then_reimbursement_status', 'in', 'range' => ReimbursementStatus::names()],
@@ -84,6 +88,7 @@ class Rule extends \yii\db\ActiveRecord
             'user_id' => Yii::t('app', 'User ID'),
             'name' => Yii::t('app', 'Name'),
             'if_keywords' => Yii::t('app', 'If Keywords'),
+            'then_ledger_id' => Yii::t('app', 'Then Ledger Id'),
             'then_transaction_type' => Yii::t('app', 'Then Transaction Type'),
             'then_category_id' => Yii::t('app', 'Then Category ID'),
             'then_from_account_id' => Yii::t('app', 'Then From Account ID'),

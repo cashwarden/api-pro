@@ -156,7 +156,12 @@ class AnalysisService extends BaseObject
     public function byCategory(array $params)
     {
         $items = [];
-        $categoriesMap = CategoryService::getCurrentMap();
+        if ($ledgerId = data_get($params, 'ledger_id')) {
+            LedgerService::checkAccess($ledgerId);
+            $categoriesMap = CategoryService::getMapByLedgerId($ledgerId);
+        } else {
+            $categoriesMap = CategoryService::getMapByUserId();
+        }
         foreach ([TransactionType::EXPENSE, TransactionType::INCOME] as $type) {
             $data = $this->getBaseQuery($params)
                 ->select([
@@ -234,7 +239,14 @@ class AnalysisService extends BaseObject
      */
     protected function getBaseQuery(array $params)
     {
-        $baseConditions = ['user_id' => Yii::$app->user->id,];
+        $baseConditions = ['user_id' => Yii::$app->user->id];
+        $andConditions = [];
+        if ($ledgerId = data_get($params, 'ledger_id')) {
+            LedgerService::checkAccess($ledgerId);
+            $baseConditions = ['user_id' => LedgerService::getLedgerMemberUserIds($ledgerId)];
+            $andConditions = ['ledger_id' => $ledgerId];
+        }
+
         $condition = ['category_id' => request('category_id'), 'type' => request('transaction_type')];
         $query = Transaction::find()->where($baseConditions)->andFilterWhere($condition);
         if (isset($params['keyword']) && $searchKeywords = trim($params['keyword'])) {
@@ -250,7 +262,7 @@ class AnalysisService extends BaseObject
         $transactionIds = $query->column();
 
         return Record::find()
-            ->where($baseConditions)
+            ->where($baseConditions + $andConditions)
             ->andWhere([
                 'transaction_id' => $transactionIds,
                 'exclude_from_stats' => (int)false,

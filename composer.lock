@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "976fb3ba5718dd6925ba3750b1be9d3e",
+    "content-hash": "ea80d2c2e99d4b558561330d741ca2b3",
     "packages": [
         {
             "name": "bower-asset/inputmask",
@@ -583,6 +583,76 @@
             "time": "2019-07-01T23:21:34+00:00"
         },
         {
+            "name": "hashids/hashids",
+            "version": "2.0.4",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/vinkla/hashids.git",
+                "reference": "7a945a5192d4a5c8888364970feece9bc26179df"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/vinkla/hashids/zipball/7a945a5192d4a5c8888364970feece9bc26179df",
+                "reference": "7a945a5192d4a5c8888364970feece9bc26179df",
+                "shasum": ""
+            },
+            "require": {
+                "php": "^5.6.4 || ^7.0"
+            },
+            "require-dev": {
+                "phpunit/phpunit": "^5.7 || ^6.3"
+            },
+            "suggest": {
+                "ext-bcmatch": "Required to use BC Math arbitrary precision mathematics (*).",
+                "ext-gmp": "Required to use GNU multiple precision mathematics (*)."
+            },
+            "type": "library",
+            "extra": {
+                "branch-alias": {
+                    "dev-master": "2.1-dev"
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "Hashids\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Ivan Akimov",
+                    "email": "ivan@barreleye.com",
+                    "homepage": "https://twitter.com/IvanAkimov"
+                },
+                {
+                    "name": "Vincent Klaiber",
+                    "email": "hello@vinkla.com",
+                    "homepage": "https://vinkla.com"
+                }
+            ],
+            "description": "Generate short, unique, non-sequential ids (like YouTube and Bitly) from numbers",
+            "homepage": "http://hashids.org/php",
+            "keywords": [
+                "bitly",
+                "decode",
+                "encode",
+                "hash",
+                "hashid",
+                "hashids",
+                "ids",
+                "obfuscate",
+                "youtube"
+            ],
+            "support": {
+                "issues": "https://github.com/vinkla/hashids/issues",
+                "source": "https://github.com/vinkla/hashids/tree/2.0.4"
+            },
+            "time": "2017-10-28T11:24:20+00:00"
+        },
+        {
             "name": "lcobucci/jwt",
             "version": "3.3.2",
             "source": {
@@ -646,6 +716,67 @@
                 }
             ],
             "time": "2020-05-22T08:21:12+00:00"
+        },
+        {
+            "name": "light/hashids",
+            "version": "2.0.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/lichunqiang/hashids.git",
+                "reference": "4c7377bf4d37eb95070d6e6e73a9425205b4946b"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/lichunqiang/hashids/zipball/4c7377bf4d37eb95070d6e6e73a9425205b4946b",
+                "reference": "4c7377bf4d37eb95070d6e6e73a9425205b4946b",
+                "shasum": ""
+            },
+            "require": {
+                "hashids/hashids": "^2.0",
+                "php": "^5.6.4 || ^7.0",
+                "yiisoft/yii2": "~2.0.14"
+            },
+            "require-dev": {
+                "phpunit/phpunit": "^6.0"
+            },
+            "type": "library",
+            "extra": {
+                "branch-alias": {
+                    "dev-master": "2.0.x-dev"
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "light\\hashids\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "lichunqiang",
+                    "email": "light-li@hotmail.com"
+                }
+            ],
+            "description": "Hashids for Yii2",
+            "keywords": [
+                "biyly",
+                "decrypt",
+                "encrypt",
+                "hash",
+                "hashid",
+                "hashids",
+                "ids",
+                "yii2",
+                "youtube"
+            ],
+            "support": {
+                "issues": "https://github.com/lichunqiang/hashids/issues",
+                "source": "https://github.com/lichunqiang/hashids/tree/2.0.0"
+            },
+            "time": "2018-02-28T15:22:53+00:00"
         },
         {
             "name": "mis/yii2-ide-helper",
@@ -7221,5 +7352,5 @@
         "ext-bcmath": "*"
     },
     "platform-dev": [],
-    "plugin-api-version": "1.1.0"
+    "plugin-api-version": "2.0.0"
 }

@@ -531,7 +531,7 @@ class TransactionService extends BaseObject
     public function exportData()
     {
         $data = [];
-        $categoriesMap = CategoryService::getCurrentMap();
+        $categoriesMap = CategoryService::getMapByUserId();
         $accountsMap = AccountService::getCurrentMap();
         $types = TransactionType::texts();
         $items = Transaction::find()

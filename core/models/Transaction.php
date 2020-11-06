@@ -66,6 +66,11 @@ class Transaction extends \yii\db\ActiveRecord
     public $currency_amount;
 
     /**
+     * @var integer
+     */
+    public $ledger_id;
+
+    /**
      * {@inheritdoc}
      */
     public static function tableName()
@@ -113,7 +118,7 @@ class Transaction extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['type', 'category_id', 'currency_amount', 'currency_code'], 'required'],
+            [['ledger_id', 'type', 'category_id', 'currency_amount', 'currency_code'], 'required'],
             [
                 'to_account_id',
                 'required',
@@ -132,6 +137,7 @@ class Transaction extends \yii\db\ActiveRecord
             ],
             [
                 [
+                    'ledger_id',
                     'user_id',
                     'from_account_id',
                     'to_account_id',
@@ -171,6 +177,7 @@ class Transaction extends \yii\db\ActiveRecord
     {
         return [
             'id' => Yii::t('app', 'ID'),
+            'ledger_id' => Yii::t('app', 'Ledger Id'),
             'user_id' => Yii::t('app', 'User ID'),
             'from_account_id' => Yii::t('app', 'From Account ID'),
             'to_account_id' => Yii::t('app', 'To Account ID'),

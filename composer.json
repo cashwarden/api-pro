@@ -28,7 +28,8 @@
         "telegram-bot/api": "^2.3",
         "ext-json": "*",
         "ext-bcmath": "*",
-        "guzzlehttp/guzzle": "^7.0"
+        "guzzlehttp/guzzle": "^7.0",
+        "light/hashids": "^2.0"
     },
     "require-dev": {
         "yiisoft/yii2-debug": "~2.1.0",

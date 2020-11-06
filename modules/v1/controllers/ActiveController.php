@@ -29,6 +29,7 @@ class ActiveController extends \yii\rest\ActiveController
     public $partialMatchAttributes = [];
     public $stringToIntAttributes = [];
     public $relations = [];
+    public $checkUserId = true;
 
     /**
      * 不参与校验的 actions
@@ -104,7 +105,9 @@ class ActiveController extends \yii\rest\ActiveController
         unset($params['sort']);
 
         $dataProvider = $searchModel->search(['SearchModel' => $params]);
-        $dataProvider->query->andWhere([$modelClass::tableName() . '.user_id' => Yii::$app->user->id]);
+        if ($this->checkUserId) {
+            $dataProvider->query->andWhere([$modelClass::tableName() . '.user_id' => Yii::$app->user->id]);
+        }
         return $dataProvider;
     }
 

@@ -91,6 +91,12 @@ $config = [
                 "GET <module>/site-config" => '/site/data',
                 "GET <module>/<alias:icons>" => '/site/<alias>',
                 "GET health-check" => 'site/health-check',
+
+                "GET <module>/ledgers/types" => '<module>/ledger/types',
+                "POST <module>/ledger/members" => '<module>/ledger/inviting-member',
+                "GET <module>/ledger/members" => '<module>/ledger-member/index',
+                "PUT <module>/ledger/members/<id:\d+>" => '<module>/ledger-member/update',
+
                 [
                     'class' => 'yii\rest\UrlRule',
                     'controller' => [
@@ -101,9 +107,10 @@ $config = [
                         'v1/record',
                         'v1/transaction',
                         'v1/recurrence',
+                        'v1/ledger',
                     ]
                 ],
-                '<module>/<controller:\w+>/<action:\w+>/<id:\d+>' => '<module>/<controller>/<action>',
+                // '<module>/<controller:\w+>/<action:\w+>/<id:\d+>' => '<module>/<controller>/<action>',
             ],
         ],
     ],
