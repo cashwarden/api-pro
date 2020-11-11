@@ -14,6 +14,7 @@ use yiier\helpers\DateHelper;
  * This is the model class for table "{{%tag}}".
  *
  * @property int $id
+ * @property int $ledger_id
  * @property int $user_id
  * @property string $color
  * @property string $name
@@ -51,10 +52,17 @@ class Tag extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['name'], 'required'],
-            [['user_id', 'count'], 'integer'],
+            [['ledger_id', 'name'], 'required'],
+            [['ledger_id', 'user_id', 'count'], 'integer'],
             [['color'], 'string', 'max' => 7],
             [['name'], 'string', 'max' => 60],
+            [
+                'ledger_id',
+                'exist',
+                'targetClass' => Ledger::class,
+                'filter' => ['user_id' => Yii::$app->user->id],
+                'targetAttribute' => 'id',
+            ],
             [
                 'name',
                 'unique',
@@ -72,6 +80,7 @@ class Tag extends \yii\db\ActiveRecord
         return [
             'id' => Yii::t('app', 'ID'),
             'user_id' => Yii::t('app', 'User ID'),
+            'ledger_id' => Yii::t('app', 'Ledger ID'),
             'color' => Yii::t('app', 'Color'),
             'name' => Yii::t('app', 'Name'),
             'count' => Yii::t('app', 'Count'),

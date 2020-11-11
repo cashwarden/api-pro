@@ -64,6 +64,13 @@ class Category extends \yii\db\ActiveRecord
             [['name', 'icon_name'], 'string', 'max' => 120],
             ['color', 'in', 'range' => ColorType::items()],
             [
+                'ledger_id',
+                'exist',
+                'targetClass' => Ledger::class,
+                'filter' => ['user_id' => Yii::$app->user->id],
+                'targetAttribute' => 'id',
+            ],
+            [
                 'name',
                 'unique',
                 'targetAttribute' => ['user_id', 'name'],

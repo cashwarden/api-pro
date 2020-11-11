@@ -26,6 +26,7 @@ use yiier\graylog\Log;
 use yiier\helpers\Setup;
 
 /**
+ * @property-read int $ledgerIdByDesc
  * @property-read int $accountIdByDesc
  */
 class TransactionService extends BaseObject
@@ -54,6 +55,7 @@ class TransactionService extends BaseObject
                 $_model->source = $transaction->source;
             }
             $_model->user_id = $transaction->user_id;
+            $_model->ledger_id = $transaction->ledger_id;
             $_model->transaction_id = $transaction->id;
             $_model->category_id = $transaction->category_id;
             $_model->amount_cent = $transaction->amount_cent;
@@ -230,6 +232,16 @@ class TransactionService extends BaseObject
                     return TransactionType::getName(TransactionType::EXPENSE);
                 }
             );
+
+            $model->ledger_id = $this->getDataByDesc(
+                $rules,
+                'then_ledger_id',
+                [$this, 'getLedgerIdByDesc']
+            );
+            if (!$model->ledger_id) {
+                throw new CannotOperateException(Yii::t('app', 'Default ledger not found.'));
+            }
+
             $transactionType = TransactionType::toEnumValue($model->type);
 
             if (in_array($transactionType, [TransactionType::EXPENSE, TransactionType::TRANSFER])) {
@@ -362,12 +374,13 @@ class TransactionService extends BaseObject
 
     /**
      * @param string $desc
+     * @param int $ledgerId
      * @return array
      * @throws Exception
      */
-    public static function matchTagsByDesc(string $desc): array
+    public static function matchTagsByDesc(string $desc, int $ledgerId): array
     {
-        if ($tags = TagService::getTagNames()) {
+        if ($tags = TagService::getTagNames($ledgerId)) {
             $tags = implode('|', $tags);
             preg_match_all("!({$tags})!", $desc, $matches);
             return data_get($matches, '0', []);
@@ -437,6 +450,16 @@ class TransactionService extends BaseObject
     {
         $userId = Yii::$app->user->id;
         return (int)data_get(AccountService::getDefaultAccount($userId), 'id', 0);
+    }
+
+    /**
+     * @return int
+     * @throws Exception
+     */
+    public function getLedgerIdByDesc(): int
+    {
+        $userId = Yii::$app->user->id;
+        return (int)data_get(LedgerService::getDefaultLedger($userId), 'id', 0);
     }
 
     /**
@@ -567,5 +590,30 @@ class TransactionService extends BaseObject
             array_push($data, array_values($datum));
         }
         return $data;
+    }
+
+    /**
+     * @param array $params
+     * @return array
+     * @throws \yii\web\ForbiddenHttpException
+     * @throws Exception
+     */
+    public function getIdsBySearch(array $params)
+    {
+        $baseConditions = ['user_id' => Yii::$app->user->id];
+        if ($ledgerId = data_get($params, 'ledger_id')) {
+            LedgerService::checkAccess($ledgerId);
+            $baseConditions = ['user_id' => LedgerService::getLedgerMemberUserIds($ledgerId), 'ledger_id' => $ledgerId];
+        }
+
+        $query = Transaction::find()->andWhere($baseConditions);
+        if ($searchKeywords = trim(request('keyword'))) {
+            $query->andWhere("MATCH(`description`, `tags`, `remark`) AGAINST ('*$searchKeywords*' IN BOOLEAN MODE)");
+        }
+
+        $query->andFilterWhere(['category_id' => data_get($params, 'category_id')]);
+
+        $ids = $query->column();
+        return array_map('intval', $ids);
     }
 }

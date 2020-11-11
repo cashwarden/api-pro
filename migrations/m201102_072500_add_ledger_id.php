@@ -15,8 +15,14 @@ class m201102_072500_add_ledger_id extends Migration
         $this->addColumn('{{category}}', 'ledger_id', $this->integer()->after('id'));
         $this->createIndex('category_ledger_id', '{{%category}}', ['ledger_id']);
 
+        $this->addColumn('{{transaction}}', 'ledger_id', $this->integer()->after('id'));
+        $this->createIndex('transaction_ledger_id', '{{%transaction}}', ['ledger_id']);
+
         $this->addColumn('{{record}}', 'ledger_id', $this->integer()->after('id'));
         $this->createIndex('record_ledger_id', '{{%record}}', ['ledger_id']);
+
+        $this->addColumn('{{tag}}', 'ledger_id', $this->integer()->after('id'));
+        $this->createIndex('tag_ledger_id', '{{%tag}}', ['ledger_id']);
 
         $this->addColumn('{{rule}}', 'then_ledger_id', $this->integer()->after('if_keywords'));
     }
@@ -28,8 +34,13 @@ class m201102_072500_add_ledger_id extends Migration
     {
         echo "m201102_072500_add_ledger_id cannot be reverted.\n";
         $this->dropColumn('{{%category}}', 'ledger_id');
+        $this->dropColumn('{{%transaction}}', 'ledger_id');
         $this->dropColumn('{{%record}}', 'ledger_id');
+        $this->dropColumn('{{%tag}}', 'ledger_id');
         $this->dropColumn('{{%rule}}', 'then_ledger_id');
+
+        \app\core\models\LedgerMember::deleteAll();
+        \app\core\models\Ledger::deleteAll();
         return true;
     }
 }

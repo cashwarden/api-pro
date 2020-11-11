@@ -19,6 +19,7 @@ use yiier\validators\MoneyValidator;
  * This is the model class for table "{{%transaction}}".
  *
  * @property int $id
+ * @property int $ledger_id
  * @property int $user_id
  * @property int $from_account_id
  * @property int|null $to_account_id
@@ -64,11 +65,6 @@ class Transaction extends \yii\db\ActiveRecord
      * @var integer
      */
     public $currency_amount;
-
-    /**
-     * @var integer
-     */
-    public $ledger_id;
 
     /**
      * {@inheritdoc}
@@ -147,6 +143,13 @@ class Transaction extends \yii\db\ActiveRecord
                     'rating'
                 ],
                 'integer'
+            ],
+            [
+                'ledger_id',
+                'exist',
+                'targetClass' => Ledger::class,
+                'filter' => ['user_id' => Yii::$app->user->id],
+                'targetAttribute' => 'id',
             ],
             [['description', 'remark'], 'trim'],
             ['type', 'in', 'range' => TransactionType::names()],
@@ -227,7 +230,10 @@ class Transaction extends \yii\db\ActiveRecord
             }
             $this->tags ? TransactionService::createTags($this->tags) : null;
             if ($this->description) {
-                $this->tags = array_merge((array)$this->tags, TransactionService::matchTagsByDesc($this->description));
+                $this->tags = array_merge(
+                    (array)$this->tags,
+                    TransactionService::matchTagsByDesc($this->description, $this->ledger_id)
+                );
             }
 
             $this->tags = $this->tags ? implode(',', array_unique($this->tags)) : null;

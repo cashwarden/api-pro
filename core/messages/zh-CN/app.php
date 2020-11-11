@@ -81,5 +81,6 @@ return [
     '{attribute} cannot be blank.' => '{attribute} 参数不能为空。',
 
     'You can only view data that you\'ve created.' => '你只能查看自己的数据。',
+    'Default ledger not found.' => '默认账本未找到。',
 
 ];

@@ -24,7 +24,6 @@ class LedgerMemberController extends ActiveController
 {
     use ServiceTrait;
 
-    public $checkUserId = false;
     public $modelClass = LedgerMember::class;
 
     public function actions()
@@ -66,9 +65,6 @@ class LedgerMemberController extends ActiveController
             throw new InvalidArgumentException(
                 Yii::t('app', '{attribute} cannot be blank.', ['attribute' => 'ledger_id'])
             );
-        }
-        if (!Ledger::find()->where(['user_id' => Yii::$app->user->id, 'id' => $ledgerId])->exists()) {
-            throw new NotFoundHttpException();
         }
         return parent::prepareDataProvider();
     }

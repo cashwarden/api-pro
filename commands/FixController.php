@@ -10,5 +10,6 @@ class FixController extends Controller
     public function actionInitLedger()
     {
         FixDataService::initLedger();
+        $this->stdout("操作成功\n");
     }
 }
