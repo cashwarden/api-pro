@@ -9,6 +9,7 @@ use app\core\requests\LedgerInvitingMember;
 use app\core\types\LedgerMemberRule;
 use app\core\types\LedgerMemberStatus;
 use Yii;
+use yii\helpers\ArrayHelper;
 use yii\web\ForbiddenHttpException;
 use yiier\graylog\Log;
 use yiier\helpers\Setup;
@@ -100,5 +101,27 @@ class LedgerService
             throw new InternalException($e->getMessage());
         }
         return true;
+    }
+
+    /**
+     * @return array
+     */
+    public function getLedgersCategories()
+    {
+        $rows = [];
+        /** @var Ledger[] $items */
+        $items = Ledger::find()->where(['user_id' => Yii::$app->user->id])->all();
+        foreach ($items as $item) {
+            $array = ArrayHelper::toArray($item->categories);
+            $categories = ArrayHelper::index($array, null, 'transaction_type');
+            $row = [
+                'id' => $item->id,
+                'name' => $item->name,
+                'categories' => $categories,
+            ];
+
+            array_push($rows, $row);
+        }
+        return $rows;
     }
 }

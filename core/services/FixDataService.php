@@ -2,6 +2,7 @@
 
 namespace app\core\services;
 
+use app\core\exceptions\InvalidArgumentException;
 use app\core\models\Category;
 use app\core\models\Ledger;
 use app\core\models\Record;
@@ -17,7 +18,7 @@ class FixDataService
 {
     /**
      * 修复历史数据账本问题
-     * @throws \yii\db\Exception
+     * @throws \yii\db\Exception|InvalidArgumentException
      */
     public static function initLedger()
     {
@@ -40,7 +41,7 @@ class FixDataService
                 Transaction::updateAll(['ledger_id' => $model->id], ['user_id' => $userId, 'ledger_id' => null]);
                 Record::updateAll(['ledger_id' => $model->id], ['user_id' => $userId, 'ledger_id' => null]);
                 Tag::updateAll(['ledger_id' => $model->id], ['user_id' => $userId, 'ledger_id' => null]);
-                Rule::updateAll(['then_ledger_id' => $model->id], ['user_id' => $userId, 'then_ledger_id' => null]);
+                Rule::updateAll(['ledger_id' => $model->id], ['user_id' => $userId, 'ledger_id' => null]);
                 $transaction->commit();
             } catch (\Exception $e) {
                 Yii::error('修复历史数据账本失败', (string)$e);

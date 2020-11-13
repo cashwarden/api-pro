@@ -10,6 +10,7 @@ use app\core\types\RecurrenceStatus;
 use Yii;
 use yii\base\InvalidConfigException;
 use yii\behaviors\TimestampBehavior;
+use yii\helpers\ArrayHelper;
 use yiier\helpers\DateHelper;
 
 /**
@@ -180,11 +181,6 @@ class Recurrence extends \yii\db\ActiveRecord
         return $this->hasOne(Transaction::class, ['id' => 'transaction_id']);
     }
 
-    public function extraFields()
-    {
-        return ['transaction'];
-    }
-
     /**
      * @return array
      */
@@ -203,6 +199,13 @@ class Recurrence extends \yii\db\ActiveRecord
 
         $fields['frequency_text'] = function (self $model) {
             return data_get(RecurrenceFrequency::texts(), $model->frequency);
+        };
+
+        $fields['transaction'] = function (self $model) {
+            return $model->transaction ? ArrayHelper::merge(
+                ArrayHelper::toArray($model->transaction),
+                ['ledger_name' => $model->transaction->ledger->name]
+            ) : null;
         };
 
         $fields['started_at'] = function (self $model) {

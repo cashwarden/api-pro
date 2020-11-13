@@ -42,6 +42,7 @@ use yiier\validators\MoneyValidator;
  * @property-read Category $category
  * @property-read Account $fromAccount
  * @property-read Record[] $records
+ * @property-read Ledger $ledger
  * @property-read Account $toAccount
  */
 class Transaction extends \yii\db\ActiveRecord
@@ -284,9 +285,14 @@ class Transaction extends \yii\db\ActiveRecord
         return $this->hasOne(Account::class, ['id' => 'to_account_id']);
     }
 
+    public function getLedger()
+    {
+        return $this->hasOne(Ledger::class, ['id' => 'ledger_id']);
+    }
+
     public function extraFields()
     {
-        return ['toAccount', 'fromAccount', 'category'];
+        return ['toAccount', 'fromAccount', 'category', 'ledger'];
     }
 
     /**

@@ -235,7 +235,7 @@ class TransactionService extends BaseObject
 
             $model->ledger_id = $this->getDataByDesc(
                 $rules,
-                'then_ledger_id',
+                'ledger_id',
                 [$this, 'getLedgerIdByDesc']
             );
             if (!$model->ledger_id) {

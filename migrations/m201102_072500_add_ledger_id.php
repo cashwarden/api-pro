@@ -24,7 +24,7 @@ class m201102_072500_add_ledger_id extends Migration
         $this->addColumn('{{tag}}', 'ledger_id', $this->integer()->after('id'));
         $this->createIndex('tag_ledger_id', '{{%tag}}', ['ledger_id']);
 
-        $this->addColumn('{{rule}}', 'then_ledger_id', $this->integer()->after('if_keywords'));
+        $this->addColumn('{{rule}}', 'ledger_id', $this->integer()->after('if_keywords'));
     }
 
     /**
@@ -37,7 +37,7 @@ class m201102_072500_add_ledger_id extends Migration
         $this->dropColumn('{{%transaction}}', 'ledger_id');
         $this->dropColumn('{{%record}}', 'ledger_id');
         $this->dropColumn('{{%tag}}', 'ledger_id');
-        $this->dropColumn('{{%rule}}', 'then_ledger_id');
+        $this->dropColumn('{{%rule}}', 'ledger_id');
 
         \app\core\models\LedgerMember::deleteAll();
         \app\core\models\Ledger::deleteAll();

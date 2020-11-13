@@ -93,6 +93,7 @@ $config = [
                 "GET health-check" => 'site/health-check',
 
                 "GET <module>/ledgers/types" => '<module>/ledger/types',
+                "GET <module>/ledgers/categories" => '<module>/ledger/categories',
                 "POST <module>/ledger/members" => '<module>/ledger/inviting-member',
                 "GET <module>/ledger/members" => '<module>/ledger-member/index',
                 "PUT <module>/ledger/members/<id:\d+>" => '<module>/ledger-member/update',

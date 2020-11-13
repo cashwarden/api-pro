@@ -23,6 +23,7 @@ class LedgerController extends ActiveController
     {
         $actions = parent::actions();
         // 注销系统自带的实现方法
+        unset($actions['delete']);
         return $actions;
     }
 
@@ -53,5 +54,11 @@ class LedgerController extends ActiveController
             $items[] = ['type' => $name, 'name' => data_get($texts, $key)];
         }
         return $items;
+    }
+
+
+    public function actionCategories()
+    {
+        return $this->ledgerService->getLedgersCategories();
     }
 }
