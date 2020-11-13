@@ -19,6 +19,7 @@ use yiier\validators\MoneyValidator;
  * This is the model class for table "{{%transaction}}".
  *
  * @property int $id
+ * @property int $ledger_id
  * @property int $user_id
  * @property int $from_account_id
  * @property int|null $to_account_id
@@ -41,6 +42,7 @@ use yiier\validators\MoneyValidator;
  * @property-read Category $category
  * @property-read Account $fromAccount
  * @property-read Record[] $records
+ * @property-read Ledger $ledger
  * @property-read Account $toAccount
  */
 class Transaction extends \yii\db\ActiveRecord
@@ -113,7 +115,7 @@ class Transaction extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['type', 'category_id', 'currency_amount', 'currency_code'], 'required'],
+            [['ledger_id', 'type', 'category_id', 'currency_amount', 'currency_code'], 'required'],
             [
                 'to_account_id',
                 'required',
@@ -132,6 +134,7 @@ class Transaction extends \yii\db\ActiveRecord
             ],
             [
                 [
+                    'ledger_id',
                     'user_id',
                     'from_account_id',
                     'to_account_id',
@@ -141,6 +144,13 @@ class Transaction extends \yii\db\ActiveRecord
                     'rating'
                 ],
                 'integer'
+            ],
+            [
+                'ledger_id',
+                'exist',
+                'targetClass' => Ledger::class,
+                'filter' => ['user_id' => Yii::$app->user->id],
+                'targetAttribute' => 'id',
             ],
             [['description', 'remark'], 'trim'],
             ['type', 'in', 'range' => TransactionType::names()],
@@ -171,6 +181,7 @@ class Transaction extends \yii\db\ActiveRecord
     {
         return [
             'id' => Yii::t('app', 'ID'),
+            'ledger_id' => Yii::t('app', 'Ledger Id'),
             'user_id' => Yii::t('app', 'User ID'),
             'from_account_id' => Yii::t('app', 'From Account ID'),
             'to_account_id' => Yii::t('app', 'To Account ID'),
@@ -220,7 +231,10 @@ class Transaction extends \yii\db\ActiveRecord
             }
             $this->tags ? TransactionService::createTags($this->tags) : null;
             if ($this->description) {
-                $this->tags = array_merge((array)$this->tags, TransactionService::matchTagsByDesc($this->description));
+                $this->tags = array_merge(
+                    (array)$this->tags,
+                    TransactionService::matchTagsByDesc($this->description, $this->ledger_id)
+                );
             }
 
             $this->tags = $this->tags ? implode(',', array_unique($this->tags)) : null;
@@ -271,9 +285,14 @@ class Transaction extends \yii\db\ActiveRecord
         return $this->hasOne(Account::class, ['id' => 'to_account_id']);
     }
 
+    public function getLedger()
+    {
+        return $this->hasOne(Ledger::class, ['id' => 'ledger_id']);
+    }
+
     public function extraFields()
     {
-        return ['toAccount', 'fromAccount', 'category'];
+        return ['toAccount', 'fromAccount', 'category', 'ledger'];
     }
 
     /**

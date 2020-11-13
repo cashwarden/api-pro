@@ -12,6 +12,7 @@ use app\core\requests\PasswordReset;
 use app\core\requests\PasswordResetRequest;
 use app\core\requests\PasswordResetTokenVerification;
 use app\core\requests\UserUpdate;
+use app\core\services\LedgerService;
 use app\core\traits\ServiceTrait;
 use app\core\types\UserStatus;
 use Yii;
@@ -54,6 +55,7 @@ class UserController extends ActiveController
             return [
                 'user' => $user,
                 'token' => (string)$token,
+                'default_ledger' => LedgerService::getDefaultLedger($user->id),
             ];
         });
     }
@@ -72,6 +74,7 @@ class UserController extends ActiveController
         return [
             'user' => $user,
             'token' => (string)$token,
+            'default_ledger' => LedgerService::getDefaultLedger($user->id),
         ];
     }
 
@@ -82,6 +85,7 @@ class UserController extends ActiveController
         return [
             'user' => $user,
             'token' => (string)$token,
+            'default_ledger' => LedgerService::getDefaultLedger($user->id),
         ];
     }
 
@@ -194,6 +198,7 @@ class UserController extends ActiveController
         return [
             'user' => $user,
             'token' => (string)$token,
+            'default_ledger' => LedgerService::getDefaultLedger($user->id),
         ];
     }
 

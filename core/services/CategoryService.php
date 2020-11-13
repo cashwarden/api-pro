@@ -45,11 +45,23 @@ class CategoryService
     }
 
     /**
+     * @param int $userId
      * @return array
      */
-    public static function getCurrentMap()
+    public static function getMapByUserId(int $userId = 0): array
     {
-        $categories = Category::find()->where(['user_id' => Yii::$app->user->id])->asArray()->all();
+        $userId = $userId ?: Yii::$app->user->id;
+        $categories = Category::find()->where(['user_id' => $userId])->asArray()->all();
+        return ArrayHelper::map($categories, 'id', 'name');
+    }
+
+    /**
+     * @param int $ledgerId
+     * @return array
+     */
+    public static function getMapByLedgerId(int $ledgerId): array
+    {
+        $categories = Category::find()->where(['ledger_id' => $ledgerId])->asArray()->all();
         return ArrayHelper::map($categories, 'id', 'name');
     }
 }

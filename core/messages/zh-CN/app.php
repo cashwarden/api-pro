@@ -47,6 +47,17 @@ return [
     'Investment income' => '投资收入',
     'Other income' => '其他收入',
 
+    'General Ledger' => '普通账本',
+    'Share Ledger' => '共享账本',
+    'AA Ledger' => 'AA 账本',
+
+    'Normal status' => '正常状态',
+    'Waiting status' => '等待加入',
+    'Archived status' => '已归档',
+
+    'Owner' => '所有者',
+    'Editor' => '使用',
+    'Viewer' => '查看',
 
     'The {attribute} has been used.' => '{attribute} 已经被使用。',
     'Cannot be deleted because it has been used.' => '不能被删除，因为已经被使用。',
@@ -65,4 +76,11 @@ return [
     'Your mailbox has been activated.' => '您的邮箱已经激活。',
     'The activation email was sent successfully, please activate within 24 hours.' => '激活邮件发送成功，请在24小时内激活。',
     'Updated successfully.' => '更新成功',
+    'This user does not exist.' => '此用户不存在。',
+    'Status range cannot be blank.' => '状态范围不能为空。',
+    '{attribute} cannot be blank.' => '{attribute} 参数不能为空。',
+
+    'You can only view data that you\'ve created.' => '你只能查看自己的数据。',
+    'Default ledger not found.' => '默认账本未找到。',
+
 ];
