@@ -2,7 +2,6 @@
 
 namespace app\modules\v1\controllers;
 
-use app\core\exceptions\InternalException;
 use app\core\exceptions\InvalidArgumentException;
 use app\core\models\Record;
 use app\core\traits\ServiceTrait;
@@ -10,8 +9,8 @@ use app\core\types\RecordSource;
 use app\core\types\TransactionType;
 use Exception;
 use Yii;
-use yii\base\InvalidConfigException;
 use yii\data\ActiveDataProvider;
+use yii\web\ForbiddenHttpException;
 
 /**
  * Record controller for the `v1` module
@@ -22,10 +21,8 @@ class RecordController extends ActiveController
 
     public $modelClass = Record::class;
     public $noAuthActions = [];
-    public $partialMatchAttributes = ['name'];
     public $defaultOrder = ['date' => SORT_DESC, 'id' => SORT_DESC];
     public $stringToIntAttributes = ['transaction_type' => TransactionType::class];
-    public $relations = ['transaction' => []];
 
     public function actions()
     {
@@ -34,20 +31,18 @@ class RecordController extends ActiveController
         return $actions;
     }
 
-
     /**
      * @return ActiveDataProvider
+     * @throws ForbiddenHttpException
      * @throws InvalidArgumentException
-     * @throws InvalidConfigException
-     * @throws InternalException
+     * @throws \app\core\exceptions\InternalException
+     * @throws \yii\base\InvalidConfigException
      */
     public function prepareDataProvider()
     {
         $dataProvider = parent::prepareDataProvider();
-        if ($searchKeywords = trim(request('keyword'))) {
-            $dataProvider->query->andWhere(
-                "MATCH(`description`, `tags`, `remark`) AGAINST ('*$searchKeywords*' IN BOOLEAN MODE)"
-            );
+        if ($transactionIds = $this->transactionService->getIdsBySearch(Yii::$app->request->queryParams)) {
+            $dataProvider->query->andWhere(['transaction_id' => $transactionIds]);
         }
         $dataProvider->setModels($this->transactionService->formatRecords($dataProvider->getModels()));
         return $dataProvider;
@@ -74,7 +69,8 @@ class RecordController extends ActiveController
      */
     public function actionOverview()
     {
-        return array_values($this->analysisService->recordOverview);
+        $params = Yii::$app->request->queryParams;
+        return array_values($this->analysisService->getRecordOverview($params));
     }
 
 
@@ -90,7 +86,8 @@ class RecordController extends ActiveController
 
         return $this->analysisService->getRecordStatisticalData(
             $date,
-            TransactionType::toEnumValue($transactionType)
+            TransactionType::toEnumValue($transactionType),
+            request('ledger_id')
         );
     }
 
@@ -106,5 +103,22 @@ class RecordController extends ActiveController
             $items[] = ['type' => $key, 'name' => $name];
         }
         return $items;
+    }
+
+    /**
+     * @param string $action
+     * @param null $model
+     * @param array $params
+     * @throws ForbiddenHttpException
+     */
+    public function checkAccess($action, $model = null, $params = [])
+    {
+        if (in_array($action, ['delete', 'update', 'view'])) {
+            if ($model->user_id !== \Yii::$app->user->id) {
+                throw new ForbiddenHttpException(
+                    t('app', 'You can only ' . $action . ' data that you\'ve created.')
+                );
+            }
+        }
     }
 }

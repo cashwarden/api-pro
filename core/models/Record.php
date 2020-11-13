@@ -19,6 +19,7 @@ use yiier\helpers\Setup;
  *
  * @property int $id
  * @property int $user_id
+ * @property int $ledger_id
  * @property int $account_id
  * @property int $transaction_type
  * @property int $category_id
@@ -79,6 +80,7 @@ class Record extends ActiveRecord
         return [
             [
                 [
+                    'ledger_id',
                     'user_id',
                     'account_id',
                     'transaction_type',
@@ -91,6 +93,7 @@ class Record extends ActiveRecord
             ],
             [
                 [
+                    'ledger_id',
                     'user_id',
                     'account_id',
                     'transaction_type',
@@ -116,6 +119,7 @@ class Record extends ActiveRecord
     {
         return [
             'id' => Yii::t('app', 'ID'),
+            'ledger_id' => Yii::t('app', 'Ledger Id'),
             'user_id' => Yii::t('app', 'User ID'),
             'account_id' => Yii::t('app', 'Account ID'),
             'transaction_type' => Yii::t('app', 'Transaction Type'),

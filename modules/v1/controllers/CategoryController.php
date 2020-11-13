@@ -34,7 +34,8 @@ class CategoryController extends ActiveController
 
         return $this->analysisService->getCategoryStatisticalData(
             $date,
-            TransactionType::toEnumValue($transactionType)
+            TransactionType::toEnumValue($transactionType),
+            request('ledger_id')
         );
     }
 }

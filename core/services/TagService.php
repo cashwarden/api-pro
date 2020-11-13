@@ -11,10 +11,9 @@ use yiier\helpers\Setup;
 
 class TagService
 {
-    public static function getTagNames(int $userId = 0)
+    public static function getTagNames(int $ledgerId)
     {
-        $userId = $userId ?: Yii::$app->user->id;
-        return Tag::find()->select('name')->where(['user_id' => $userId])->column();
+        return Tag::find()->select('name')->where(['ledger_id' => $ledgerId])->column();
     }
 
     /**
