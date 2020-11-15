@@ -80,7 +80,6 @@ class Record extends ActiveRecord
         return [
             [
                 [
-                    'ledger_id',
                     'user_id',
                     'account_id',
                     'transaction_type',
