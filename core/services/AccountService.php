@@ -3,6 +3,7 @@
 namespace app\core\services;
 
 use app\core\exceptions\InternalException;
+use app\core\helpers\DateHelper;
 use app\core\models\Account;
 use app\core\models\Record;
 use app\core\models\Recurrence;
@@ -11,6 +12,7 @@ use app\core\models\Transaction;
 use app\core\types\DirectionType;
 use Exception;
 use Yii;
+use yii\base\InvalidConfigException;
 use yii\db\ActiveRecord;
 use yii\helpers\ArrayHelper;
 use yiier\helpers\Setup;
@@ -132,5 +134,34 @@ class AccountService
     {
         $accounts = Account::find()->where(['user_id' => Yii::$app->user->id])->asArray()->all();
         return ArrayHelper::map($accounts, 'id', 'name');
+    }
+
+    /**
+     * @param Account $model
+     * @param string $endDate
+     * @return array
+     * @throws InvalidConfigException
+     */
+    public function balancesTrend(Account $model, string $endDate): array
+    {
+        $currentBalanceCent = $model->balance_cent;
+        $data = Record::find()
+            ->where(['account_id' => $model->id, 'exclude_from_stats' => (int)false])
+            ->andWhere(['>=', 'date', $endDate])
+            ->orderBy(['date' => SORT_DESC, 'id' => SORT_DESC])
+            ->asArray()
+            ->all();
+        $items = DateHelper::getMonthRange($endDate);
+
+        foreach ($data as $datum) {
+            $accountBalanceCent = $accountBalanceCent ?? $currentBalanceCent;
+            $date = DateHelper::toDate($datum['date']);
+            $afterBalanceCent = $datum['direction'] == DirectionType::INCOME ?
+                $accountBalanceCent - $datum['amount_cent'] : $accountBalanceCent + $datum['amount_cent'];
+
+            $accountBalanceCent = $afterBalanceCent;
+            $items[$date] = Setup::toYuan($accountBalanceCent);
+        }
+        return $items;
     }
 }

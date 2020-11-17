@@ -2,6 +2,7 @@
 
 namespace app\modules\v1\controllers;
 
+use app\core\helpers\DateHelper;
 use app\core\models\Account;
 use app\core\services\AccountService;
 use app\core\traits\ServiceTrait;
@@ -9,6 +10,7 @@ use app\core\types\AccountStatus;
 use app\core\types\AccountType;
 use Exception;
 use Yii;
+use yii\base\InvalidConfigException;
 use yii\web\NotFoundHttpException;
 use yiier\helpers\Setup;
 
@@ -71,6 +73,20 @@ class AccountController extends ActiveController
         $model = $this->validate($model, $params);
 
         return $this->accountService->createUpdate($model);
+    }
+
+    /**
+     * @param int $id
+     * @return array
+     * @throws NotFoundHttpException|InvalidConfigException
+     */
+    public function actionBalancesTrend(int $id)
+    {
+        if (!$model = AccountService::findCurrentOne($id)) {
+            throw new NotFoundHttpException();
+        }
+        $endDate = DateHelper::toDate('-1 month');
+        return $this->accountService->balancesTrend($model, $endDate);
     }
 
 
