@@ -7,6 +7,7 @@ use app\core\exceptions\InvalidArgumentException;
 use app\core\models\Account;
 use app\core\models\AuthClient;
 use app\core\models\Category;
+use app\core\models\Ledger;
 use app\core\models\User;
 use app\core\requests\JoinRequest;
 use app\core\requests\PasswordResetRequest;
@@ -14,6 +15,7 @@ use app\core\traits\ServiceTrait;
 use app\core\types\AccountType;
 use app\core\types\AuthClientType;
 use app\core\types\ColorType;
+use app\core\types\LedgerType;
 use app\core\types\TransactionType;
 use app\core\types\UserStatus;
 use Exception;
@@ -255,6 +257,14 @@ class UserService
             }
             if (!ModelHelper::saveAll(Category::tableName(), $rows)) {
                 throw new DBException('Init Category fail');
+            }
+            $ledger = new Ledger();
+            $ledger->name = '日常生活';
+            $ledger->type = LedgerType::getName(LedgerType::GENERAL);
+            $ledger->user_id = $user->id;
+            $ledger->default = true;
+            if (!$ledger->save()) {
+                throw new \Exception(Setup::errorMessage($ledger->firstErrors));
             }
         } catch (Exception $e) {
             throw $e;

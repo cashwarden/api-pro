@@ -65,6 +65,7 @@ $config = [
                 "POST <module>/rules/<id:\d+>/copy" => '<module>/rule/copy',
                 "PUT <module>/rules/<id:\d+>/status" => '<module>/rule/update-status',
                 "GET <module>/accounts/types" => '<module>/account/types',
+                "GET <module>/accounts/<id:\d+>/balances/trend" => '<module>/account/balances-trend',
                 "GET <module>/accounts/overview" => '<module>/account/overview',
                 "POST <module>/reset-token" => '<module>/user/reset-token',
 
