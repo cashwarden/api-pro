@@ -141,6 +141,7 @@ class AccountService
      * @param string $endDate
      * @return array
      * @throws InvalidConfigException
+     * @throws Exception
      */
     public function balancesTrend(Account $model, string $endDate): array
     {
@@ -151,17 +152,24 @@ class AccountService
             ->orderBy(['date' => SORT_DESC, 'id' => SORT_DESC])
             ->asArray()
             ->all();
-        $items = DateHelper::getMonthRange($endDate);
-
+        $items = [];
+        $rows = [];
         foreach ($data as $datum) {
-            $accountBalanceCent = $accountBalanceCent ?? $currentBalanceCent;
             $date = DateHelper::toDate($datum['date']);
-            $afterBalanceCent = $datum['direction'] == DirectionType::INCOME ?
-                $accountBalanceCent - $datum['amount_cent'] : $accountBalanceCent + $datum['amount_cent'];
-
-            $accountBalanceCent = $afterBalanceCent;
-            $items[$date] = Setup::toYuan($accountBalanceCent);
+            $amountCent = $datum['direction'] == DirectionType::INCOME ?
+                -$datum['amount_cent'] : $datum['amount_cent'];
+            if (!isset($rows[$date]['amount_cent'])) {
+                $rows[$date]['amount_cent'] = 0;
+            }
+            $rows[$date]['amount_cent'] += $amountCent;
         }
-        return $items;
+        $dares = DateHelper::getMonthRange($endDate);
+        foreach ($dares as $date) {
+            $accountBalanceCent = $accountBalanceCent ?? $currentBalanceCent;
+            $afterBalanceCent = $accountBalanceCent + data_get($rows, "{$date}.amount_cent", 0);
+            $items[$date] = ['date' => $date, 'after_balance' => (float)Setup::toYuan($afterBalanceCent)];
+            $accountBalanceCent = $afterBalanceCent;
+        }
+        return array_reverse(array_values($items));
     }
 }

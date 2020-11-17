@@ -34,7 +34,8 @@ class DateHelper
         $items = [];
         for ($i = 0; $i < $days; $i++) {
             $newDate = strtotime("-{$i} days", $beginDate);
-            $items[self::toDate($newDate)] = 0;
+            array_push($items, self::toDate($newDate));
+//            $items[self::toDate($newDate)] = 0;
         }
         return $items;
     }
