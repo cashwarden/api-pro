@@ -165,10 +165,11 @@ class AccountService
         }
         $dares = DateHelper::getMonthRange($endDate);
         foreach ($dares as $date) {
-            $accountBalanceCent = $accountBalanceCent ?? $currentBalanceCent;
-            $afterBalanceCent = $accountBalanceCent + data_get($rows, "{$date}.amount_cent", 0);
-            $items[$date] = ['date' => $date, 'after_balance' => (float)Setup::toYuan($afterBalanceCent)];
-            $accountBalanceCent = $afterBalanceCent;
+            $afterBalanceCent = $afterBalanceCent ?? $currentBalanceCent;
+            if (!isset($items[$date])) {
+                $items[$date] = ['date' => $date, 'after_balance' => (float)Setup::toYuan($afterBalanceCent)];
+            }
+            $afterBalanceCent = $afterBalanceCent + data_get($rows, "{$date}.amount_cent", 0);
         }
         return array_reverse(array_values($items));
     }
