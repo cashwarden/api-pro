@@ -168,11 +168,15 @@ class Rule extends \yii\db\ActiveRecord
     public function fields()
     {
         $fields = parent::fields();
-        unset($fields['user_id']);
+        unset($fields['user_id'], $fields['then_currency_amount']);
 
 
         $fields['ledger'] = function (self $model) {
             return $model->ledger;
+        };
+
+        $fields['then_currency_amount'] = function (self $model) {
+            return Setup::toYuan($model->then_currency_amount_cent);
         };
 
         $fields['then_transaction_type'] = function (self $model) {

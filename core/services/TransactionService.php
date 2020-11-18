@@ -281,7 +281,12 @@ class TransactionService extends BaseObject
             $model->status = $this->getDataByDesc($rules, 'then_transaction_status');
             $model->reimbursement_status = $this->getDataByDesc($rules, 'then_reimbursement_status');
 
-            $model->currency_amount = $this->getAmountByDesc($desc);
+            $model->currency_amount = $this->getDataByDesc(
+                $rules,
+                'then_currency_amount',
+                [$this, 'getAmountByDesc']
+            );
+
             $model->currency_code = user('base_currency_code');
             if (!$model->save()) {
                 throw new DBException(Setup::errorMessage($model->firstErrors));
