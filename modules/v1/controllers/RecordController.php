@@ -42,7 +42,7 @@ class RecordController extends ActiveController
     {
         $dataProvider = parent::prepareDataProvider();
         if ($transactionIds = $this->transactionService->getIdsBySearch(Yii::$app->request->queryParams)) {
-            $dataProvider->query->andWhere(['transaction_id' => $transactionIds]);
+            $dataProvider->query->andWhere(['transaction_id' => array_merge([0], $transactionIds)]);
         }
         $dataProvider->setModels($this->transactionService->formatRecords($dataProvider->getModels()));
         return $dataProvider;

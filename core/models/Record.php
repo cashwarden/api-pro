@@ -37,6 +37,7 @@ use yiier\helpers\Setup;
  * @property float $amount
  * @property-read Account $account
  * @property-read Category $category
+ * @property-read Ledger $ledger
  * @property-read Transaction $transaction
  */
 class Record extends ActiveRecord
@@ -152,6 +153,11 @@ class Record extends ActiveRecord
         return $this->hasOne(Category::class, ['id' => 'category_id']);
     }
 
+    public function getLedger()
+    {
+        return $this->hasOne(Ledger::class, ['id' => 'ledger_id']);
+    }
+
     /**
      * @param bool $insert
      * @return bool
@@ -237,7 +243,6 @@ class Record extends ActiveRecord
         $fields = parent::fields();
         unset($fields['currency_amount_cent'], $fields['user_id'], $fields['amount_cent']);
 
-
         $fields['direction'] = function (self $model) {
             return DirectionType::getName($model->direction);
         };
@@ -267,6 +272,10 @@ class Record extends ActiveRecord
 
         $fields['account'] = function (self $model) {
             return $model->account;
+        };
+
+        $fields['ledger'] = function (self $model) {
+            return $model->ledger;
         };
 
         $fields['date'] = function (self $model) {
