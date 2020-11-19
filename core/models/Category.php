@@ -73,7 +73,7 @@ class Category extends \yii\db\ActiveRecord
             [
                 'name',
                 'unique',
-                'targetAttribute' => ['user_id', 'name'],
+                'targetAttribute' => ['user_id', 'ledger_id', 'name'],
                 'message' => Yii::t('app', 'The {attribute} has been used.')
             ],
         ];
