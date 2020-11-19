@@ -392,19 +392,20 @@ class TransactionService extends BaseObject
 
     /**
      * @param array $tags
+     * @param int $ledgerId
      * @throws InvalidConfigException
      */
-    public static function createTags(array $tags)
+    public static function createTags(array $tags, int $ledgerId)
     {
         $has = Tag::find()
             ->select('name')
-            ->where(['user_id' => Yii::$app->user->id, 'name' => $tags])
+            ->where(['user_id' => Yii::$app->user->id, 'name' => $tags, 'ledger_id' => $ledgerId])
             ->column();
         /** @var TagService $tagService */
         $tagService = Yii::createObject(TagService::class);
         foreach (array_diff($tags, $has) as $item) {
             try {
-                $tagService->create(['name' => $item]);
+                $tagService->create(['name' => $item, 'ledger_id' => $ledgerId]);
             } catch (Exception $e) {
                 Log::error('add tag fail', [$item, (string)$e]);
             }
@@ -523,13 +524,14 @@ class TransactionService extends BaseObject
 
     /**
      * @param string $tag
+     * @param int $ledgerId
      * @param int $userId
      * @return bool|int|string|null
      */
-    public static function countTransactionByTag(string $tag, int $userId)
+    public static function countTransactionByTag(string $tag, int $ledgerId, int $userId)
     {
         return Transaction::find()
-            ->where(['user_id' => $userId])
+            ->where(['user_id' => $userId, 'ledger_id' => $ledgerId])
             ->andWhere(new Expression('FIND_IN_SET(:tag, tags)'))->addParams([':tag' => $tag])
             ->count();
     }
