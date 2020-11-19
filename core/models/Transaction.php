@@ -229,7 +229,7 @@ class Transaction extends \yii\db\ActiveRecord
                 // $this->amount_cent = $this->currency_amount_cent;
                 // todo 计算汇率
             }
-            $this->tags ? TransactionService::createTags($this->tags) : null;
+            $this->tags ? TransactionService::createTags($this->tags, $this->ledger_id) : null;
             if ($this->description) {
                 $this->tags = array_merge(
                     (array)$this->tags,
@@ -261,7 +261,7 @@ class Transaction extends \yii\db\ActiveRecord
 
         $tags = explode(',', $this->tags) + explode(',', $oldTags);
         if ($tags = array_unique($tags)) {
-            TagService::updateCounters($tags);
+            TagService::updateCounters($tags, $this->ledger_id);
         }
     }
 

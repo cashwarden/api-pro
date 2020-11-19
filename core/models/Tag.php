@@ -66,7 +66,7 @@ class Tag extends \yii\db\ActiveRecord
             [
                 'name',
                 'unique',
-                'targetAttribute' => ['user_id', 'name'],
+                'targetAttribute' => ['user_id', 'ledger_id', 'name'],
                 'message' => Yii::t('app', 'The {attribute} has been used.')
             ],
         ];
@@ -106,8 +106,8 @@ class Tag extends \yii\db\ActiveRecord
     {
         if (parent::beforeSave($insert)) {
             if ($insert) {
-                $ran = ColorType::items();
-                $this->color = $this->color ?: $ran[mt_rand(0, count($ran) - 1)];
+                $rand = ColorType::items();
+                $this->color = $this->color ?: $rand[mt_rand(0, count($rand) - 1)];
             }
             return true;
         } else {
@@ -125,7 +125,7 @@ class Tag extends \yii\db\ActiveRecord
         parent::afterSave($insert, $changedAttributes);
 
         if ($oldName = data_get($changedAttributes, 'name', '')) {
-            TagService::updateTagName($oldName, $this->name);
+            TagService::updateTagName($oldName, $this->name, $this->ledger_id);
         }
     }
 
