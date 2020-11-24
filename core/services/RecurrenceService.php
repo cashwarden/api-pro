@@ -118,12 +118,14 @@ class RecurrenceService extends BaseObject
     }
 
     /**
-     * @throws InvalidConfigException|ThirdPartyServiceErrorException
+     * @param array $ids
+     * @throws InvalidConfigException
+     * @throws ThirdPartyServiceErrorException
      */
-    public static function updateAllExecutionDate()
+    public static function updateAllExecutionDate(array $ids)
     {
         $items = Recurrence::find()
-            ->where(['status' => RecurrenceStatus::ACTIVE])
+            ->where(['status' => RecurrenceStatus::ACTIVE, 'id' => $ids])
             ->andWhere(['!=', 'frequency', RecurrenceFrequency::LEGAL_WORKING_DAY])
             ->all();
         /** @var Recurrence $item */
@@ -134,17 +136,19 @@ class RecurrenceService extends BaseObject
                 ['id' => $item->id]
             );
         }
-        self::updateAllLegalWorkingDay();
+        self::updateAllLegalWorkingDay($ids);
     }
 
     /**
+     * @param array $ids
      * @throws InvalidConfigException
      * @throws ThirdPartyServiceErrorException
      */
-    private static function updateAllLegalWorkingDay()
+    private static function updateAllLegalWorkingDay(array $ids)
     {
         $items = Recurrence::find()
-            ->where(['frequency' => RecurrenceFrequency::LEGAL_WORKING_DAY, 'status' => RecurrenceStatus::ACTIVE])
+            ->where(['status' => RecurrenceStatus::ACTIVE, 'id' => $ids])
+            ->andWhere(['frequency' => RecurrenceFrequency::LEGAL_WORKING_DAY])
             ->asArray()
             ->all();
         $nextWorkday = HolidayHelper::getNextWorkday();

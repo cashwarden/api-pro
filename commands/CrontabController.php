@@ -25,6 +25,7 @@ class CrontabController extends Controller
      * @throws InvalidConfigException
      * @throws Exception
      * @throws NotFoundHttpException|ThirdPartyServiceErrorException
+     * @throws \Throwable
      */
     public function actionRecurrence()
     {
@@ -34,6 +35,7 @@ class CrontabController extends Controller
             ->asArray()
             ->all();
         $transaction = Yii::$app->db->beginTransaction();
+        $ids = [];
         try {
             foreach ($items as $item) {
                 \Yii::$app->user->setIdentity(User::findOne($item['user_id']));
@@ -41,10 +43,11 @@ class CrontabController extends Controller
                     $keyboard = $this->telegramService->getRecordMarkup($t);
                     $text = $this->telegramService->getMessageTextByTransaction($t, '定时记账成功');
                     $this->telegramService->sendMessage($text, $keyboard);
+                    array_push($ids, $item['id']);
                     $this->stdout("定时记账成功，transaction_id：{$t->id}\n");
                 }
             }
-            RecurrenceService::updateAllExecutionDate();
+            RecurrenceService::updateAllExecutionDate($ids);
             $transaction->commit();
         } catch (\Exception $e) {
             $this->stdout("定时记账失败：{$e->getMessage()}\n");
