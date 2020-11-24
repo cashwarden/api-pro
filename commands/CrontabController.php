@@ -50,7 +50,8 @@ class CrontabController extends Controller
             RecurrenceService::updateAllExecutionDate($ids);
             $transaction->commit();
         } catch (\Exception $e) {
-            $this->stdout("定时记账失败：{$e->getMessage()}\n");
+            $ids = implode(',', $ids);
+            $this->stdout("定时记账失败：{$ids}，{$e->getMessage()}\n");
             $transaction->rollBack();
             throw $e;
         }
