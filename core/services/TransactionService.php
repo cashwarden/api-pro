@@ -243,9 +243,10 @@ class TransactionService extends BaseObject
             }
 
             $transactionType = TransactionType::toEnumValue($model->type);
-
+            // 先去账号根据关键词查找
+            $accountId = $this->accountService->getAccountIdByDesc($desc);
             if (in_array($transactionType, [TransactionType::EXPENSE, TransactionType::TRANSFER])) {
-                $model->from_account_id = $this->getDataByDesc(
+                $model->from_account_id = $accountId ?: $this->getDataByDesc(
                     $rules,
                     'then_from_account_id',
                     [$this, 'getAccountIdByDesc']
@@ -256,7 +257,7 @@ class TransactionService extends BaseObject
             }
 
             if (in_array($transactionType, [TransactionType::INCOME, TransactionType::TRANSFER])) {
-                $model->to_account_id = $this->getDataByDesc(
+                $model->to_account_id = $accountId ?: $this->getDataByDesc(
                     $rules,
                     'then_to_account_id',
                     [$this, 'getAccountIdByDesc']
@@ -266,14 +267,18 @@ class TransactionService extends BaseObject
                 }
             }
 
-            $model->category_id = $this->getDataByDesc(
+            $categoryId = $this->categoryService->getCategoryIdByDesc($desc, $model->ledger_id, $transactionType);
+            $model->category_id = $categoryId ?: $this->getDataByDesc(
                 $rules,
                 'then_category_id',
-                function () {
-                    //  todo 根据交易类型查找默认分类
-                    return (int)data_get(CategoryService::getDefaultCategory(), 'id', 0);
+                function () use ($transactionType) {
+                    return (int)data_get(CategoryService::getDefaultCategory($transactionType), 'id', 0);
                 }
             );
+
+            if (!$model->category_id) {
+                throw new CannotOperateException(Yii::t('app', 'Category not found.'));
+            }
 
             $model->date = $this->getDateByDesc($desc);
 

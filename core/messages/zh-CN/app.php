@@ -54,6 +54,7 @@ return [
     'Normal status' => '正常状态',
     'Waiting status' => '等待加入',
     'Archived status' => '已归档',
+    'Frozen state' => '冻结状态',
 
     'Owner' => '所有者',
     'Editor' => '使用',
