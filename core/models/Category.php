@@ -8,15 +8,17 @@ use app\core\types\TransactionType;
 use Yii;
 use yii\behaviors\TimestampBehavior;
 use yiier\helpers\DateHelper;
+use yiier\validators\ArrayValidator;
 
 /**
  * This is the model class for table "{{%category}}".
  *
  * @property int $id
- * @property int $user_id
  * @property int $ledger_id
+ * @property int $user_id
  * @property int $transaction_type
  * @property string $name
+ * @property string|null|array $keywords
  * @property string $color
  * @property string $icon_name
  * @property int|null $status
@@ -63,6 +65,7 @@ class Category extends \yii\db\ActiveRecord
             ['transaction_type', 'in', 'range' => TransactionType::names()],
             [['name', 'icon_name'], 'string', 'max' => 120],
             ['color', 'in', 'range' => ColorType::items()],
+            [['keywords'], ArrayValidator::class],
             [
                 'ledger_id',
                 'exist',
@@ -90,6 +93,7 @@ class Category extends \yii\db\ActiveRecord
             'user_id' => Yii::t('app', 'User ID'),
             'transaction_type' => Yii::t('app', 'Transaction Type'),
             'name' => Yii::t('app', 'Name'),
+            'keywords' => Yii::t('app', 'Keywords'),
             'color' => Yii::t('app', 'Color'),
             'icon_name' => Yii::t('app', 'Icon Name'),
             'status' => Yii::t('app', 'Status'),
@@ -122,6 +126,7 @@ class Category extends \yii\db\ActiveRecord
                 $ran = ColorType::items();
                 $this->color = $this->color ?: $ran[mt_rand(0, count($ran) - 1)];
             }
+            $this->keywords = $this->keywords ? implode(',', $this->keywords) : null;
             $this->transaction_type = TransactionType::toEnumValue($this->transaction_type);
             return true;
         } else {
@@ -136,6 +141,10 @@ class Category extends \yii\db\ActiveRecord
     {
         $fields = parent::fields();
         unset($fields['user_id']);
+
+        $fields['keywords'] = function (self $model) {
+            return $model->keywords ? explode(',', $model->keywords) : [];
+        };
 
         $fields['transaction_type'] = function (self $model) {
             return TransactionType::getName($model->transaction_type);

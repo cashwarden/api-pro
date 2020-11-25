@@ -9,6 +9,7 @@ use app\core\models\Record;
 use app\core\models\Recurrence;
 use app\core\models\Rule;
 use app\core\models\Transaction;
+use app\core\types\AccountStatus;
 use app\core\types\DirectionType;
 use Exception;
 use Yii;
@@ -172,5 +173,26 @@ class AccountService
             $afterBalanceCent = $afterBalanceCent + data_get($rows, "{$date}.amount_cent", 0);
         }
         return array_reverse(array_values($items));
+    }
+
+
+    /**
+     * @param string $desc
+     * @return int
+     */
+    public function getAccountIdByDesc(string $desc)
+    {
+        $models = Account::find()
+            ->where(['user_id' => \Yii::$app->user->id, 'status' => AccountStatus::ACTIVE])
+            ->andWhere(['<>', 'keywords', ''])
+            ->orderBy(['sort' => SORT_ASC, 'id' => SORT_DESC])
+            ->all();
+        /** @var Account $model */
+        foreach ($models as $model) {
+            if (\app\core\helpers\ArrayHelper::strPosArr($desc, explode(',', $model->keywords)) !== false) {
+                return $model->id;
+            }
+        }
+        return 0;
     }
 }

@@ -12,11 +12,11 @@ use yii\web\NotFoundHttpException;
 
 class CategoryService
 {
-    public static function getDefaultCategory(int $userId = 0)
+    public static function getDefaultCategory(int $transactionType, int $userId = 0)
     {
         $userId = $userId ?: Yii::$app->user->id;
         return Category::find()
-            ->where(['user_id' => $userId, 'default' => Category::DEFAULT])
+            ->where(['user_id' => $userId, 'transaction_type' => $transactionType, 'default' => Category::DEFAULT])
             ->orderBy(['id' => SORT_ASC])
             ->asArray()
             ->one();
@@ -63,5 +63,31 @@ class CategoryService
     {
         $categories = Category::find()->where(['ledger_id' => $ledgerId])->asArray()->all();
         return ArrayHelper::map($categories, 'id', 'name');
+    }
+
+    /**
+     * @param string $desc
+     * @param int $ledgerId
+     * @param int $transactionType
+     * @return int
+     */
+    public function getCategoryIdByDesc(string $desc, int $ledgerId, int $transactionType)
+    {
+        $models = Category::find()
+            ->where([
+                'user_id' => \Yii::$app->user->id,
+                'ledger_id' => $ledgerId,
+                'transaction_type' => $transactionType
+            ])
+            ->andWhere(['<>', 'keywords', ''])
+            ->orderBy(['sort' => SORT_ASC, 'id' => SORT_DESC])
+            ->all();
+        /** @var Account $model */
+        foreach ($models as $model) {
+            if (\app\core\helpers\ArrayHelper::strPosArr($desc, explode(',', $model->keywords)) !== false) {
+                return $model->id;
+            }
+        }
+        return 0;
     }
 }
