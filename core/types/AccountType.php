@@ -24,6 +24,9 @@ class AccountType extends BaseType
     /** @var int Investment Account */
     public const INVESTMENT_ACCOUNT = 5;
 
+    /** @var int Loan account */
+    public const LOAN_ACCOUNT = 6;
+
     public static function names(): array
     {
         return [
@@ -33,6 +36,7 @@ class AccountType extends BaseType
             self::CREDIT_CARD => 'credit_card',
             self::SAVING_ACCOUNT => 'saving_account',
             self::INVESTMENT_ACCOUNT => 'investment_account',
+            self::LOAN_ACCOUNT => 'loan_account',
         ];
     }
 
@@ -45,6 +49,7 @@ class AccountType extends BaseType
             self::CREDIT_CARD => Yii::t('app', 'Credit Card'),
             self::SAVING_ACCOUNT => Yii::t('app', 'Saving Account'),
             self::INVESTMENT_ACCOUNT => Yii::t('app', 'Investment Account'),
+            self::LOAN_ACCOUNT => Yii::t('app', 'Loan Account'),
         ];
     }
 }
