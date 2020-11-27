@@ -3,7 +3,6 @@
 namespace app\core\services;
 
 use app\core\exceptions\InvalidArgumentException;
-use app\core\models\Account;
 use app\core\models\Category;
 use app\core\models\Ledger;
 use app\core\models\Record;
@@ -70,20 +69,6 @@ class FixDataService
                 continue;
             }
             $items = [
-                [
-                    'name' => Yii::t('app', 'Other expenses'),
-                    'color' => ColorType::GEEK_BLUE,
-                    'icon_name' => 'expenses',
-                    'transaction_type' => TransactionType::EXPENSE,
-                    'default' => Account::DEFAULT,
-                ],
-                [
-                    'name' => Yii::t('app', 'Other income'),
-                    'color' => ColorType::MAGENTA,
-                    'icon_name' => 'income',
-                    'transaction_type' => TransactionType::INCOME,
-                    'default' => Category::DEFAULT,
-                ],
                 [
                     'name' => Yii::t('app', 'Transfer'),
                     'color' => ColorType::GREEN,
