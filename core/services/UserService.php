@@ -140,6 +140,14 @@ class UserService
             if (!$account->save()) {
                 throw new DBException('Init Account fail ' . Setup::errorMessage($account->firstErrors));
             }
+            $ledger = new Ledger();
+            $ledger->name = '日常生活';
+            $ledger->type = LedgerType::getName(LedgerType::GENERAL);
+            $ledger->user_id = $user->id;
+            $ledger->default = true;
+            if (!$ledger->save()) {
+                throw new \Exception(Setup::errorMessage($ledger->firstErrors));
+            }
             $items = [
                 [
                     'name' => Yii::t('app', 'Food and drink'),
@@ -254,17 +262,10 @@ class UserService
                 $rows[$key]['user_id'] = $user->id;
                 $rows[$key]['created_at'] = $time;
                 $rows[$key]['updated_at'] = $time;
+                $rows[$key]['ledger_id'] = $ledger->id;
             }
             if (!ModelHelper::saveAll(Category::tableName(), $rows)) {
                 throw new DBException('Init Category fail');
-            }
-            $ledger = new Ledger();
-            $ledger->name = '日常生活';
-            $ledger->type = LedgerType::getName(LedgerType::GENERAL);
-            $ledger->user_id = $user->id;
-            $ledger->default = true;
-            if (!$ledger->save()) {
-                throw new \Exception(Setup::errorMessage($ledger->firstErrors));
             }
         } catch (Exception $e) {
             throw $e;

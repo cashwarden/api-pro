@@ -118,6 +118,7 @@ class LedgerService
                 $rows[$key]['user_id'] = $ledger->user_id;
                 $rows[$key]['created_at'] = $time;
                 $rows[$key]['updated_at'] = $time;
+                $rows[$key]['ledger_id'] = $ledger->id;
             }
             if (!ModelHelper::saveAll(Category::tableName(), $rows)) {
                 throw new DBException('Init Category fail');
