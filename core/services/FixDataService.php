@@ -104,6 +104,7 @@ class FixDataService
             foreach ($items as $key => $value) {
                 $rows[$key] = $value;
                 $rows[$key]['user_id'] = $ledger['user_id'];
+                $rows[$key]['ledger_id'] = $ledger['id'];
                 $rows[$key]['created_at'] = $time;
                 $rows[$key]['updated_at'] = $time;
             }
