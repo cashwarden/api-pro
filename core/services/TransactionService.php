@@ -226,7 +226,7 @@ class TransactionService extends BaseObject
                 $rules,
                 'then_transaction_type',
                 function () use ($desc) {
-                    if (ArrayHelper::strPosArr($desc, ['收到', '收入']) !== false) {
+                    if (ArrayHelper::strPosArr($desc, ['收到', '收入', '退款']) !== false) {
                         return TransactionType::getName(TransactionType::INCOME);
                     }
                     return TransactionType::getName(TransactionType::EXPENSE);

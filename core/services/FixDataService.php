@@ -3,6 +3,7 @@
 namespace app\core\services;
 
 use app\core\exceptions\InvalidArgumentException;
+use app\core\models\Account;
 use app\core\models\Category;
 use app\core\models\Ledger;
 use app\core\models\Record;
@@ -68,22 +69,132 @@ class FixDataService
             if ($category) {
                 continue;
             }
-            $items = [
-                [
-                    'name' => Yii::t('app', 'Transfer'),
-                    'color' => ColorType::GREEN,
-                    'icon_name' => 'transfer',
-                    'transaction_type' => TransactionType::TRANSFER,
-                    'default' => Category::NOT_DEFAULT,
-                ],
-                [
-                    'name' => Yii::t('app', 'Adjust Balance'),
-                    'color' => ColorType::BLUE,
-                    'icon_name' => 'adjust',
-                    'transaction_type' => TransactionType::ADJUST,
-                    'default' => Category::NOT_DEFAULT,
-                ],
-            ];
+            if (!Category::find()->where(['ledger_id' => $ledger['id']])->count()) {
+                $items = [
+                    [
+                        'name' => Yii::t('app', 'Food and drink'),
+                        'color' => ColorType::RED,
+                        'icon_name' => 'food',
+                        'transaction_type' => TransactionType::EXPENSE,
+                        'default' => Category::NOT_DEFAULT
+                    ],
+                    [
+                        'name' => Yii::t('app', 'Home life'),
+                        'color' => ColorType::ORANGE,
+                        'icon_name' => 'home',
+                        'transaction_type' => TransactionType::EXPENSE,
+                        'default' => Category::NOT_DEFAULT
+                    ],
+                    [
+                        'name' => Yii::t('app', 'Traffic'),
+                        'color' => ColorType::BLUE,
+                        'icon_name' => 'bus',
+                        'transaction_type' => TransactionType::EXPENSE,
+                        'default' => Category::NOT_DEFAULT
+                    ],
+                    [
+                        'name' => Yii::t('app', 'Recreation'),
+                        'color' => ColorType::VOLCANO,
+                        'icon_name' => 'game',
+                        'transaction_type' => TransactionType::EXPENSE,
+                        'default' => Category::NOT_DEFAULT
+                    ],
+                    [
+                        'name' => Yii::t('app', 'Health care'),
+                        'color' => ColorType::GREEN,
+                        'icon_name' => 'medicine-chest',
+                        'transaction_type' => TransactionType::EXPENSE,
+                        'default' => Category::NOT_DEFAULT
+                    ],
+                    [
+                        'name' => Yii::t('app', 'Clothes'),
+                        'color' => ColorType::PURPLE,
+                        'icon_name' => 'clothes',
+                        'transaction_type' => TransactionType::EXPENSE,
+                        'default' => Category::NOT_DEFAULT
+                    ],
+                    [
+                        'name' => Yii::t('app', 'Cultural education'),
+                        'color' => ColorType::CYAN,
+                        'icon_name' => 'education',
+                        'transaction_type' => TransactionType::EXPENSE,
+                        'default' => Category::NOT_DEFAULT
+                    ],
+                    [
+                        'name' => Yii::t('app', 'Investment expenditure'),
+                        'color' => ColorType::GOLD,
+                        'icon_name' => 'investment',
+                        'transaction_type' => TransactionType::EXPENSE,
+                        'default' => Category::NOT_DEFAULT
+                    ],
+                    [
+                        'name' => Yii::t('app', 'Childcare'),
+                        'color' => ColorType::LIME,
+                        'icon_name' => 'baby',
+                        'transaction_type' => TransactionType::EXPENSE,
+                        'default' => Category::NOT_DEFAULT
+                    ],
+                    [
+                        'name' => Yii::t('app', 'Other expenses'),
+                        'color' => ColorType::GEEK_BLUE,
+                        'icon_name' => 'expenses',
+                        'transaction_type' => TransactionType::EXPENSE,
+                        'default' => Account::DEFAULT,
+                    ],
+                    [
+                        'name' => Yii::t('app', 'Work income'),
+                        'color' => ColorType::BLUE,
+                        'icon_name' => 'work',
+                        'transaction_type' => TransactionType::INCOME,
+                        'default' => Category::NOT_DEFAULT
+                    ],
+                    [
+                        'name' => Yii::t('app', 'Investment income'),
+                        'color' => ColorType::GOLD,
+                        'icon_name' => 'investment',
+                        'transaction_type' => TransactionType::INCOME,
+                        'default' => Category::NOT_DEFAULT
+                    ],
+                    [
+                        'name' => Yii::t('app', 'Other income'),
+                        'color' => ColorType::MAGENTA,
+                        'icon_name' => 'income',
+                        'transaction_type' => TransactionType::INCOME,
+                        'default' => Category::DEFAULT,
+                    ],
+                    [
+                        'name' => Yii::t('app', 'Transfer'),
+                        'color' => ColorType::GREEN,
+                        'icon_name' => 'transfer',
+                        'transaction_type' => TransactionType::TRANSFER,
+                        'default' => Category::NOT_DEFAULT,
+                    ],
+                    [
+                        'name' => Yii::t('app', 'Adjust Balance'),
+                        'color' => ColorType::BLUE,
+                        'icon_name' => 'adjust',
+                        'transaction_type' => TransactionType::ADJUST,
+                        'default' => Category::NOT_DEFAULT,
+                    ],
+                ];
+            } else {
+                $items = [
+                    [
+                        'name' => Yii::t('app', 'Transfer'),
+                        'color' => ColorType::GREEN,
+                        'icon_name' => 'transfer',
+                        'transaction_type' => TransactionType::TRANSFER,
+                        'default' => Category::NOT_DEFAULT,
+                    ],
+                    [
+                        'name' => Yii::t('app', 'Adjust Balance'),
+                        'color' => ColorType::BLUE,
+                        'icon_name' => 'adjust',
+                        'transaction_type' => TransactionType::ADJUST,
+                        'default' => Category::NOT_DEFAULT,
+                    ],
+                ];
+            }
             $time = date('Y-m-d H:i:s');
             $rows = [];
             foreach ($items as $key => $value) {
