@@ -13,6 +13,7 @@ use Yii;
 use yii\base\BaseObject;
 use yii\base\InvalidConfigException;
 use yii\web\ForbiddenHttpException;
+use yiier\helpers\ArrayHelper;
 use yiier\helpers\DateHelper;
 use yiier\helpers\Setup;
 
@@ -97,17 +98,34 @@ class AnalysisService extends BaseObject
         $baseConditions = $baseConditions + ['transaction_type' => $transactionType];
         $categories = Category::find()->where($baseConditions)->asArray()->all();
 
+        $totalCent = Record::find()
+            ->where($baseConditions)
+            ->andWhere(['exclude_from_stats' => false])
+            ->andWhere($conditions)
+            ->sum('amount_cent');
+        if (!$totalCent) {
+            return [];
+        }
         foreach ($categories as $key => $category) {
-            $items[$key]['x'] = $category['name'];
-            $sum = Record::find()
+            $sumCent = Record::find()
                 ->where($baseConditions)
                 ->andWhere(['category_id' => $category['id'], 'exclude_from_stats' => false])
                 ->andWhere($conditions)
                 ->sum('amount_cent');
-            $items[$key]['y'] = $sum ? (float)Setup::toYuan($sum) : 0;
+            if ($sumCent) {
+                $item = [
+                    'name' => $category['name'],
+                    'value' => (float)Setup::toYuan($sumCent),
+                    'percent' => (bcdiv($sumCent, $totalCent, 4) * 100) . '%'
+                ];
+                array_push($items, $item);
+            }
         }
 
-        return $items;
+        return [
+            'items' => ArrayHelper::sort2DArray($items, 'value', 'DESC'),
+            'total' => (float)Setup::toYuan($totalCent)
+        ];
     }
 
     /**
@@ -205,6 +223,7 @@ class AnalysisService extends BaseObject
             $items['total'][$k] = 0;
             $items[$k] = [];
             foreach ($data as $key => $value) {
+                $v['category_id'] = $value['category_id'];
                 $v['category_name'] = data_get($categoriesMap, $value['category_id'], 0);
                 $v['currency_amount'] = (float)Setup::toYuan($value['currency_amount_cent']);
                 $items['total'][$k] += $v['currency_amount'];
