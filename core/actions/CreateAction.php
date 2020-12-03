@@ -16,7 +16,6 @@ class CreateAction extends Action
      */
     public $scenario = Model::SCENARIO_DEFAULT;
 
-
     /**
      * Creates a new model.
      * @return ActiveRecordInterface the model newly created

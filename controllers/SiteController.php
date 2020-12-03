@@ -115,6 +115,11 @@ class SiteController extends Controller
                             'link' => '/tag/index',
                             'icon' => 'anticon-appstore',
                         ],
+                        [
+                            'text' => '预算',
+                            'link' => '/budget/index',
+                            'icon' => 'anticon-area-chart',
+                        ],
 //                        [
 //                            'text' => '定时',
 //                            'link' => '/recurrence/index',
@@ -160,18 +165,48 @@ class SiteController extends Controller
                         ],
 
                         [
+                            'text' => '分析',
+                            'link' => '/analysis/index',
+                            'icon' => 'anticon-area-chart',
+                        ],
+                        [
+                            'text' => '预算',
+                            'link' => '/budget/index',
+                            'icon' => 'anticon-area-chart',
+                        ],
+                        [
                             'text' => '定时',
                             'link' => '/recurrence/index',
                             'icon' => 'anticon-field-time',
                         ],
                         [
-                            'text' => '规则',
-                            'link' => '/rule/index',
-                            'icon' => 'anticon-group',
+                            'text' => '设置',
+                            'icon' => 'anticon-setting',
+                            'children' => [
+                                [
+                                    'text' => '个人设置',
+                                    'link' => '/settings/personal',
+                                    'icon' => 'anticon-user',
+                                ],
+                                [
+                                    'text' => '分类设置',
+                                    'link' => '/settings/categories',
+                                    'icon' => 'anticon-appstore',
+                                ],
+                                [
+                                    'text' => '标签设置',
+                                    'link' => '/settings/tags',
+                                    'icon' => 'anticon-appstore',
+                                ],
+                                [
+                                    'text' => '规则设置',
+                                    'link' => '/settings/rules',
+                                    'icon' => 'anticon-group',
+                                ]
+                            ]
                         ],
-                    ],
-                ],
-
+                    ]
+                ]
             ]
         ];
     }
