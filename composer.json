@@ -29,7 +29,8 @@
         "ext-json": "*",
         "ext-bcmath": "*",
         "guzzlehttp/guzzle": "^7.0",
-        "light/hashids": "^2.0"
+        "light/hashids": "^2.0",
+        "nesbot/carbon": "^2.42"
     },
     "require-dev": {
         "yiisoft/yii2-debug": "~2.1.0",

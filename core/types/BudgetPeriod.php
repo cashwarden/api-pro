@@ -14,8 +14,8 @@ class BudgetPeriod extends BaseType
     public static function names(): array
     {
         return [
-            self::DAY => 'day',
-            self::WEEK => 'week',
+            // self::DAY => 'day',
+            // self::WEEK => 'week',
             self::MONTH => 'month',
             self::YEAR => 'year',
             self::ONE_TIME => 'one_time',
@@ -25,8 +25,8 @@ class BudgetPeriod extends BaseType
     public static function texts()
     {
         return [
-            self::DAY => '每天',
-            self::WEEK => '每周',
+            // self::DAY => '每天',
+            // self::WEEK => '每周',
             self::MONTH => '每月',
             self::YEAR => '每年',
             self::ONE_TIME => '一次性'

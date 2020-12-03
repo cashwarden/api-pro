@@ -3,13 +3,11 @@
 namespace app\modules\v1\controllers;
 
 use app\core\models\Budget;
+use app\core\models\BudgetConfig;
 
-/**
- * Tag controller for the `v1` module
- */
-class BudgetController extends ActiveController
+class BudgetConfigController extends ActiveController
 {
-    public $modelClass = Budget::class;
+    public $modelClass = BudgetConfig::class;
     public $defaultOrder = ['id' => SORT_DESC];
     public $partialMatchAttributes = ['name'];
 }
