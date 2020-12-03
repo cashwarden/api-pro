@@ -65,9 +65,21 @@ $config = [
                 "POST <module>/rules/<id:\d+>/copy" => '<module>/rule/copy',
                 "PUT <module>/rules/<id:\d+>/status" => '<module>/rule/update-status',
                 "GET <module>/accounts/types" => '<module>/account/types',
+                "GET <module>/accounts/<id:\d+>/balances/trend" => '<module>/account/balances-trend',
                 "GET <module>/accounts/overview" => '<module>/account/overview',
                 "POST <module>/reset-token" => '<module>/user/reset-token',
+
                 "GET <module>/users/auth-clients" => '<module>/user/get-auth-clients',
+                'POST <module>/users/confirm' => '<module>/user/confirm',
+                'POST <module>/users/send-confirmation' => '<module>/user/send-confirmation',
+                'POST <module>/users/me' => '<module>/user/me-update',
+                'GET <module>/users/me' => '<module>/user/me',
+                'POST <module>/users/password-reset' => '<module>/user/password-reset',
+                'POST <module>/users/change-password' => '<module>/user/change-password',
+                'POST <module>/users/password-reset-token-verification' =>
+                    '<module>/user/password-reset-token-verification',
+                'POST <module>/users/password-reset-request' => '<module>/user/password-reset-request',
+
                 "GET <module>/transactions/<alias:types|export>" => '<module>/transaction/<alias>',
                 "POST <module>/transactions/upload" => '<module>/transaction/upload',
                 "GET <module>/records/overview" => '<module>/record/overview',
@@ -80,6 +92,13 @@ $config = [
                 "GET <module>/site-config" => '/site/data',
                 "GET <module>/<alias:icons>" => '/site/<alias>',
                 "GET health-check" => 'site/health-check',
+
+                "GET <module>/ledgers/types" => '<module>/ledger/types',
+                "GET <module>/ledgers/categories" => '<module>/ledger/categories',
+                "POST <module>/ledger/members" => '<module>/ledger/inviting-member',
+                "GET <module>/ledger/members" => '<module>/ledger-member/index',
+                "PUT <module>/ledger/members/<id:\d+>" => '<module>/ledger-member/update',
+
                 [
                     'class' => 'yii\rest\UrlRule',
                     'controller' => [
@@ -91,9 +110,10 @@ $config = [
                         'v1/transaction',
                         'v1/recurrence',
                         'v1/budget',
+                        'v1/ledger',
                     ]
                 ],
-                '<module>/<controller:\w+>/<action:\w+>/<id:\d+>' => '<module>/<controller>/<action>',
+                // '<module>/<controller:\w+>/<action:\w+>/<id:\d+>' => '<module>/<controller>/<action>',
             ],
         ],
     ],

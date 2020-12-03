@@ -7,11 +7,15 @@ use app\core\exceptions\InvalidArgumentException;
 use app\core\models\Account;
 use app\core\models\AuthClient;
 use app\core\models\Category;
+use app\core\models\Ledger;
 use app\core\models\User;
 use app\core\requests\JoinRequest;
+use app\core\requests\PasswordResetRequest;
+use app\core\traits\ServiceTrait;
 use app\core\types\AccountType;
 use app\core\types\AuthClientType;
 use app\core\types\ColorType;
+use app\core\types\LedgerType;
 use app\core\types\TransactionType;
 use app\core\types\UserStatus;
 use Exception;
@@ -25,6 +29,8 @@ use yiier\helpers\Setup;
 
 class UserService
 {
+    use ServiceTrait;
+
     /**
      * @param JoinRequest $request
      * @return User
@@ -40,6 +46,7 @@ class UserService
             $user->base_currency_code = $request->base_currency_code;
             $user->setPassword($request->password);
             $user->generateAuthKey();
+            $user->status = params('verificationEmail') ? UserStatus::UNACTIVATED : UserStatus::ACTIVE;
             if (!$user->save()) {
                 throw new DBException(Setup::errorMessage($user->firstErrors));
             }
@@ -72,7 +79,7 @@ class UserService
         $key = $jwt->getKey();
         $time = time();
         return (string)$jwt->getBuilder()
-            ->issuedBy(params('appUrl'))
+            ->issuedBy(params('appURL'))
             ->identifiedBy(Yii::$app->name, true)
             ->issuedAt($time)
             ->expiresAt($time + 3600 * 72)
@@ -89,9 +96,7 @@ class UserService
     public static function getUserByUsernameOrEmail(string $value)
     {
         $condition = strpos($value, '@') ? ['email' => $value] : ['username' => $value];
-        return User::find()->where(['status' => UserStatus::ACTIVE])
-            ->andWhere($condition)
-            ->one();
+        return User::find()->andWhere($condition)->one();
     }
 
     /**
@@ -112,6 +117,7 @@ class UserService
         if (!$user->save()) {
             return false;
         }
+        return true;
     }
 
     /**
@@ -133,6 +139,14 @@ class UserService
             ]);
             if (!$account->save()) {
                 throw new DBException('Init Account fail ' . Setup::errorMessage($account->firstErrors));
+            }
+            $ledger = new Ledger();
+            $ledger->name = '日常生活';
+            $ledger->type = LedgerType::getName(LedgerType::GENERAL);
+            $ledger->user_id = $user->id;
+            $ledger->default = true;
+            if (!$ledger->save()) {
+                throw new \Exception(Setup::errorMessage($ledger->firstErrors));
             }
             $items = [
                 [
@@ -248,6 +262,7 @@ class UserService
                 $rows[$key]['user_id'] = $user->id;
                 $rows[$key]['created_at'] = $time;
                 $rows[$key]['updated_at'] = $time;
+                $rows[$key]['ledger_id'] = $ledger->id;
             }
             if (!ModelHelper::saveAll(Category::tableName(), $rows)) {
                 throw new DBException('Init Category fail');
@@ -283,7 +298,9 @@ class UserService
         }
 
         if (!$user = User::findByPasswordResetToken($token)) {
-            throw new InvalidArgumentException('链接无效或者已失效，请重新操作。');
+            throw new InvalidArgumentException(
+                Yii::t('app', 'The link is invalid or has expired, please try again.')
+            );
         }
         return $user;
     }
@@ -301,5 +318,20 @@ class UserService
             return $model->user;
         }
         throw new Exception('您还未绑定账号，请先访问「个人设置」中的「账号绑定」进行绑定账号，然后才能快速记账。');
+    }
+
+    /**
+     *
+     * @param PasswordResetRequest $request
+     * @return bool whether the email was send
+     * @throws \yii\base\Exception
+     * @throws \yii\base\InvalidConfigException
+     */
+    public function sendPasswordResetEmail(PasswordResetRequest $request)
+    {
+        /* @var $user User */
+        $user = User::findOne(['status' => UserStatus::ACTIVE, 'email' => $request->email]);
+        $this->setPasswordResetToken($user);
+        return $this->getMailerService()->sendPasswordResetMessage($user);
     }
 }

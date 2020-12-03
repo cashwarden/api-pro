@@ -19,6 +19,7 @@ use yiier\helpers\Setup;
  *
  * @property int $id
  * @property int $user_id
+ * @property int $ledger_id
  * @property int $account_id
  * @property int $transaction_type
  * @property int $category_id
@@ -36,6 +37,7 @@ use yiier\helpers\Setup;
  * @property float $amount
  * @property-read Account $account
  * @property-read Category $category
+ * @property-read Ledger $ledger
  * @property-read Transaction $transaction
  */
 class Record extends ActiveRecord
@@ -91,6 +93,7 @@ class Record extends ActiveRecord
             ],
             [
                 [
+                    'ledger_id',
                     'user_id',
                     'account_id',
                     'transaction_type',
@@ -116,6 +119,7 @@ class Record extends ActiveRecord
     {
         return [
             'id' => Yii::t('app', 'ID'),
+            'ledger_id' => Yii::t('app', 'Ledger Id'),
             'user_id' => Yii::t('app', 'User ID'),
             'account_id' => Yii::t('app', 'Account ID'),
             'transaction_type' => Yii::t('app', 'Transaction Type'),
@@ -147,6 +151,11 @@ class Record extends ActiveRecord
     public function getCategory()
     {
         return $this->hasOne(Category::class, ['id' => 'category_id']);
+    }
+
+    public function getLedger()
+    {
+        return $this->hasOne(Ledger::class, ['id' => 'ledger_id']);
     }
 
     /**
@@ -234,7 +243,6 @@ class Record extends ActiveRecord
         $fields = parent::fields();
         unset($fields['currency_amount_cent'], $fields['user_id'], $fields['amount_cent']);
 
-
         $fields['direction'] = function (self $model) {
             return DirectionType::getName($model->direction);
         };
@@ -264,6 +272,10 @@ class Record extends ActiveRecord
 
         $fields['account'] = function (self $model) {
             return $model->account;
+        };
+
+        $fields['ledger'] = function (self $model) {
+            return $model->ledger;
         };
 
         $fields['date'] = function (self $model) {

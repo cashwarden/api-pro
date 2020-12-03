@@ -26,6 +26,7 @@ use yiier\graylog\Log;
 use yiier\helpers\Setup;
 
 /**
+ * @property-read int $ledgerIdByDesc
  * @property-read int $accountIdByDesc
  */
 class TransactionService extends BaseObject
@@ -54,6 +55,7 @@ class TransactionService extends BaseObject
                 $_model->source = $transaction->source;
             }
             $_model->user_id = $transaction->user_id;
+            $_model->ledger_id = $transaction->ledger_id;
             $_model->transaction_id = $transaction->id;
             $_model->category_id = $transaction->category_id;
             $_model->amount_cent = $transaction->amount_cent;
@@ -224,16 +226,27 @@ class TransactionService extends BaseObject
                 $rules,
                 'then_transaction_type',
                 function () use ($desc) {
-                    if (ArrayHelper::strPosArr($desc, ['收到', '收入']) !== false) {
+                    if (ArrayHelper::strPosArr($desc, ['收到', '收入', '退款']) !== false) {
                         return TransactionType::getName(TransactionType::INCOME);
                     }
                     return TransactionType::getName(TransactionType::EXPENSE);
                 }
             );
-            $transactionType = TransactionType::toEnumValue($model->type);
 
+            $model->ledger_id = $this->getDataByDesc(
+                $rules,
+                'ledger_id',
+                [$this, 'getLedgerIdByDesc']
+            );
+            if (!$model->ledger_id) {
+                throw new CannotOperateException(Yii::t('app', 'Default ledger not found.'));
+            }
+
+            $transactionType = TransactionType::toEnumValue($model->type);
+            // 先去账号根据关键词查找
+            $accountId = $this->accountService->getAccountIdByDesc($desc);
             if (in_array($transactionType, [TransactionType::EXPENSE, TransactionType::TRANSFER])) {
-                $model->from_account_id = $this->getDataByDesc(
+                $model->from_account_id = $accountId ?: $this->getDataByDesc(
                     $rules,
                     'then_from_account_id',
                     [$this, 'getAccountIdByDesc']
@@ -244,7 +257,7 @@ class TransactionService extends BaseObject
             }
 
             if (in_array($transactionType, [TransactionType::INCOME, TransactionType::TRANSFER])) {
-                $model->to_account_id = $this->getDataByDesc(
+                $model->to_account_id = $accountId ?: $this->getDataByDesc(
                     $rules,
                     'then_to_account_id',
                     [$this, 'getAccountIdByDesc']
@@ -254,14 +267,18 @@ class TransactionService extends BaseObject
                 }
             }
 
-            $model->category_id = $this->getDataByDesc(
+            $categoryId = $this->categoryService->getCategoryIdByDesc($desc, $model->ledger_id, $transactionType);
+            $model->category_id = $categoryId ?: $this->getDataByDesc(
                 $rules,
                 'then_category_id',
-                function () {
-                    //  todo 根据交易类型查找默认分类
-                    return (int)data_get(CategoryService::getDefaultCategory(), 'id', 0);
+                function () use ($transactionType) {
+                    return (int)data_get(CategoryService::getDefaultCategory($transactionType), 'id', 0);
                 }
             );
+
+            if (!$model->category_id) {
+                throw new CannotOperateException(Yii::t('app', 'Category not found.'));
+            }
 
             $model->date = $this->getDateByDesc($desc);
 
@@ -269,7 +286,9 @@ class TransactionService extends BaseObject
             $model->status = $this->getDataByDesc($rules, 'then_transaction_status');
             $model->reimbursement_status = $this->getDataByDesc($rules, 'then_reimbursement_status');
 
-            $model->currency_amount = $this->getAmountByDesc($desc);
+            $currencyAmount = $this->getAmountByDesc($desc);
+            $model->currency_amount = $currencyAmount ?: $this->getDataByDesc($rules, 'then_currency_amount');
+
             $model->currency_code = user('base_currency_code');
             if (!$model->save()) {
                 throw new DBException(Setup::errorMessage($model->firstErrors));
@@ -362,12 +381,13 @@ class TransactionService extends BaseObject
 
     /**
      * @param string $desc
+     * @param int $ledgerId
      * @return array
      * @throws Exception
      */
-    public static function matchTagsByDesc(string $desc): array
+    public static function matchTagsByDesc(string $desc, int $ledgerId): array
     {
-        if ($tags = TagService::getTagNames()) {
+        if ($tags = TagService::getTagNames($ledgerId)) {
             $tags = implode('|', $tags);
             preg_match_all("!({$tags})!", $desc, $matches);
             return data_get($matches, '0', []);
@@ -377,19 +397,20 @@ class TransactionService extends BaseObject
 
     /**
      * @param array $tags
+     * @param int $ledgerId
      * @throws InvalidConfigException
      */
-    public static function createTags(array $tags)
+    public static function createTags(array $tags, int $ledgerId)
     {
         $has = Tag::find()
             ->select('name')
-            ->where(['user_id' => Yii::$app->user->id, 'name' => $tags])
+            ->where(['user_id' => Yii::$app->user->id, 'name' => $tags, 'ledger_id' => $ledgerId])
             ->column();
         /** @var TagService $tagService */
         $tagService = Yii::createObject(TagService::class);
         foreach (array_diff($tags, $has) as $item) {
             try {
-                $tagService->create(['name' => $item]);
+                $tagService->create(['name' => $item, 'ledger_id' => $ledgerId]);
             } catch (Exception $e) {
                 Log::error('add tag fail', [$item, (string)$e]);
             }
@@ -437,6 +458,16 @@ class TransactionService extends BaseObject
     {
         $userId = Yii::$app->user->id;
         return (int)data_get(AccountService::getDefaultAccount($userId), 'id', 0);
+    }
+
+    /**
+     * @return int
+     * @throws Exception
+     */
+    public function getLedgerIdByDesc(): int
+    {
+        $userId = Yii::$app->user->id;
+        return (int)data_get(LedgerService::getDefaultLedger($userId), 'id', 0);
     }
 
     /**
@@ -498,13 +529,14 @@ class TransactionService extends BaseObject
 
     /**
      * @param string $tag
+     * @param int $ledgerId
      * @param int $userId
      * @return bool|int|string|null
      */
-    public static function countTransactionByTag(string $tag, int $userId)
+    public static function countTransactionByTag(string $tag, int $ledgerId, int $userId)
     {
         return Transaction::find()
-            ->where(['user_id' => $userId])
+            ->where(['user_id' => $userId, 'ledger_id' => $ledgerId])
             ->andWhere(new Expression('FIND_IN_SET(:tag, tags)'))->addParams([':tag' => $tag])
             ->count();
     }
@@ -531,7 +563,7 @@ class TransactionService extends BaseObject
     public function exportData()
     {
         $data = [];
-        $categoriesMap = CategoryService::getCurrentMap();
+        $categoriesMap = CategoryService::getMapByUserId();
         $accountsMap = AccountService::getCurrentMap();
         $types = TransactionType::texts();
         $items = Transaction::find()
@@ -567,5 +599,30 @@ class TransactionService extends BaseObject
             array_push($data, array_values($datum));
         }
         return $data;
+    }
+
+    /**
+     * @param array $params
+     * @return array
+     * @throws \yii\web\ForbiddenHttpException
+     * @throws Exception
+     */
+    public function getIdsBySearch(array $params)
+    {
+        $baseConditions = ['user_id' => Yii::$app->user->id];
+        if ($ledgerId = data_get($params, 'ledger_id')) {
+            LedgerService::checkAccess($ledgerId);
+            $baseConditions = ['user_id' => LedgerService::getLedgerMemberUserIds($ledgerId), 'ledger_id' => $ledgerId];
+        }
+
+        $query = Transaction::find()->andWhere($baseConditions);
+        if ($searchKeywords = trim(request('keyword'))) {
+            $query->andWhere("MATCH(`description`, `tags`, `remark`) AGAINST ('*$searchKeywords*' IN BOOLEAN MODE)");
+        }
+
+        $query->andFilterWhere(['category_id' => data_get($params, 'category_id')]);
+
+        $ids = $query->column();
+        return array_map('intval', $ids);
     }
 }

@@ -2,13 +2,21 @@
 
 namespace app\modules\v1\controllers;
 
-use app\core\exceptions\InternalException;
 use app\core\exceptions\InvalidArgumentException;
 use app\core\models\User;
+use app\core\requests\ChangePassword;
+use app\core\requests\JoinConfirm;
 use app\core\requests\JoinRequest;
 use app\core\requests\LoginRequest;
+use app\core\requests\PasswordReset;
+use app\core\requests\PasswordResetRequest;
+use app\core\requests\PasswordResetTokenVerification;
+use app\core\requests\UserUpdate;
+use app\core\services\LedgerService;
 use app\core\traits\ServiceTrait;
+use app\core\types\UserStatus;
 use Yii;
+use yii\base\Exception;
 
 /**
  * User controller for the `v1` module
@@ -18,7 +26,7 @@ class UserController extends ActiveController
     use ServiceTrait;
 
     public $modelClass = User::class;
-    public $noAuthActions = ['join', 'login'];
+    public $noAuthActions = ['join', 'login', 'confirm'];
 
     public function actions()
     {
@@ -30,16 +38,26 @@ class UserController extends ActiveController
 
     /**
      * @return User
-     * @throws InternalException
      * @throws InvalidArgumentException|\Throwable
      */
     public function actionJoin()
     {
         $params = Yii::$app->request->bodyParams;
         $data = $this->validate(new JoinRequest(), $params);
-
-        /** @var JoinRequest $data */
-        return $this->userService->createUser($data);
+        return Yii::$app->db->transaction(function () use ($data) {
+            /** @var JoinRequest $data */
+            $user = $this->userService->createUser($data);
+            if (params('verificationEmail')) {
+                $this->mailerService->sendConfirmationMessage($user);
+            }
+            Yii::$app->user->setIdentity($user);
+            $token = $this->userService->getToken();
+            return [
+                'user' => $user,
+                'token' => (string)$token,
+                'default_ledger' => LedgerService::getDefaultLedger($user->id),
+            ];
+        });
     }
 
     /**
@@ -56,6 +74,7 @@ class UserController extends ActiveController
         return [
             'user' => $user,
             'token' => (string)$token,
+            'default_ledger' => LedgerService::getDefaultLedger($user->id),
         ];
     }
 
@@ -66,12 +85,13 @@ class UserController extends ActiveController
         return [
             'user' => $user,
             'token' => (string)$token,
+            'default_ledger' => LedgerService::getDefaultLedger($user->id),
         ];
     }
 
     /**
      * @return array
-     * @throws \yii\base\Exception
+     * @throws Exception
      */
     public function actionResetToken()
     {
@@ -80,8 +100,48 @@ class UserController extends ActiveController
         $this->userService->setPasswordResetToken($user);
         return [
             'reset_token' => $user->password_reset_token,
-            'expire_in' => params('user.passwordResetTokenExpire')
+            'expire_in' => params('userPasswordResetTokenExpire')
         ];
+    }
+
+
+    /**
+     * @return User
+     * @throws Exception
+     * @throws InvalidArgumentException
+     */
+    public function actionMeUpdate()
+    {
+        $model = new UserUpdate();
+        $model->id = Yii::$app->user->id;
+        $this->validate($model, Yii::$app->request->bodyParams);
+        return $model->save();
+    }
+
+    /**
+     * @return User|array|\yii\db\ActiveRecord
+     */
+    public function actionMe()
+    {
+        return User::find()->where(['id' => Yii::$app->user->id])->one();
+    }
+
+    /**
+     * @return string
+     * @throws Exception
+     * @throws \yii\base\InvalidConfigException
+     */
+    public function actionSendConfirmation()
+    {
+        /** @var User $user */
+        $user = User::find()->where(['id' => Yii::$app->user->id])->one();
+        if ($user->status == UserStatus::ACTIVE) {
+            throw new InvalidArgumentException(Yii::t('app', 'Your mailbox has been activated.'));
+        }
+        if ($this->mailerService->sendConfirmationMessage($user)) {
+            return Yii::t('app', 'The activation email was sent successfully, please activate within 24 hours.');
+        }
+        return '';
     }
 
     /**
@@ -90,5 +150,82 @@ class UserController extends ActiveController
     public function actionGetAuthClients()
     {
         return $this->userService->getAuthClients();
+    }
+
+    /**
+     * Process password reset request
+     *
+     * @return string
+     * @throws Exception
+     * @throws InvalidArgumentException
+     * @throws \yii\base\InvalidConfigException
+     */
+    public function actionPasswordResetRequest()
+    {
+        $model = new PasswordResetRequest();
+        /** @var PasswordResetRequest $model */
+        $model = $this->validate($model, Yii::$app->request->bodyParams);
+        return $this->userService->sendPasswordResetEmail($model);
+    }
+
+    /**
+     * Verify password reset token
+     * @return string
+     * @throws InvalidArgumentException
+     */
+    public function actionPasswordResetTokenVerification()
+    {
+        $model = new PasswordResetTokenVerification();
+        /** @var PasswordResetRequest $model */
+        $this->validate($model, Yii::$app->request->bodyParams);
+        return '';
+    }
+
+    /**
+     * Process user sign-up confirmation
+     *
+     * @return array
+     * @throws InvalidArgumentException|\Throwable
+     */
+    public function actionConfirm()
+    {
+        $model = new JoinConfirm();
+        /** @var JoinConfirm $model */
+        $model = $this->validate($model, Yii::$app->request->bodyParams);
+        $user = $model->confirm();
+        Yii::$app->user->setIdentity($user);
+        $token = $this->userService->getToken();
+        return [
+            'user' => $user,
+            'token' => (string)$token,
+            'default_ledger' => LedgerService::getDefaultLedger($user->id),
+        ];
+    }
+
+    /**
+     * Process password reset
+     * @return string
+     * @throws InvalidArgumentException
+     */
+    public function actionPasswordReset()
+    {
+        $params = Yii::$app->request->bodyParams;
+        $model = new PasswordReset();
+        $model = $this->validate($model, $params);
+        return $model->resetPassword();
+    }
+
+
+    /**
+     * @return string
+     * @throws Exception
+     */
+    public function actionChangePassword()
+    {
+        $params = Yii::$app->request->bodyParams;
+        $model = new ChangePassword();
+        /** @var ChangePassword $model */
+        $model = $this->validate($model, $params);
+        return $model->change();
     }
 }

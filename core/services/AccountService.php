@@ -3,14 +3,17 @@
 namespace app\core\services;
 
 use app\core\exceptions\InternalException;
+use app\core\helpers\DateHelper;
 use app\core\models\Account;
 use app\core\models\Record;
 use app\core\models\Recurrence;
 use app\core\models\Rule;
 use app\core\models\Transaction;
+use app\core\types\AccountStatus;
 use app\core\types\DirectionType;
 use Exception;
 use Yii;
+use yii\base\InvalidConfigException;
 use yii\db\ActiveRecord;
 use yii\helpers\ArrayHelper;
 use yiier\helpers\Setup;
@@ -132,5 +135,64 @@ class AccountService
     {
         $accounts = Account::find()->where(['user_id' => Yii::$app->user->id])->asArray()->all();
         return ArrayHelper::map($accounts, 'id', 'name');
+    }
+
+    /**
+     * @param Account $model
+     * @param string $endDate
+     * @return array
+     * @throws InvalidConfigException
+     * @throws Exception
+     */
+    public function balancesTrend(Account $model, string $endDate): array
+    {
+        $currentBalanceCent = $model->balance_cent;
+        $data = Record::find()
+            ->where(['account_id' => $model->id, 'exclude_from_stats' => (int)false])
+            ->andWhere(['>=', 'date', $endDate])
+            ->orderBy(['date' => SORT_DESC, 'id' => SORT_DESC])
+            ->asArray()
+            ->all();
+        $items = [];
+        $rows = [];
+        foreach ($data as $datum) {
+            $date = DateHelper::toDate($datum['date']);
+            $amountCent = $datum['direction'] == DirectionType::INCOME ?
+                -$datum['amount_cent'] : $datum['amount_cent'];
+            if (!isset($rows[$date]['amount_cent'])) {
+                $rows[$date]['amount_cent'] = 0;
+            }
+            $rows[$date]['amount_cent'] += $amountCent;
+        }
+        $dares = DateHelper::getMonthRange($endDate);
+        foreach ($dares as $date) {
+            $afterBalanceCent = $afterBalanceCent ?? $currentBalanceCent;
+            if (!isset($items[$date])) {
+                $items[$date] = ['date' => $date, 'after_balance' => (float)Setup::toYuan($afterBalanceCent)];
+            }
+            $afterBalanceCent = $afterBalanceCent + data_get($rows, "{$date}.amount_cent", 0);
+        }
+        return array_reverse(array_values($items));
+    }
+
+
+    /**
+     * @param string $desc
+     * @return int
+     */
+    public function getAccountIdByDesc(string $desc)
+    {
+        $models = Account::find()
+            ->where(['user_id' => \Yii::$app->user->id, 'status' => AccountStatus::ACTIVE])
+            ->andWhere(['<>', 'keywords', ''])
+            ->orderBy(['sort' => SORT_ASC, 'id' => SORT_DESC])
+            ->all();
+        /** @var Account $model */
+        foreach ($models as $model) {
+            if (\app\core\helpers\ArrayHelper::strPosArr($desc, explode(',', $model->keywords)) !== false) {
+                return $model->id;
+            }
+        }
+        return 0;
     }
 }

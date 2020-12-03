@@ -13,6 +13,7 @@ use Yii;
 use yii\behaviors\TimestampBehavior;
 use yiier\helpers\DateHelper;
 use yiier\helpers\Setup;
+use yiier\validators\ArrayValidator;
 use yiier\validators\MoneyValidator;
 
 /**
@@ -21,6 +22,7 @@ use yiier\validators\MoneyValidator;
  * @property int $id
  * @property int $user_id
  * @property string $name
+ * @property string|null|array $keywords
  * @property int|string $type
  * @property string $color
  * @property int|null $balance_cent
@@ -33,6 +35,7 @@ use yiier\validators\MoneyValidator;
  * @property int|null $credit_card_billing_day
  * @property int $default
  * @property int|null $sort
+ * @property string $remark
  * @property string|null $created_at
  * @property string|null $updated_at
  *
@@ -104,12 +107,14 @@ class Account extends \yii\db\ActiveRecord
             ],
             ['status', 'in', 'range' => AccountStatus::names()],
             [['name'], 'string', 'max' => 120],
+            [['remark'], 'string', 'max' => 255],
             [['color'], 'string', 'max' => 7],
             ['type', 'in', 'range' => AccountType::names()],
             [['balance', 'currency_balance'], MoneyValidator::class, 'allowsNegative' => true], //todo message
             ['exclude_from_stats', 'boolean', 'trueValue' => true, 'falseValue' => false, 'strict' => true],
             ['default', 'boolean', 'trueValue' => true, 'falseValue' => false, 'strict' => true],
             ['currency_code', 'in', 'range' => CurrencyCode::getKeys()],
+            [['keywords'], ArrayValidator::class],
             [
                 'name',
                 'unique',
@@ -128,6 +133,7 @@ class Account extends \yii\db\ActiveRecord
             'id' => Yii::t('app', 'ID'),
             'user_id' => Yii::t('app', 'User ID'),
             'name' => Yii::t('app', 'Name'),
+            'keywords' => Yii::t('app', 'Keywords'),
             'type' => Yii::t('app', 'Type'),
             'color' => Yii::t('app', 'Color'),
             'balance' => Yii::t('app', 'Balance'),
@@ -140,6 +146,7 @@ class Account extends \yii\db\ActiveRecord
             'credit_card_billing_day' => Yii::t('app', 'Credit Card Billing Day'),
             'default' => Yii::t('app', 'Default'),
             'sort' => Yii::t('app', 'Sort'),
+            'remark' => Yii::t('app', 'Remark'),
             'created_at' => Yii::t('app', 'Created At'),
             'updated_at' => Yii::t('app', 'Updated At'),
         ];
@@ -173,6 +180,7 @@ class Account extends \yii\db\ActiveRecord
                 // $this->balance_cent = $this->currency_balance_cent;
                 // todo 计算汇率
             }
+            $this->keywords = $this->keywords ? implode(',', $this->keywords) : null;
 
             $this->type = AccountType::toEnumValue($this->type);
             return true;
@@ -220,12 +228,20 @@ class Account extends \yii\db\ActiveRecord
         $fields = parent::fields();
         unset($fields['currency_balance_cent'], $fields['balance_cent'], $fields['user_id']);
 
+        $fields['keywords'] = function (self $model) {
+            return $model->keywords ? explode(',', $model->keywords) : [];
+        };
+
         $fields['type'] = function (self $model) {
             return AccountType::getName($model->type);
         };
 
         $fields['status'] = function (self $model) {
             return AccountStatus::getName($model->status);
+        };
+
+        $fields['status_txt'] = function (self $model) {
+            return AccountStatus::texts()[$model->status];
         };
 
         $fields['icon_name'] = function (self $model) {

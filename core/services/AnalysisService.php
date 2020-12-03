@@ -12,6 +12,8 @@ use app\core\types\TransactionType;
 use Yii;
 use yii\base\BaseObject;
 use yii\base\InvalidConfigException;
+use yii\web\ForbiddenHttpException;
+use yiier\helpers\ArrayHelper;
 use yiier\helpers\DateHelper;
 use yiier\helpers\Setup;
 
@@ -22,15 +24,16 @@ use yiier\helpers\Setup;
 class AnalysisService extends BaseObject
 {
     /**
+     * @param array $params
      * @return array
      * @throws \Exception
      */
-    public function getRecordOverview(): array
+    public function getRecordOverview(array $params = []): array
     {
         $items = [];
         foreach (AnalysisDateType::texts() as $key => $item) {
             $date = AnalysisService::getDateRange($key);
-            $items[$key]['overview'] = $this->getRecordOverviewByDate($date);
+            $items[$key]['overview'] = $this->getRecordOverviewByDate($date, $params);
             $items[$key]['key'] = $key;
             $items[$key]['text'] = $item;
         }
@@ -38,15 +41,20 @@ class AnalysisService extends BaseObject
         return $items;
     }
 
-    public function getRecordOverviewByDate(array $date): array
+    public function getRecordOverviewByDate(array $date, array $params = []): array
     {
         $conditions = [];
         if (count($date) == 2) {
             $conditions = ['between', 'date', $date[0], $date[1]];
         }
-        $userId = \Yii::$app->user->id;
+        $baseConditions = ['user_id' => Yii::$app->user->id];
+        if ($ledgerId = data_get($params, 'ledger_id')) {
+            LedgerService::checkAccess($ledgerId);
+            $baseConditions = ['user_id' => LedgerService::getLedgerMemberUserIds($ledgerId), 'ledger_id' => $ledgerId];
+        }
+
         $types = [TransactionType::EXPENSE, TransactionType::INCOME];
-        $baseConditions = ['user_id' => $userId, 'transaction_type' => $types, 'exclude_from_stats' => false];
+        $baseConditions = $baseConditions + ['transaction_type' => $types, 'exclude_from_stats' => false];
         $sum = Record::find()
             ->where($baseConditions)
             ->andWhere(['direction' => DirectionType::INCOME])
@@ -66,41 +74,80 @@ class AnalysisService extends BaseObject
         return $items;
     }
 
-    public function getCategoryStatisticalData(array $date, int $transactionType)
+    /**
+     * @param array $date
+     * @param int $transactionType
+     * @param null $ledgerId
+     * @return array
+     * @throws ForbiddenHttpException
+     */
+    public function getCategoryStatisticalData(array $date, int $transactionType, $ledgerId = null)
     {
         $conditions = [];
         $items = [];
         if (count($date) == 2) {
             $conditions = ['between', 'date', $date[0], $date[1]];
         }
-        $userId = \Yii::$app->user->id;
-        $baseConditions = ['user_id' => $userId, 'transaction_type' => $transactionType];
+
+        $baseConditions = ['user_id' => Yii::$app->user->id];
+        if ($ledgerId) {
+            LedgerService::checkAccess($ledgerId);
+            $baseConditions = ['user_id' => LedgerService::getLedgerMemberUserIds($ledgerId), 'ledger_id' => $ledgerId];
+        }
+
+        $baseConditions = $baseConditions + ['transaction_type' => $transactionType];
         $categories = Category::find()->where($baseConditions)->asArray()->all();
 
+        $totalCent = Record::find()
+            ->where($baseConditions)
+            ->andWhere(['exclude_from_stats' => false])
+            ->andWhere($conditions)
+            ->sum('amount_cent');
+        if (!$totalCent) {
+            return [];
+        }
         foreach ($categories as $key => $category) {
-            $items[$key]['x'] = $category['name'];
-            $sum = Record::find()
+            $sumCent = Record::find()
                 ->where($baseConditions)
                 ->andWhere(['category_id' => $category['id'], 'exclude_from_stats' => false])
                 ->andWhere($conditions)
                 ->sum('amount_cent');
-            $items[$key]['y'] = $sum ? (float)Setup::toYuan($sum) : 0;
+            if ($sumCent) {
+                $item = [
+                    'name' => $category['name'],
+                    'value' => (float)Setup::toYuan($sumCent),
+                    'percent' => (bcdiv($sumCent, $totalCent, 4) * 100) . '%'
+                ];
+                array_push($items, $item);
+            }
         }
 
-        return $items;
+        return [
+            'items' => ArrayHelper::sort2DArray($items, 'value', 'DESC'),
+            'total' => (float)Setup::toYuan($totalCent)
+        ];
     }
 
     /**
      * @param string $dateStr
      * @param int $transactionType
+     * @param null $ledgerId
      * @return array
+     * @throws ForbiddenHttpException
      * @throws InvalidConfigException
      */
-    public function getRecordStatisticalData(string $dateStr, int $transactionType)
+    public function getRecordStatisticalData(string $dateStr, int $transactionType, $ledgerId = null)
     {
         $dates = AnalysisDateType::getEveryDayByMonth($dateStr);
-        $userId = \Yii::$app->user->id;
-        $baseConditions = ['user_id' => $userId, 'transaction_type' => $transactionType, 'exclude_from_stats' => false];
+
+        $baseConditions = ['user_id' => Yii::$app->user->id];
+        if ($ledgerId) {
+            LedgerService::checkAccess($ledgerId);
+            $baseConditions = ['user_id' => LedgerService::getLedgerMemberUserIds($ledgerId), 'ledger_id' => $ledgerId];
+        }
+
+        $baseConditions = $baseConditions + ['transaction_type' => $transactionType, 'exclude_from_stats' => false];
+
         $items = [];
         foreach ($dates as $key => $date) {
             $items[$key]['x'] = sprintf("%02d", $key + 1);
@@ -156,7 +203,12 @@ class AnalysisService extends BaseObject
     public function byCategory(array $params)
     {
         $items = [];
-        $categoriesMap = CategoryService::getCurrentMap();
+        if ($ledgerId = data_get($params, 'ledger_id')) {
+            LedgerService::checkAccess($ledgerId);
+            $categoriesMap = CategoryService::getMapByLedgerId($ledgerId);
+        } else {
+            $categoriesMap = CategoryService::getMapByUserId();
+        }
         foreach ([TransactionType::EXPENSE, TransactionType::INCOME] as $type) {
             $data = $this->getBaseQuery($params)
                 ->select([
@@ -171,6 +223,7 @@ class AnalysisService extends BaseObject
             $items['total'][$k] = 0;
             $items[$k] = [];
             foreach ($data as $key => $value) {
+                $v['category_id'] = $value['category_id'];
                 $v['category_name'] = data_get($categoriesMap, $value['category_id'], 0);
                 $v['currency_amount'] = (float)Setup::toYuan($value['currency_amount_cent']);
                 $items['total'][$k] += $v['currency_amount'];
@@ -234,7 +287,12 @@ class AnalysisService extends BaseObject
      */
     protected function getBaseQuery(array $params)
     {
-        $baseConditions = ['user_id' => Yii::$app->user->id,];
+        $baseConditions = ['user_id' => Yii::$app->user->id];
+        if ($ledgerId = data_get($params, 'ledger_id')) {
+            LedgerService::checkAccess($ledgerId);
+            $baseConditions = ['user_id' => LedgerService::getLedgerMemberUserIds($ledgerId), 'ledger_id' => $ledgerId];
+        }
+
         $condition = ['category_id' => request('category_id'), 'type' => request('transaction_type')];
         $query = Transaction::find()->where($baseConditions)->andFilterWhere($condition);
         if (isset($params['keyword']) && $searchKeywords = trim($params['keyword'])) {

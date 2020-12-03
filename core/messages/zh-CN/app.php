@@ -15,6 +15,7 @@ return [
     'Credit Card' => '信用卡',
     'Saving Account' => '储蓄账户',
     'Investment Account' => '投资账户',
+    'Loan Account' => '贷款账户',
     'Expense' => '支出',
     'Income' => '收入',
     'Transfer' => '转账',
@@ -47,6 +48,18 @@ return [
     'Investment income' => '投资收入',
     'Other income' => '其他收入',
 
+    'General Ledger' => '普通账本',
+    'Share Ledger' => '共享账本',
+    'AA Ledger' => 'AA 账本',
+
+    'Normal status' => '正常状态',
+    'Waiting status' => '等待加入',
+    'Archived status' => '已归档',
+    'Frozen state' => '冻结状态',
+
+    'Owner' => '所有者',
+    'Editor' => '使用',
+    'Viewer' => '查看',
 
     'The {attribute} has been used.' => '{attribute} 已经被使用。',
     'Cannot be deleted because it has been used.' => '不能被删除，因为已经被使用。',
@@ -55,4 +68,21 @@ return [
     'The {attribute} not found.' => '{attribute} 未找到。',
     'Upload file failed' => '上传文件失败',
     'Category not found.' => '分类未找到',
+    'Incorrect old password.' => '旧密码不正确。',
+    'Please email to activate your account first.' => '请先去邮件激活您的账号。',
+    'Incorrect password reset token.' => '密码重置令牌已失效或者不正确。',
+    'The link is invalid or has expired, please try again.' => '链接无效或者已失效，请重新操作。',
+    'The Token is not valid.' => '令牌无效。',
+    'This email address has already been taken.' => '该电子邮件地址已被使用。',
+    'This username has already been taken.' => '该用户名已经被使用。',
+    'Your mailbox has been activated.' => '您的邮箱已经激活。',
+    'The activation email was sent successfully, please activate within 24 hours.' => '激活邮件发送成功，请在24小时内激活。',
+    'Updated successfully.' => '更新成功',
+    'This user does not exist.' => '此用户不存在。',
+    'Status range cannot be blank.' => '状态范围不能为空。',
+    '{attribute} cannot be blank.' => '{attribute} 参数不能为空。',
+
+    'You can only view data that you\'ve created.' => '你只能查看自己的数据。',
+    'Default ledger not found.' => '默认账本未找到。',
+
 ];

@@ -77,7 +77,7 @@ class SiteController extends Controller
             ],
             'menu' => [
                 [
-                    'text' => 'Main',
+                    'text' => '账本',
                     'group' => false,
                     'children' => [
                         [
@@ -85,16 +85,85 @@ class SiteController extends Controller
                             'link' => '/dashboard',
                             'icon' => 'anticon-dashboard',
                         ],
-                        [
-                            'text' => '账户',
-                            'link' => '/account/index',
-                            'icon' => 'anticon-account-book',
-                        ],
+//                        [
+//                            'text' => '账户',
+//                            'link' => '/account/index',
+//                            'icon' => 'anticon-wallet',
+//                        ],
                         [
                             'text' => '记录',
                             'link' => '/record/index',
                             'icon' => 'anticon-database',
                         ],
+                        [
+                            'text' => '分析',
+                            'link' => '/analysis/index',
+                            'icon' => 'anticon-area-chart',
+                        ],
+                        [
+                            'text' => '成员',
+                            'link' => '/ledger/member',
+                            'icon' => 'anticon-user',
+                        ],
+                        [
+                            'text' => '分类',
+                            'link' => '/category/index',
+                            'icon' => 'anticon-appstore',
+                        ],
+                        [
+                            'text' => '标签',
+                            'link' => '/tag/index',
+                            'icon' => 'anticon-appstore',
+                        ],
+                        [
+                            'text' => '预算',
+                            'link' => '/budget/index',
+                            'icon' => 'anticon-area-chart',
+                        ],
+//                        [
+//                            'text' => '定时',
+//                            'link' => '/recurrence/index',
+//                            'icon' => 'anticon-field-time',
+//                        ],
+//                        [
+//                            'text' => '设置',
+//                            'icon' => 'anticon-setting',
+//                            'children' => [
+//                                [
+//                                    'text' => '个人设置',
+//                                    'link' => '/settings/personal',
+//                                    'icon' => 'anticon-user',
+//                                ],
+//                                [
+//                                    'text' => '标签设置',
+//                                    'link' => '/settings/tags',
+//                                    'icon' => 'anticon-appstore',
+//                                ],
+//                                [
+//                                    'text' => '规则设置',
+//                                    'link' => '/settings/rules',
+//                                    'icon' => 'anticon-group',
+//                                ]
+//                            ]
+//                        ],
+                    ],
+                ],
+                [
+                    'text' => '全局',
+                    'group' => true,
+                    'children' => [
+                        [
+                            'text' => '账户',
+                            'link' => '/account/index',
+                            'icon' => 'anticon-wallet',
+                        ],
+
+                        [
+                            'text' => '账本',
+                            'link' => '/ledger/index',
+                            'icon' => 'anticon-account-book',
+                        ],
+
                         [
                             'text' => '分析',
                             'link' => '/analysis/index',

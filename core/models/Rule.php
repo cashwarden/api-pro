@@ -10,7 +10,9 @@ use app\core\types\TransactionType;
 use Yii;
 use yii\behaviors\TimestampBehavior;
 use yiier\helpers\DateHelper;
+use yiier\helpers\Setup;
 use yiier\validators\ArrayValidator;
+use yiier\validators\MoneyValidator;
 
 /**
  * This is the model class for table "{{%rule}}".
@@ -19,10 +21,13 @@ use yiier\validators\ArrayValidator;
  * @property int $user_id
  * @property string $name
  * @property string|array $if_keywords Multiple choice use,
+ * @property int $ledger_id
  * @property int $then_transaction_type
  * @property int|null $then_category_id
  * @property int|null $then_from_account_id
  * @property int|null $then_to_account_id
+ * @property int|null $then_currency_amount_cent
+ * @property string|null $then_currency_code
  * @property int|null $then_transaction_status
  * @property int|null $then_reimbursement_status
  * @property string|null|array $then_tags Multiple choice use,
@@ -31,10 +36,16 @@ use yiier\validators\ArrayValidator;
  * @property string|null $created_at
  * @property string|null $updated_at
  *
+ * @property-read Ledger $ledger
  * @property-read Category $thenCategory
  */
 class Rule extends \yii\db\ActiveRecord
 {
+    /**
+     * @var integer
+     */
+    public $then_currency_amount;
+
     /**
      * {@inheritdoc}
      */
@@ -64,13 +75,25 @@ class Rule extends \yii\db\ActiveRecord
     {
         return [
             [['name', 'if_keywords', 'then_transaction_type'], 'required'],
-            [['user_id', 'then_category_id', 'then_from_account_id', 'then_to_account_id', 'sort'], 'integer'],
+            [
+                ['user_id', 'ledger_id', 'then_category_id', 'then_from_account_id', 'then_to_account_id', 'sort'],
+                'integer'
+            ],
+            [
+                'ledger_id',
+                'exist',
+                'targetClass' => Ledger::class,
+                'filter' => ['user_id' => Yii::$app->user->id],
+                'targetAttribute' => 'id',
+            ],
             ['status', 'in', 'range' => RuleStatus::names()],
             ['then_transaction_type', 'in', 'range' => TransactionType::names()],
             ['then_reimbursement_status', 'in', 'range' => ReimbursementStatus::names()],
             ['then_transaction_status', 'in', 'range' => TransactionStatus::names()],
             [['if_keywords', 'then_tags'], ArrayValidator::class],
             [['name'], 'string', 'max' => 255],
+            [['then_currency_amount'], MoneyValidator::class], //todo message
+            [['then_currency_code'], 'string', 'max' => 3],
         ];
     }
 
@@ -84,10 +107,14 @@ class Rule extends \yii\db\ActiveRecord
             'user_id' => Yii::t('app', 'User ID'),
             'name' => Yii::t('app', 'Name'),
             'if_keywords' => Yii::t('app', 'If Keywords'),
+            'ledger_id' => Yii::t('app', 'Then Ledger ID'),
             'then_transaction_type' => Yii::t('app', 'Then Transaction Type'),
             'then_category_id' => Yii::t('app', 'Then Category ID'),
             'then_from_account_id' => Yii::t('app', 'Then From Account ID'),
             'then_to_account_id' => Yii::t('app', 'Then To Account ID'),
+            'then_currency_amount_cent' => Yii::t('app', 'Then Currency Amount Cent'),
+            'then_currency_amount' => Yii::t('app', 'Then Currency Amount'),
+            'then_currency_code' => Yii::t('app', 'Then Currency Code'),
             'then_transaction_status' => Yii::t('app', 'Then Transaction Status'),
             'then_reimbursement_status' => Yii::t('app', 'Then Reimbursement Status'),
             'then_tags' => Yii::t('app', 'Then Tags'),
@@ -114,6 +141,7 @@ class Rule extends \yii\db\ActiveRecord
             $this->then_transaction_status = is_null($this->then_transaction_status) ?
                 TransactionStatus::DONE : TransactionStatus::toEnumValue($this->then_transaction_status);
 
+            $this->then_currency_amount_cent = Setup::toFen($this->then_currency_amount);
             $this->status = is_null($this->status) ? RuleStatus::ACTIVE : RuleStatus::toEnumValue($this->status);
             $this->then_transaction_type = TransactionType::toEnumValue($this->then_transaction_type);
             $this->if_keywords = $this->if_keywords ? implode(',', $this->if_keywords) : null;
@@ -129,13 +157,27 @@ class Rule extends \yii\db\ActiveRecord
         return $this->hasOne(Category::class, ['id' => 'then_category_id']);
     }
 
+    public function getLedger()
+    {
+        return $this->hasOne(Ledger::class, ['id' => 'ledger_id']);
+    }
+
     /**
      * @return array
      */
     public function fields()
     {
         $fields = parent::fields();
-        unset($fields['user_id']);
+        unset($fields['user_id'], $fields['then_currency_amount']);
+
+
+        $fields['ledger'] = function (self $model) {
+            return $model->ledger;
+        };
+
+        $fields['then_currency_amount'] = function (self $model) {
+            return Setup::toYuan($model->then_currency_amount_cent);
+        };
 
         $fields['then_transaction_type'] = function (self $model) {
             return TransactionType::getName($model->then_transaction_type);
@@ -148,6 +190,7 @@ class Rule extends \yii\db\ActiveRecord
         $fields['then_tags'] = function (self $model) {
             return $model->then_tags ? explode(',', $model->then_tags) : [];
         };
+
         $fields['thenCategory'] = function (self $model) {
             return $model->thenCategory;
         };

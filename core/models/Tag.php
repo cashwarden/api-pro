@@ -14,6 +14,7 @@ use yiier\helpers\DateHelper;
  * This is the model class for table "{{%tag}}".
  *
  * @property int $id
+ * @property int $ledger_id
  * @property int $user_id
  * @property string $color
  * @property string $name
@@ -51,14 +52,21 @@ class Tag extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['name'], 'required'],
-            [['user_id', 'count'], 'integer'],
+            [['ledger_id', 'name'], 'required'],
+            [['ledger_id', 'user_id', 'count'], 'integer'],
             [['color'], 'string', 'max' => 7],
             [['name'], 'string', 'max' => 60],
             [
+                'ledger_id',
+                'exist',
+                'targetClass' => Ledger::class,
+                'filter' => ['user_id' => Yii::$app->user->id],
+                'targetAttribute' => 'id',
+            ],
+            [
                 'name',
                 'unique',
-                'targetAttribute' => ['user_id', 'name'],
+                'targetAttribute' => ['user_id', 'ledger_id', 'name'],
                 'message' => Yii::t('app', 'The {attribute} has been used.')
             ],
         ];
@@ -72,6 +80,7 @@ class Tag extends \yii\db\ActiveRecord
         return [
             'id' => Yii::t('app', 'ID'),
             'user_id' => Yii::t('app', 'User ID'),
+            'ledger_id' => Yii::t('app', 'Ledger ID'),
             'color' => Yii::t('app', 'Color'),
             'name' => Yii::t('app', 'Name'),
             'count' => Yii::t('app', 'Count'),
@@ -97,8 +106,8 @@ class Tag extends \yii\db\ActiveRecord
     {
         if (parent::beforeSave($insert)) {
             if ($insert) {
-                $ran = ColorType::items();
-                $this->color = $this->color ?: $ran[mt_rand(0, count($ran) - 1)];
+                $rand = ColorType::items();
+                $this->color = $this->color ?: $rand[mt_rand(0, count($rand) - 1)];
             }
             return true;
         } else {
@@ -116,7 +125,7 @@ class Tag extends \yii\db\ActiveRecord
         parent::afterSave($insert, $changedAttributes);
 
         if ($oldName = data_get($changedAttributes, 'name', '')) {
-            TagService::updateTagName($oldName, $this->name);
+            TagService::updateTagName($oldName, $this->name, $this->ledger_id);
         }
     }
 

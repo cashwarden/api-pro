@@ -11,10 +11,9 @@ use yiier\helpers\Setup;
 
 class TagService
 {
-    public static function getTagNames(int $userId = 0)
+    public static function getTagNames(int $ledgerId)
     {
-        $userId = $userId ?: Yii::$app->user->id;
-        return Tag::find()->select('name')->where(['user_id' => $userId])->column();
+        return Tag::find()->select('name')->where(['ledger_id' => $ledgerId])->column();
     }
 
     /**
@@ -35,17 +34,18 @@ class TagService
 
     /**
      * @param array $tags
+     * @param int $ledgerId
      * @param int $userId
      * @throws \yii\base\InvalidConfigException
      */
-    public static function updateCounters(array $tags, int $userId = 0)
+    public static function updateCounters(array $tags, int $ledgerId, int $userId = 0)
     {
         $userId = $userId ?: Yii::$app->user->id;
         foreach ($tags as $tag) {
-            $count = TransactionService::countTransactionByTag($tag, $userId);
+            $count = TransactionService::countTransactionByTag($tag, $ledgerId, $userId);
             Tag::updateAll(
                 ['count' => $count, 'updated_at' => Yii::$app->formatter->asDatetime('now')],
-                ['user_id' => $userId, 'name' => $tag]
+                ['ledger_id' => $ledgerId, 'user_id' => $userId, 'name' => $tag]
             );
         }
     }
@@ -53,14 +53,15 @@ class TagService
     /**
      * @param string $oldName
      * @param string $newName
+     * @param int $ledgerId
      * @param int $userId
      * @throws \yii\base\InvalidConfigException
      */
-    public static function updateTagName(string $oldName, string $newName, int $userId = 0)
+    public static function updateTagName(string $oldName, string $newName, int $ledgerId, int $userId = 0)
     {
         $userId = $userId ?: Yii::$app->user->id;
         $items = Transaction::find()
-            ->where(['user_id' => $userId])
+            ->where(['user_id' => $userId, 'ledger_id' => $ledgerId])
             ->andWhere(new Expression('FIND_IN_SET(:tag, tags)'))->addParams([':tag' => $oldName])
             ->asArray()
             ->all();

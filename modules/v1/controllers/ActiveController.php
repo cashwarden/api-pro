@@ -7,6 +7,7 @@ use app\core\actions\UpdateAction;
 use app\core\exceptions\InternalException;
 use app\core\exceptions\InvalidArgumentException;
 use app\core\helpers\SearchHelper;
+use app\core\services\LedgerService;
 use sizeg\jwt\JwtHttpBearerAuth;
 use Yii;
 use yii\base\InvalidConfigException;
@@ -106,7 +107,14 @@ class ActiveController extends \yii\rest\ActiveController
         unset($params['sort']);
 
         $dataProvider = $searchModel->search(['SearchModel' => $params]);
-        $dataProvider->query->andWhere([$modelClass::tableName() . '.user_id' => Yii::$app->user->id]);
+
+        $userIds = Yii::$app->user->id;
+        if ($ledgerId = data_get($params, 'ledger_id')) {
+            LedgerService::checkAccess($ledgerId);
+            $userIds = LedgerService::getLedgerMemberUserIds($ledgerId);
+        }
+
+        $dataProvider->query->andWhere([$modelClass::tableName() . '.user_id' => $userIds]);
         return $dataProvider;
     }
 
