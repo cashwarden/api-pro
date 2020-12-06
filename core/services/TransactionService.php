@@ -38,7 +38,7 @@ class TransactionService extends BaseObject
      * @return bool
      * @throws \yii\db\Exception
      */
-    public static function createUpdateRecord(Transaction $transaction)
+    public static function createUpdateRecord(Transaction $transaction): bool
     {
         $data = [];
         if (in_array($transaction->type, [TransactionType::EXPENSE, TransactionType::TRANSFER])) {
@@ -72,7 +72,7 @@ class TransactionService extends BaseObject
         return true;
     }
 
-    public function createByCSV($filename)
+    public function createByCSV($filename): array
     {
         ini_set("memory_limit", "1024M");
         ini_set("set_time_limit", "0");
@@ -229,6 +229,11 @@ class TransactionService extends BaseObject
                     if (ArrayHelper::strPosArr($desc, ['收到', '收入', '退款']) !== false) {
                         return TransactionType::getName(TransactionType::INCOME);
                     }
+                    if (ArrayHelper::strPosArr($desc, ['还款', '转账', '借出']) !== false) {
+                        if ($transferAccountIds = $this->getTransferAccountIdsByDesc($desc)) {
+                            return TransactionType::getName(TransactionType::TRANSFER);
+                        }
+                    }
                     return TransactionType::getName(TransactionType::EXPENSE);
                 }
             );
@@ -309,7 +314,7 @@ class TransactionService extends BaseObject
      * @return array
      * @throws InvalidConfigException
      */
-    public function formatRecords(array $records)
+    public function formatRecords(array $records): array
     {
         $items = [];
         foreach ($records as $record) {
@@ -338,7 +343,7 @@ class TransactionService extends BaseObject
      * @return int
      * @throws InvalidConfigException
      */
-    public function updateRating(int $id, int $rating)
+    public function updateRating(int $id, int $rating): int
     {
         return Transaction::updateAll(
             ['rating' => $rating, 'updated_at' => Yii::$app->formatter->asDatetime('now')],
@@ -352,7 +357,7 @@ class TransactionService extends BaseObject
      * @throws \yii\db\Exception
      * @throws InvalidConfigException
      */
-    public static function createAdjustRecord(Account $account)
+    public static function createAdjustRecord(Account $account): bool
     {
         $diff = $account->currency_balance_cent - AccountService::getCalculateCurrencyBalanceCent($account->id);
         if (!$diff) {
@@ -514,6 +519,19 @@ class TransactionService extends BaseObject
         return self::getCreateRecordDate();
     }
 
+    /**
+     * @param string $desc
+     * @return array
+     */
+    private function getTransferAccountIdsByDesc(string $desc): array
+    {
+        $fromAccountId = $this->accountService->getAccountIdByDesc($desc);
+        $toAccountId = $this->accountService->getAccountIdByDesc($desc, $fromAccountId);
+        if ($fromAccountId && $toAccountId) {
+            return [$fromAccountId, $toAccountId];
+        }
+        return [];
+    }
 
     /**
      * @param string $value
@@ -521,7 +539,7 @@ class TransactionService extends BaseObject
      * @return string
      * @throws InvalidConfigException
      */
-    public static function getCreateRecordDate(string $value = 'now', string $format = 'php:Y-m-d H:i')
+    public static function getCreateRecordDate(string $value = 'now', string $format = 'php:Y-m-d H:i'): string
     {
         return Yii::$app->formatter->asDatetime($value, $format);
     }
@@ -560,7 +578,7 @@ class TransactionService extends BaseObject
      * @return array
      * @throws Exception
      */
-    public function exportData()
+    public function exportData(): array
     {
         $data = [];
         $categoriesMap = CategoryService::getMapByUserId();
@@ -607,7 +625,7 @@ class TransactionService extends BaseObject
      * @throws \yii\web\ForbiddenHttpException
      * @throws Exception
      */
-    public function getIdsBySearch(array $params)
+    public function getIdsBySearch(array $params): array
     {
         $baseConditions = ['user_id' => Yii::$app->user->id];
         if ($ledgerId = data_get($params, 'ledger_id')) {
