@@ -12,7 +12,7 @@ class SiteController extends Controller
     /**
      * @return string
      */
-    public function actionIndex()
+    public function actionIndex(): string
     {
         return 'hello yii';
     }
@@ -20,7 +20,7 @@ class SiteController extends Controller
     /**
      * @return string
      */
-    public function actionHealthCheck()
+    public function actionHealthCheck(): string
     {
         return 'OK';
     }
@@ -45,7 +45,7 @@ class SiteController extends Controller
     }
 
 
-    public function actionIcons()
+    public function actionIcons(): array
     {
         return [
             'food',
@@ -65,7 +65,7 @@ class SiteController extends Controller
         ];
     }
 
-    public function actionData()
+    public function actionData(): array
     {
         return [
             'app' => [
@@ -85,11 +85,6 @@ class SiteController extends Controller
                             'link' => '/dashboard',
                             'icon' => 'anticon-dashboard',
                         ],
-//                        [
-//                            'text' => '账户',
-//                            'link' => '/account/index',
-//                            'icon' => 'anticon-wallet',
-//                        ],
                         [
                             'text' => '记录',
                             'link' => '/record/index',
@@ -118,34 +113,8 @@ class SiteController extends Controller
                         [
                             'text' => '预算',
                             'link' => '/budget/index',
-                            'icon' => 'anticon-area-chart',
+                            'icon' => 'anticon-funnel-plot',
                         ],
-//                        [
-//                            'text' => '定时',
-//                            'link' => '/recurrence/index',
-//                            'icon' => 'anticon-field-time',
-//                        ],
-//                        [
-//                            'text' => '设置',
-//                            'icon' => 'anticon-setting',
-//                            'children' => [
-//                                [
-//                                    'text' => '个人设置',
-//                                    'link' => '/settings/personal',
-//                                    'icon' => 'anticon-user',
-//                                ],
-//                                [
-//                                    'text' => '标签设置',
-//                                    'link' => '/settings/tags',
-//                                    'icon' => 'anticon-appstore',
-//                                ],
-//                                [
-//                                    'text' => '规则设置',
-//                                    'link' => '/settings/rules',
-//                                    'icon' => 'anticon-group',
-//                                ]
-//                            ]
-//                        ],
                     ],
                 ],
                 [
@@ -165,45 +134,14 @@ class SiteController extends Controller
                         ],
 
                         [
-                            'text' => '分析',
-                            'link' => '/analysis/index',
-                            'icon' => 'anticon-area-chart',
-                        ],
-                        [
-                            'text' => '预算',
-                            'link' => '/budget/index',
-                            'icon' => 'anticon-area-chart',
-                        ],
-                        [
                             'text' => '定时',
                             'link' => '/recurrence/index',
                             'icon' => 'anticon-field-time',
                         ],
                         [
-                            'text' => '设置',
-                            'icon' => 'anticon-setting',
-                            'children' => [
-                                [
-                                    'text' => '个人设置',
-                                    'link' => '/settings/personal',
-                                    'icon' => 'anticon-user',
-                                ],
-                                [
-                                    'text' => '分类设置',
-                                    'link' => '/settings/categories',
-                                    'icon' => 'anticon-appstore',
-                                ],
-                                [
-                                    'text' => '标签设置',
-                                    'link' => '/settings/tags',
-                                    'icon' => 'anticon-appstore',
-                                ],
-                                [
-                                    'text' => '规则设置',
-                                    'link' => '/settings/rules',
-                                    'icon' => 'anticon-group',
-                                ]
-                            ]
+                            'text' => '规则',
+                            'link' => '/rule/index',
+                            'icon' => 'anticon-group',
                         ],
                     ]
                 ]

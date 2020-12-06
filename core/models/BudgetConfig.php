@@ -94,10 +94,14 @@ class BudgetConfig extends \yii\db\ActiveRecord
             [['amount', 'init_amount'], MoneyValidator::class],
             ['period', 'in', 'range' => BudgetPeriod::names()],
             ['status', 'in', 'range' => BaseStatus::names()],
-            ['transaction_type', 'in', 'range' => [
-                TransactionType::getName(TransactionType::EXPENSE),
-                TransactionType::getName(TransactionType::INCOME),
-            ]],
+            [
+                'transaction_type',
+                'in',
+                'range' => [
+                    TransactionType::getName(TransactionType::EXPENSE),
+                    TransactionType::getName(TransactionType::INCOME),
+                ]
+            ],
             [
                 'ledger_id',
                 'exist',
@@ -155,9 +159,10 @@ class BudgetConfig extends \yii\db\ActiveRecord
     public function afterSave($insert, $changedAttributes)
     {
         parent::afterSave($insert, $changedAttributes);
-        if ($insert) {
-            BudgetService::createBudgetConfigAfter($this);
+        if (!$insert) {
+            Budget::deleteAll(['user_id' => $this->user_id, 'budget_config_id' => $this->id]);
         }
+        BudgetService::createUpdateBudgetConfigAfter($this);
     }
 
 
@@ -205,7 +210,7 @@ class BudgetConfig extends \yii\db\ActiveRecord
         };
 
         $fields['category_ids'] = function (self $model) {
-            return $model->category_ids ? explode(',', $model->category_ids) : [];
+            return $model->category_ids ? array_map('intval', explode(',', $model->category_ids)) : [];
         };
 
         $fields['transaction_type'] = function (self $model) {

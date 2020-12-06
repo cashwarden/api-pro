@@ -19,22 +19,27 @@ class BudgetService extends BaseObject
      * @param BudgetConfig $budgetConfig
      * @throws Exception
      */
-    public static function createBudgetConfigAfter(BudgetConfig $budgetConfig): void
+    public static function createUpdateBudgetConfigAfter(BudgetConfig $budgetConfig): void
     {
         $d1 = new Carbon($budgetConfig->started_at);
         $d2 = new Carbon($budgetConfig->ended_at);
         $model = new Budget();
         switch ($budgetConfig->period) {
             case BudgetPeriod::MONTH:
-                $diff = $d1->diffInMonths($d2);
-                for ($i = 0; $i <= $diff; $i++) {
+                $diff = ceil($d1->floatDiffInMonths($d2));
+                if ($diff == 1 && $d1->month !== $d2->month) {
+                    $diff = 2;
+                }
+                // dd($diff);
+                for ($i = 0; $i < $diff; $i++) {
                     $_model = clone $model;
                     $_model->started_at = Carbon::parse($budgetConfig->started_at)->addMonths($i);
-                    $_model->ended_at = Carbon::parse($budgetConfig->started_at)
-                        ->addMonths($i)
-                        ->endOfMonth()
-                        ->endOfDay();
-                    if ($i === $diff) {
+                    if ($i < $diff - 1) {
+                        $_model->ended_at = Carbon::parse($budgetConfig->started_at)
+                            ->addMonths($i)
+                            ->endOfMonth()
+                            ->endOfDay();
+                    } else {
                         $_model->ended_at = Carbon::parse($budgetConfig->ended_at)->endOfDay();
                     }
                     if ($i > 0) {
@@ -50,12 +55,19 @@ class BudgetService extends BaseObject
                 }
                 break;
             case BudgetPeriod::YEAR:
-                $diff = $d1->diffInYears($d2) + 1;
-                for ($i = 0; $i <= $diff; $i++) {
+                $diff = ceil($d1->floatDiffInYears($d2));
+                if ($diff == 1 && $d1->year !== $d2->year) {
+                    $diff = 2;
+                }
+                for ($i = 0; $i < $diff; $i++) {
                     $_model = clone $model;
                     $_model->started_at = Carbon::parse($budgetConfig->started_at)->addYears($i);
-                    $_model->ended_at = Carbon::parse($budgetConfig->started_at)->addYears($i)->endOfYear()->endOfDay();
-                    if ($i === $diff) {
+                    if ($i < $diff - 1) {
+                        $_model->ended_at = Carbon::parse($budgetConfig->started_at)
+                            ->addMonths($i)
+                            ->endOfYear()
+                            ->endOfDay();
+                    } else {
                         $_model->ended_at = Carbon::parse($budgetConfig->ended_at)->endOfDay();
                     }
                     if ($i > 0) {
@@ -107,14 +119,15 @@ class BudgetService extends BaseObject
                 ->andWhere(['between', 'date', $budget->started_at, $budget->ended_at])
                 ->andFilterWhere(['ledger_id' => $budgetConfig->ledger_id, 'category_id' => $categoryIds,]);
             if ($tag = $budgetConfig->include_tags) {
-                $query->andWhere(new Expression('FIND_IN_SET(:tag, include_tags)'))
+                $query->andWhere(new Expression('FIND_IN_SET(:tag, tags)'))
                     ->addParams([':tag' => $tag]);
             }
             if ($tag = $budgetConfig->exclude_tags) {
-                $query->andWhere(new Expression('NOT FIND_IN_SET(:tag, exclude_tags)'))
+                $query->andWhere(new Expression('NOT FIND_IN_SET(:tag, tags)'))
                     ->addParams([':tag' => $tag]);
             }
-            if ($budget->actual_amount_cent = $query->sum('amount_cent')) {
+            if ($actualAmountCent = $query->sum('amount_cent')) {
+                $budget->actual_amount_cent = $actualAmountCent;
                 $recordIds = Record::find()
                     ->where(['user_id' => $budgetConfig->user_id, 'transaction_id' => $query->column()])
                     ->column();
