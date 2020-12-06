@@ -222,22 +222,6 @@ class TransactionService extends BaseObject
             $model->description = $desc;
             $model->user_id = Yii::$app->user->id;
             $rules = $this->getRuleService()->getRulesByDesc($desc);
-            $model->type = $this->getDataByDesc(
-                $rules,
-                'then_transaction_type',
-                function () use ($desc) {
-                    if (ArrayHelper::strPosArr($desc, ['收到', '收入', '退款']) !== false) {
-                        return TransactionType::getName(TransactionType::INCOME);
-                    }
-                    if (ArrayHelper::strPosArr($desc, ['还款', '转账', '借出']) !== false) {
-                        if ($transferAccountIds = $this->getTransferAccountIdsByDesc($desc)) {
-                            return TransactionType::getName(TransactionType::TRANSFER);
-                        }
-                    }
-                    return TransactionType::getName(TransactionType::EXPENSE);
-                }
-            );
-
             $model->ledger_id = $this->getDataByDesc(
                 $rules,
                 'ledger_id',
@@ -247,28 +231,47 @@ class TransactionService extends BaseObject
                 throw new CannotOperateException(Yii::t('app', 'Default ledger not found.'));
             }
 
-            $transactionType = TransactionType::toEnumValue($model->type);
-            // 先去账号根据关键词查找
-            $accountId = $this->accountService->getAccountIdByDesc($desc);
-            if (in_array($transactionType, [TransactionType::EXPENSE, TransactionType::TRANSFER])) {
-                $model->from_account_id = $accountId ?: $this->getDataByDesc(
-                    $rules,
-                    'then_from_account_id',
-                    [$this, 'getAccountIdByDesc']
-                );
-                if (!$model->from_account_id) {
-                    throw new CannotOperateException(Yii::t('app', 'Default account not found.'));
+            $model->type = $this->getDataByDesc(
+                $rules,
+                'then_transaction_type',
+                function () use ($desc) {
+                    if (ArrayHelper::strPosArr($desc, ['收到', '收入', '退款']) !== false) {
+                        return TransactionType::getName(TransactionType::INCOME);
+                    }
+                    return TransactionType::getName(TransactionType::EXPENSE);
                 }
-            }
+            );
 
-            if (in_array($transactionType, [TransactionType::INCOME, TransactionType::TRANSFER])) {
-                $model->to_account_id = $accountId ?: $this->getDataByDesc(
-                    $rules,
-                    'then_to_account_id',
-                    [$this, 'getAccountIdByDesc']
-                );
-                if (!$model->to_account_id) {
-                    throw new CannotOperateException(Yii::t('app', 'Default account not found.'));
+            $transactionType = TransactionType::toEnumValue($model->type);
+            $isTransfer = ArrayHelper::strPosArr($desc, ['还款', '转账', '借出']) !== false;
+            if ($isTransfer && $transferAccountIds = $this->getTransferAccountIdsByDesc($desc)) {
+                $model->type = TransactionType::getName(TransactionType::TRANSFER);
+                $model->from_account_id = $transferAccountIds[0];
+                $model->to_account_id = $transferAccountIds[1];
+            } else {
+                $transactionType = TransactionType::toEnumValue($model->type);
+                // 先去账号根据关键词查找
+                $accountId = $this->accountService->getAccountIdByDesc($desc);
+                if (in_array($transactionType, [TransactionType::EXPENSE, TransactionType::TRANSFER])) {
+                    $model->from_account_id = $accountId ?: $this->getDataByDesc(
+                        $rules,
+                        'then_from_account_id',
+                        [$this, 'getAccountIdByDesc']
+                    );
+                    if (!$model->from_account_id) {
+                        throw new CannotOperateException(Yii::t('app', 'Default account not found.'));
+                    }
+                }
+
+                if (in_array($transactionType, [TransactionType::INCOME, TransactionType::TRANSFER])) {
+                    $model->to_account_id = $accountId ?: $this->getDataByDesc(
+                        $rules,
+                        'then_to_account_id',
+                        [$this, 'getAccountIdByDesc']
+                    );
+                    if (!$model->to_account_id) {
+                        throw new CannotOperateException(Yii::t('app', 'Default account not found.'));
+                    }
                 }
             }
 
@@ -525,10 +528,19 @@ class TransactionService extends BaseObject
      */
     private function getTransferAccountIdsByDesc(string $desc): array
     {
-        $fromAccountId = $this->accountService->getAccountIdByDesc($desc);
-        $toAccountId = $this->accountService->getAccountIdByDesc($desc, $fromAccountId);
-        if ($fromAccountId && $toAccountId) {
-            return [$fromAccountId, $toAccountId];
+        $models = AccountService::getHasKeywordAccounts();
+        $accounts = [];
+        /** @var Account $model */
+        foreach ($models as $model) {
+            if (($sort = ArrayHelper::strPosArr($desc, explode(',', $model->keywords))) !== false) {
+                array_push($accounts, ['id' => $model->id, 'sort' => $sort]);
+            }
+        }
+        if (count($accounts) == 2) {
+            return \yii\helpers\ArrayHelper::getColumn(
+                \yiier\helpers\ArrayHelper::sort2DArray($accounts, 'sort'),
+                'id'
+            );
         }
         return [];
     }

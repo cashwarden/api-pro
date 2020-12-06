@@ -183,13 +183,8 @@ class AccountService
      */
     public function getAccountIdByDesc(string $desc, ?int $excludeAccountId = null): int
     {
-        $models = Account::find()
-            ->where(['user_id' => \Yii::$app->user->id, 'status' => AccountStatus::ACTIVE])
-            ->andWhere(['<>', 'keywords', ''])
-            ->orderBy(['sort' => SORT_ASC, 'id' => SORT_DESC])
-            ->all();
         /** @var Account $model */
-        foreach ($models as $model) {
+        foreach (self::getHasKeywordAccounts() as $model) {
             if (\app\core\helpers\ArrayHelper::strPosArr($desc, explode(',', $model->keywords)) !== false) {
                 if ($model->id != $excludeAccountId) {
                     return $model->id;
@@ -197,5 +192,17 @@ class AccountService
             }
         }
         return 0;
+    }
+
+    /**
+     * @return array|ActiveRecord[]
+     */
+    public static function getHasKeywordAccounts(): array
+    {
+        return Account::find()
+            ->where(['user_id' => \Yii::$app->user->id, 'status' => AccountStatus::ACTIVE])
+            ->andWhere(['<>', 'keywords', ''])
+            ->orderBy(['sort' => SORT_ASC, 'id' => SORT_DESC])
+            ->all();
     }
 }
