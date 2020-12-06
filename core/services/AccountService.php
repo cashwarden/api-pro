@@ -178,9 +178,10 @@ class AccountService
 
     /**
      * @param string $desc
+     * @param int|null $excludeAccountId
      * @return int
      */
-    public function getAccountIdByDesc(string $desc)
+    public function getAccountIdByDesc(string $desc, ?int $excludeAccountId = null): int
     {
         $models = Account::find()
             ->where(['user_id' => \Yii::$app->user->id, 'status' => AccountStatus::ACTIVE])
@@ -190,7 +191,9 @@ class AccountService
         /** @var Account $model */
         foreach ($models as $model) {
             if (\app\core\helpers\ArrayHelper::strPosArr($desc, explode(',', $model->keywords)) !== false) {
-                return $model->id;
+                if ($model->id != $excludeAccountId) {
+                    return $model->id;
+                }
             }
         }
         return 0;
