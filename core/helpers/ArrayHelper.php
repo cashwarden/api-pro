@@ -21,25 +21,4 @@ class ArrayHelper
         }
         return false;
     }
-
-    /**
-     * @param $haystack
-     * @param array $needles
-     * @param int $offset
-     * @return false|mixed
-     */
-    public static function strPosArray($haystack, $needles = [], $offset = 0): bool
-    {
-        $chr = [];
-        foreach ($needles as $needle) {
-            $res = strpos($haystack, $needle, $offset);
-            if ($res !== false) {
-                $chr[$needle] = $res;
-            }
-        }
-        if (empty($chr)) {
-            return false;
-        }
-        return min($chr);
-    }
 }
