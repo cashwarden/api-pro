@@ -273,7 +273,6 @@ class TransactionService extends BaseObject
             }
 
             $categoryId = $this->categoryService->getCategoryIdByDesc($desc, $model->ledger_id, $transactionType);
-//            dd(CategoryService::getDefaultCategory($transactionType));
             $model->category_id = $categoryId ?: $this->getDataByDesc(
                 $rules,
                 'then_category_id',
