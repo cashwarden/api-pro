@@ -16,8 +16,8 @@ class CategoryService
     {
         $userId = $userId ?: Yii::$app->user->id;
         return Category::find()
-            ->where(['user_id' => $userId, 'transaction_type' => $transactionType, 'default' => Category::DEFAULT])
-            ->orderBy(['id' => SORT_ASC])
+            ->where(['user_id' => $userId, 'transaction_type' => $transactionType,])
+            ->orderBy(['default' => SORT_DESC, 'id' => SORT_ASC])
             ->asArray()
             ->one();
     }
