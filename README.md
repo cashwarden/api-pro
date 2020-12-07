@@ -6,20 +6,19 @@
     <br>
 </p>
 
-Yii 2 REST API Project Template is a skeleton [Yii 2](http://www.yiiframework.com/) application best for
-rapidly creating small rest api projects.
+Yii 2 REST API Project Template is a skeleton [Yii 2](http://www.yiiframework.com/) application best for rapidly
+creating small rest api projects.
 
-The template contains the basic features including user join/login api.
-It includes all commonly used configurations that would allow you to focus on adding new
-features to your application.
+The template contains the basic features including user join/login api. It includes all commonly used configurations
+that would allow you to focus on adding new features to your application.
 
 [![Testing](https://github.com/cashwarden/api/workflows/Testing/badge.svg)](https://github.com/cashwarden/api/actions)
 [![Lint](https://github.com/cashwarden/api/workflows/Lint/badge.svg)](https://github.com/cashwarden/api/actions)
 [![Code Coverage](https://scrutinizer-ci.com/g/cashwarden/api/badges/coverage.png?b=master)](https://scrutinizer-ci.com/g/cashwarden/api/?branch=master)
 [![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/cashwarden/api/badges/quality-score.png?b=master)](https://scrutinizer-ci.com/g/cashwarden/api/?branch=master)
-[![Latest Stable Version](https://poser.pugx.org/cashwarden/api/v/stable)](https://packagist.org/packages/cashwarden/api) 
-[![Total Downloads](https://poser.pugx.org/cashwarden/api/downloads)](https://packagist.org/packages/cashwarden/api) 
-[![Latest Unstable Version](https://poser.pugx.org/cashwarden/api/v/unstable)](https://packagist.org/packages/cashwarden/api) 
+[![Latest Stable Version](https://poser.pugx.org/cashwarden/api/v/stable)](https://packagist.org/packages/cashwarden/api)
+[![Total Downloads](https://poser.pugx.org/cashwarden/api/downloads)](https://packagist.org/packages/cashwarden/api)
+[![Latest Unstable Version](https://poser.pugx.org/cashwarden/api/v/unstable)](https://packagist.org/packages/cashwarden/api)
 [![License](https://poser.pugx.org/cashwarden/api/license)](https://packagist.org/packages/cashwarden/api)
 
 REQUIREMENTS
@@ -44,6 +43,7 @@ cp .env.example .env
 chmod 777 -R runtime/
 chmod 777 -R web/uploads/
 php yii migrate
+php yii queue-migrate
 php yii generate/key # optional 
 ~~~
 
@@ -65,6 +65,7 @@ cp .env.example .env
 chmod 777 -R runtime/
 chmod 777 -R web/uploads/
 php yii migrate
+php yii queue-migrate
 php yii generate/key # optional 
 ```
 
@@ -73,7 +74,6 @@ You can then access the application through the following URL:
 ~~~
 http://localhost/<rest-api>/web/
 ~~~
-
 
 ### Install with Docker
 
@@ -94,15 +94,17 @@ Start the container
 ```sh
 docker-compose up -d
 ```
-   
+
 You can then access the application through the following URL:
 
 ```
 http://127.0.0.1:8000
 ```
 
-**NOTES:** 
-- Minimum required Docker engine version `17.04` for development (see [Performance tuning for volume mounts](https://docs.docker.com/docker-for-mac/osxfs-caching/))
+**NOTES:**
+
+- Minimum required Docker engine version `17.04` for development (
+  see [Performance tuning for volume mounts](https://docs.docker.com/docker-for-mac/osxfs-caching/))
 - The default configuration uses a host-volume in your home directory `.docker-composer` for composer caches
 
 Check out the packages
@@ -117,14 +119,16 @@ Use
 
 At this time, you have a RESTful API server running at `http://127.0.0.1:8000`. It provides the following endpoints:
 
-* `GET /health-check`: a health check service provided for health checking purpose (needed when implementing a server cluster)
+* `GET /health-check`: a health check service provided for health checking purpose (needed when implementing a server
+  cluster)
 * `POST /v1/join`: create a user
 * `POST /v1/login`: authenticates a user and generates a JWT
 * `POST /v1/refresh-token`: refresh a JWT
 
-Try the URL `http://localhost:8000/health-check` in a browser, and you should see something like `{"code":0,"data":"OK","message":"成功"}` displayed.
+Try the URL `http://localhost:8000/health-check` in a browser, and you should see something
+like `{"code":0,"data":"OK","message":"成功"}` displayed.
 
-If you have `cURL` or some API client tools (e.g. [Postman](https://www.getpostman.com/)), you may try the following 
+If you have `cURL` or some API client tools (e.g. [Postman](https://www.getpostman.com/)), you may try the following
 more complex scenarios:
 
 ```shell

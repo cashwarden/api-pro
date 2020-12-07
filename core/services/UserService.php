@@ -104,7 +104,7 @@ class UserService
      * @return bool
      * @throws \yii\base\Exception
      */
-    public function setPasswordResetToken(User $user)
+    public function setPasswordResetToken(User $user): bool
     {
         if (!$user) {
             return false;

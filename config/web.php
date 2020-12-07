@@ -109,6 +109,7 @@ $config = [
                         'v1/record',
                         'v1/transaction',
                         'v1/recurrence',
+                        'v1/budget-config',
                         'v1/ledger',
                     ]
                 ],
