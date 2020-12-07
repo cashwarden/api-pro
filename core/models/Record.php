@@ -3,6 +3,7 @@
 namespace app\core\models;
 
 use app\core\exceptions\CannotOperateException;
+use app\core\jobs\UpdateBudgetJob;
 use app\core\services\AccountService;
 use app\core\services\RecurrenceService;
 use app\core\types\DirectionType;
@@ -232,6 +233,7 @@ class Record extends ActiveRecord
                 $record->delete();
             }
         }
+        Yii::$app->queue->push(new UpdateBudgetJob(['ledgerId' => $this->ledger_id, 'datetime' => $this->date]));
         $this->account_id ? AccountService::updateAccountBalance($this->account_id) : null;
     }
 

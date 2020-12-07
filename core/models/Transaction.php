@@ -2,6 +2,7 @@
 
 namespace app\core\models;
 
+use app\core\jobs\UpdateBudgetJob;
 use app\core\services\TagService;
 use app\core\services\TransactionService;
 use app\core\types\RecordSource;
@@ -263,6 +264,10 @@ class Transaction extends \yii\db\ActiveRecord
         if ($tags = array_unique($tags)) {
             TagService::updateCounters($tags, $this->ledger_id);
         }
+        if ($date = data_get($changedAttributes, 'date')) {
+            Yii::$app->queue->push(new UpdateBudgetJob(['ledgerId' => $this->ledger_id, 'datetime' => $date]));
+        }
+        Yii::$app->queue->push(new UpdateBudgetJob(['ledgerId' => $this->ledger_id, 'datetime' => $this->date]));
     }
 
     public function getCategory()

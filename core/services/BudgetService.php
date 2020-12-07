@@ -141,4 +141,21 @@ class BudgetService extends BaseObject
             $remainingBudgetAmountCent = $budget->budget_amount_cent - $budget->actual_amount_cent;
         }
     }
+
+
+    /**
+     * @param int $ledgerId
+     * @param string $datetime
+     * @throws Exception
+     */
+    public static function updateBudgetActualAmount(int $ledgerId, string $datetime)
+    {
+        $budgetConfigs = BudgetConfig::find()->where(['ledger_id' => $ledgerId])
+            ->andWhere(['<=', 'started_at', $datetime])
+            ->all();
+
+        foreach ($budgetConfigs as $budgetConfig) {
+            self::calculationAmount($budgetConfig);
+        }
+    }
 }

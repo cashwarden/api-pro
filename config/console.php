@@ -25,6 +25,15 @@ $config = [
         ],
     ],
     'params' => $params,
+    'controllerMap' => [
+        'queue-migrate' => [
+            'class' => 'yii\console\controllers\MigrateController',
+            'migrationPath' => null,
+            'migrationNamespaces' => [
+                'yii\queue\db\migrations',
+            ],
+        ],
+    ],
 ];
 
 if (YII_ENV_DEV) {

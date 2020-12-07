@@ -37,6 +37,7 @@ use yiier\validators\MoneyValidator;
  * @property int|null $rollover 结转
  * @property string|null $created_at
  * @property string|null $updated_at
+ * @property-read array $budgetProgress
  */
 class BudgetConfig extends \yii\db\ActiveRecord
 {
@@ -126,7 +127,6 @@ class BudgetConfig extends \yii\db\ActiveRecord
     {
         parent::afterFind();
         $this->status = BudgetStatus::getName($this->status);
-        $this->period = BudgetPeriod::getName($this->period);
         $this->rollover = (bool)$this->rollover;
     }
 
@@ -216,6 +216,36 @@ class BudgetConfig extends \yii\db\ActiveRecord
         ];
     }
 
+    public function afterDelete()
+    {
+        parent::afterDelete();
+        Budget::deleteAll(['budget_config_id' => $this->id]);
+    }
+
+    /**
+     * @return array
+     * @throws \Exception
+     */
+    public function getBudgetProgress(): array
+    {
+        $now = Carbon::now()->toDateString();
+        $budget = Budget::find()
+            ->where(['budget_config_id' => $this->id])
+            ->andWhere(['<=', 'started_at', $now])
+            ->andWhere(['>=', 'ended_at', $now])
+            ->asArray()
+            ->all();
+
+        $budgetAmountCent = array_sum(array_column($budget, 'budget_amount_cent'));
+        $actualAmountCent = array_sum(array_column($budget, 'actual_amount_cent'));
+        return [
+            'started_at' => data_get($budget, '0.started_at'),
+            'ended_at' => data_get($budget, '0.ended_at'),
+            'actual_amount' => Setup::toYuan($actualAmountCent),
+            'budget_amount' => Setup::toYuan($budgetAmountCent),
+            'progress' => $budgetAmountCent ? (bcdiv($actualAmountCent, $budgetAmountCent, 4) * 100) : 100
+        ];
+    }
 
     /**
      * @return array
@@ -237,11 +267,25 @@ class BudgetConfig extends \yii\db\ActiveRecord
             return $model->category_ids ? array_map('intval', explode(',', $model->category_ids)) : [];
         };
 
+        $fields['category_ids_txt'] = function (self $model) {
+            return $model->category_ids ?
+                Category::find()->select('name')->where(['id' => explode(',', $model->category_ids)])->column()
+                : '';
+        };
+
         $fields['transaction_type'] = function (self $model) {
             return TransactionType::getName($model->transaction_type);
         };
 
-        $fields['period_text'] = function (self $model) {
+        $fields['transaction_type_txt'] = function (self $model) {
+            return data_get(TransactionType::texts(), $model->transaction_type);
+        };
+
+        $fields['period'] = function (self $model) {
+            return BudgetPeriod::getName($model->period);
+        };
+
+        $fields['period_txt'] = function (self $model) {
             return data_get(BudgetPeriod::texts(), $model->period);
         };
 
@@ -259,6 +303,10 @@ class BudgetConfig extends \yii\db\ActiveRecord
 
         $fields['updated_at'] = function (self $model) {
             return DateHelper::datetimeToIso8601($model->updated_at);
+        };
+
+        $fields['budgetProgress'] = function (self $model) {
+            return $model->budgetProgress;
         };
 
         return $fields;

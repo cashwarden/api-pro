@@ -1,12 +1,14 @@
 <?php
 
 use yii\log\Logger;
+use yii\mutex\MysqlMutex;
+use yii\queue\ExecEvent;
 
 return [
     'timeZone' => env('APP_TIME_ZONE'),
     'language' => env('APP_LANGUAGE'),
     'name' => env('APP_NAME'),
-    'bootstrap' => ['log', 'ideHelper', \app\core\EventBootstrap::class],
+    'bootstrap' => ['log', 'ideHelper', \app\core\EventBootstrap::class, 'queue'],
     'components' => [
         'ideHelper' => [
             'class' => 'Mis\IdeHelper\IdeHelper',
@@ -50,6 +52,19 @@ return [
             'enableSchemaCache' => YII_ENV_PROD,
             'schemaCacheDuration' => 60,
             'schemaCache' => 'cache',
+        ],
+        'queue' => [
+            'class' => \yii\queue\db\Queue::class,
+            'db' => 'db', // DB connection component or its config
+            'tableName' => '{{%queue}}', // Table name
+            'ttr' => 5 * 60, // Max time for job execution
+            'attempts' => 3, // Max number of attempts
+            'channel' => 'default', // Queue channel key
+            'mutex' => MysqlMutex::class, // Mutex used to sync queries
+            'on afterError' => function (ExecEvent $event) {
+                \yiier\graylog\Log::error('队列执行失败1', $event->job);
+                \yiier\graylog\Log::error('队列执行失败2', $event->error);
+            }
         ],
         'i18n' => [
             'translations' => [
