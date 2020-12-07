@@ -60,6 +60,8 @@ return [
     'Owner' => '所有者',
     'Editor' => '使用',
     'Viewer' => '查看',
+    'Started At' => '开始时间',
+    'Ended At' => '结束时间',
 
     'The {attribute} has been used.' => '{attribute} 已经被使用。',
     'Cannot be deleted because it has been used.' => '不能被删除，因为已经被使用。',

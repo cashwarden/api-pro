@@ -115,6 +115,7 @@ class BudgetConfig extends \yii\db\ActiveRecord
             ['rollover', 'boolean', 'trueValue' => true, 'falseValue' => false, 'strict' => true],
             [['started_at', 'ended_at'], 'datetime', 'format' => 'php:Y-m-d'],
             [['name', 'include_tags', 'exclude_tags'], 'string', 'max' => 255],
+            ['ended_at', 'compare', 'compareAttribute' => 'started_at', 'operator' => '>='],
         ];
     }
 
