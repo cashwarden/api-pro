@@ -8,6 +8,7 @@ use app\core\types\BaseStatus;
 use app\core\types\BudgetPeriod;
 use app\core\types\BudgetStatus;
 use app\core\types\TransactionType;
+use Carbon\Carbon;
 use Yii;
 use yii\base\InvalidConfigException;
 use yii\behaviors\TimestampBehavior;
@@ -142,12 +143,34 @@ class BudgetConfig extends \yii\db\ActiveRecord
             $this->amount_cent = Setup::toFen($this->amount);
             $this->init_amount_cent = Setup::toFen($this->init_amount);
             $this->period = BudgetPeriod::toEnumValue($this->period);
+            $this->formatDate();
             $this->transaction_type = TransactionType::toEnumValue($this->transaction_type);
             $this->status = is_null($this->status) ? BudgetStatus::ACTIVE : BudgetStatus::toEnumValue($this->status);
             $this->category_ids = $this->category_ids ? implode(',', array_unique($this->category_ids)) : null;
             return true;
         } else {
             return false;
+        }
+    }
+
+
+    public function formatDate()
+    {
+        $d1 = new Carbon($this->started_at);
+        $d2 = new Carbon($this->ended_at);
+        switch ($this->period) {
+            case BudgetPeriod::MONTH:
+                $this->started_at = $d1->firstOfMonth();
+                $this->ended_at = $d2->endOfMonth();
+                break;
+            case BudgetPeriod::YEAR:
+                $this->started_at = $d1->firstOfYear();
+                $this->ended_at = $d2->endOfYear();
+                break;
+            default:
+                $this->started_at = $d1;
+                $this->ended_at = $d2->endOfDay();
+                break;
         }
     }
 

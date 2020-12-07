@@ -26,20 +26,15 @@ class BudgetService extends BaseObject
         $model = new Budget();
         switch ($budgetConfig->period) {
             case BudgetPeriod::MONTH:
-                $diff = ceil($d1->floatDiffInMonths($d2));
-                if ($diff == 1 && $d1->month !== $d2->month) {
-                    $diff = 2;
-                }
-                // dd($diff);
-                for ($i = 0; $i < $diff; $i++) {
+                $diff = $d1->diffInMonths($d2);
+                for ($i = 0; $i <= $diff; $i++) {
                     $_model = clone $model;
                     $_model->started_at = Carbon::parse($budgetConfig->started_at)->addMonths($i);
-                    if ($i < $diff - 1) {
-                        $_model->ended_at = Carbon::parse($budgetConfig->started_at)
-                            ->addMonths($i)
-                            ->endOfMonth()
-                            ->endOfDay();
-                    } else {
+                    $_model->ended_at = Carbon::parse($budgetConfig->started_at)
+                        ->addMonths($i)
+                        ->endOfMonth()
+                        ->endOfDay();
+                    if ($i === $diff) {
                         $_model->ended_at = Carbon::parse($budgetConfig->ended_at)->endOfDay();
                     }
                     if ($i > 0) {
@@ -55,19 +50,12 @@ class BudgetService extends BaseObject
                 }
                 break;
             case BudgetPeriod::YEAR:
-                $diff = ceil($d1->floatDiffInYears($d2));
-                if ($diff == 1 && $d1->year !== $d2->year) {
-                    $diff = 2;
-                }
-                for ($i = 0; $i < $diff; $i++) {
+                $diff = $d1->diffInYears($d2);
+                for ($i = 0; $i <= $diff; $i++) {
                     $_model = clone $model;
                     $_model->started_at = Carbon::parse($budgetConfig->started_at)->addYears($i);
-                    if ($i < $diff - 1) {
-                        $_model->ended_at = Carbon::parse($budgetConfig->started_at)
-                            ->addMonths($i)
-                            ->endOfYear()
-                            ->endOfDay();
-                    } else {
+                    $_model->ended_at = Carbon::parse($budgetConfig->started_at)->addYears($i)->endOfYear()->endOfDay();
+                    if ($i === $diff) {
                         $_model->ended_at = Carbon::parse($budgetConfig->ended_at)->endOfDay();
                     }
                     if ($i > 0) {
@@ -107,15 +95,22 @@ class BudgetService extends BaseObject
      */
     public static function calculationAmount(BudgetConfig $budgetConfig): void
     {
+        $ledgerId = $budgetConfig->ledger_id;
+        $baseConditions = ['user_id' => LedgerService::getLedgerMemberUserIds($ledgerId), 'ledger_id' => $ledgerId];
+        $endDate = Transaction::find()->where($baseConditions)->max('date');
+        if (!$endDate) {
+            return;
+        }
         $budgets = Budget::find()
             ->where(['budget_config_id' => $budgetConfig->id, 'relation_budget_id' => null])
+            ->andWhere(['<=', 'started_at', $endDate])
             ->all();
         $remainingBudgetAmountCent = 0;
         /** @var Budget $budget */
         foreach ($budgets as $k => $budget) {
             $categoryIds = explode(',', $budgetConfig->category_ids);
             $query = Transaction::find()
-                ->where(['user_id' => $budgetConfig->user_id, 'type' => $budgetConfig->transaction_type])
+                ->where($baseConditions + ['type' => $budgetConfig->transaction_type])
                 ->andWhere(['between', 'date', $budget->started_at, $budget->ended_at])
                 ->andFilterWhere(['ledger_id' => $budgetConfig->ledger_id, 'category_id' => $categoryIds,]);
             if ($tag = $budgetConfig->include_tags) {
