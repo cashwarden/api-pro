@@ -242,12 +242,12 @@ class TransactionService extends BaseObject
                 }
             );
 
-            $transactionType = TransactionType::toEnumValue($model->type);
             $isTransfer = ArrayHelper::strPosArr($desc, ['还款', '转账', '借出']) !== false;
             if ($isTransfer && $transferAccountIds = $this->getTransferAccountIdsByDesc($desc)) {
                 $model->type = TransactionType::getName(TransactionType::TRANSFER);
                 $model->from_account_id = $transferAccountIds[0];
                 $model->to_account_id = $transferAccountIds[1];
+                $transactionType = $transactionType = TransactionType::toEnumValue($model->type);
             } else {
                 $transactionType = TransactionType::toEnumValue($model->type);
                 // 先去账号根据关键词查找
