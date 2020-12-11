@@ -86,12 +86,12 @@ class TelegramController extends ActiveController
             });
 
             $bot->command(ltrim(TelegramKeyword::HELP, '/'), function (Message $message) use ($bot) {
-                $text = "我能做什么？\n
-                /help - 查看帮助 \n
-                /cmd - 列出所有指令 \n
-                /start - 开始使用 \n
-                /password_reset - 重置密码 \n
-                \n
+                $text = "我能做什么？
+                /help - 查看帮助
+                /cmd - 列出所有指令
+                /start - 开始使用
+                /password_reset - 重置密码
+
                 绑定账号成功之后发送文字直接记账";
                 /** @var BotApi $bot */
                 $bot->sendMessage($message->getChat()->getId(), $text);
