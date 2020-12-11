@@ -26,7 +26,7 @@ class UserController extends ActiveController
     use ServiceTrait;
 
     public $modelClass = User::class;
-    public $noAuthActions = ['join', 'login', 'confirm'];
+    public $noAuthActions = ['join', 'login', 'confirm', 'password-reset-request', 'password-reset'];
 
     public function actions()
     {
@@ -110,7 +110,7 @@ class UserController extends ActiveController
      * @throws Exception
      * @throws InvalidArgumentException
      */
-    public function actionMeUpdate()
+    public function actionMeUpdate(): User
     {
         $model = new UserUpdate();
         $model->id = Yii::$app->user->id;
@@ -131,7 +131,7 @@ class UserController extends ActiveController
      * @throws Exception
      * @throws \yii\base\InvalidConfigException
      */
-    public function actionSendConfirmation()
+    public function actionSendConfirmation(): string
     {
         /** @var User $user */
         $user = User::find()->where(['id' => Yii::$app->user->id])->one();
@@ -160,7 +160,7 @@ class UserController extends ActiveController
      * @throws InvalidArgumentException
      * @throws \yii\base\InvalidConfigException
      */
-    public function actionPasswordResetRequest()
+    public function actionPasswordResetRequest(): string
     {
         $model = new PasswordResetRequest();
         /** @var PasswordResetRequest $model */
@@ -173,7 +173,7 @@ class UserController extends ActiveController
      * @return string
      * @throws InvalidArgumentException
      */
-    public function actionPasswordResetTokenVerification()
+    public function actionPasswordResetTokenVerification(): string
     {
         $model = new PasswordResetTokenVerification();
         /** @var PasswordResetRequest $model */
@@ -204,13 +204,14 @@ class UserController extends ActiveController
 
     /**
      * Process password reset
-     * @return string
-     * @throws InvalidArgumentException
+     * @return bool
+     * @throws InvalidArgumentException|Exception
      */
-    public function actionPasswordReset()
+    public function actionPasswordReset(): bool
     {
         $params = Yii::$app->request->bodyParams;
         $model = new PasswordReset();
+        /** @var PasswordReset $model */
         $model = $this->validate($model, $params);
         return $model->resetPassword();
     }

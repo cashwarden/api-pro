@@ -60,6 +60,22 @@ class TelegramController extends ActiveController
                 $bot->sendMessage($message->getChat()->getId(), '请选择统计范围', null, false, null, $keyboard);
             });
 
+            $bot->command(ltrim(TelegramKeyword::PASSWORD_RESET, '/'), function (Message $message) use ($bot) {
+                $text = "您还未绑定账号，请先访问「个人设置」中的「账号绑定」进行绑定账号，然后才能使用此功能。";
+                $user = $this->userService->getUserByClientId(
+                    AuthClientType::TELEGRAM,
+                    $message->getFrom()->getId()
+                );
+                if ($user) {
+                    $resetURL = params('frontendURL') .
+                        '#/passport/password-reset?token=' .
+                        $user->password_reset_token;
+                    $text = "请在 24 小时内使使用此链接设置新密码\n {$resetURL}";
+                }
+                /** @var BotApi $bot */
+                $bot->sendMessage($message->getChat()->getId(), $text);
+            });
+
             $bot->command(ltrim(TelegramKeyword::CMD, '/'), function (Message $message) use ($bot) {
                 $keyboard = new ReplyKeyboardMarkup(
                     [[TelegramKeyword::REPORT]],

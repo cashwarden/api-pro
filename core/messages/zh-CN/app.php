@@ -86,5 +86,6 @@ return [
 
     'You can only view data that you\'ve created.' => '你只能查看自己的数据。',
     'Default ledger not found.' => '默认账本未找到。',
+    'There is no user with this email address.' => '此用户邮箱未注册或者未激活。',
 
 ];
