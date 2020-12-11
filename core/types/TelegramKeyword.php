@@ -12,7 +12,7 @@ class TelegramKeyword
     public const TODAY = '/' . AnalysisDateType::TODAY;
     public const YESTERDAY = '/' . AnalysisDateType::YESTERDAY;
     public const LAST_MONTH = '/' . AnalysisDateType::LAST_MONTH;
-    public const PASSWORD_RESET = '忘记密码';
+    public const PASSWORD_RESET = '/password_reset';
 
     /**
      * @return string[]
