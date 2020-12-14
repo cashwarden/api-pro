@@ -135,7 +135,7 @@ class Tag extends \yii\db\ActiveRecord
      */
     public function beforeDelete()
     {
-        if (TransactionService::countTransactionByTag($this->name, $this->user_id)) {
+        if (TransactionService::countTransactionByTag($this->name, $this->ledger_id, $this->user_id)) {
             throw new CannotOperateException(Yii::t('app', 'Cannot be deleted because it has been used.'));
         }
         return parent::beforeDelete();

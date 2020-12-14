@@ -572,6 +572,19 @@ class TransactionService extends BaseObject
     }
 
     /**
+     * @param int $categoryId
+     * @param int $ledgerId
+     * @param int $userId
+     * @return bool|int|string|null
+     */
+    public static function countTransactionByCategoryId(int $categoryId, int $ledgerId, int $userId)
+    {
+        return Transaction::find()
+            ->where(['user_id' => $userId, 'ledger_id' => $ledgerId, 'category_id' => $categoryId])
+            ->count();
+    }
+
+    /**
      * @param int $id
      * @param int $userId
      * @return Transaction|object
