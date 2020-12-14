@@ -4,6 +4,7 @@ namespace app\modules\v1\controllers;
 
 use app\core\helpers\ArrayHelper;
 use app\core\services\TelegramService;
+use app\core\services\UserService;
 use app\core\traits\ServiceTrait;
 use app\core\types\AuthClientType;
 use app\core\types\RecordSource;
@@ -67,6 +68,7 @@ class TelegramController extends ActiveController
                     $message->getFrom()->getId()
                 );
                 if ($user) {
+                    (new UserService())->setPasswordResetToken($user);
                     $resetURL = params('frontendURL') .
                         '#/passport/password-reset?token=' .
                         $user->password_reset_token;
@@ -87,12 +89,12 @@ class TelegramController extends ActiveController
 
             $bot->command(ltrim(TelegramKeyword::HELP, '/'), function (Message $message) use ($bot) {
                 $text = "我能做什么？
-                /help - 查看帮助
-                /cmd - 列出所有指令
-                /start - 开始使用
-                /password_reset - 重置密码
+/help - 查看帮助
+/cmd - 列出所有指令
+/start - 开始使用
+/password_reset - 重置密码
 
-                绑定账号成功之后发送文字直接记账";
+绑定账号成功之后发送文字直接记账";
                 /** @var BotApi $bot */
                 $bot->sendMessage($message->getChat()->getId(), $text);
             });

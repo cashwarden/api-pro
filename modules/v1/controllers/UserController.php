@@ -187,7 +187,7 @@ class UserController extends ActiveController
      * @return array
      * @throws InvalidArgumentException|\Throwable
      */
-    public function actionConfirm()
+    public function actionConfirm(): array
     {
         $model = new JoinConfirm();
         /** @var JoinConfirm $model */
@@ -221,7 +221,7 @@ class UserController extends ActiveController
      * @return string
      * @throws Exception
      */
-    public function actionChangePassword()
+    public function actionChangePassword(): string
     {
         $params = Yii::$app->request->bodyParams;
         $model = new ChangePassword();
