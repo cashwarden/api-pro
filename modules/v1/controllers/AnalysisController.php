@@ -25,7 +25,7 @@ class AnalysisController extends ActiveController
      * @return array
      * @throws InvalidArgumentException
      */
-    public function actionCategory()
+    public function actionCategory(): array
     {
         $params = \Yii::$app->request->queryParams;
         return $this->analysisService->byCategory($params);
@@ -35,7 +35,7 @@ class AnalysisController extends ActiveController
      * @return array
      * @throws InvalidArgumentException
      */
-    public function actionDate()
+    public function actionDate(): array
     {
         $params = \Yii::$app->request->queryParams;
         $groupByDateType = request('group_type') ?: AnalysisGroupDateType::DAY;

@@ -247,9 +247,11 @@ class TelegramService extends BaseObject
      * @return string
      * @throws \Exception
      */
-    public function getReportTextByType(string $type)
+    public function getReportTextByType(string $type): string
     {
         $recordOverview = $this->analysisService->recordOverview;
+        $date = AnalysisDateType::getDateByType($type);
+        $recordByCategory = $this->analysisService->byCategory(['date' => implode('~', $date)]);
         $text = "收支报告\n";
 
         $title = data_get($recordOverview, "{$type}.text");
@@ -258,12 +260,27 @@ class TelegramService extends BaseObject
         $surplus = data_get($recordOverview, "{$type}.overview.surplus", 0);
         $text .= "{$title}统计：已支出 {$expense}，已收入 {$income}，结余 {$surplus}\n";
 
+        foreach ($recordByCategory['expense'] as $item) {
+            $text .= "    - 【支出】{$item['category_name']}：{$item['currency_amount']}\n";
+        }
+        foreach ($recordByCategory['income'] as $item) {
+            $text .= "    - 【收入】{$item['category_name']}：{$item['currency_amount']}\n";
+        }
+
         $type = AnalysisDateType::CURRENT_MONTH;
         $title = data_get($recordOverview, "{$type}.text");
         $expense = data_get($recordOverview, "{$type}.overview.expense", 0);
         $income = data_get($recordOverview, "{$type}.overview.income", 0);
         $surplus = data_get($recordOverview, "{$type}.overview.surplus", 0);
         $text .= "{$title}统计：已支出 {$expense}，已收入 {$income}，结余 {$surplus}\n";
+        $date = AnalysisDateType::getDateByType(AnalysisDateType::TODAY);
+        $recordByCategory = $this->analysisService->byCategory(['date' => implode('~', $date)]);
+        foreach ($recordByCategory['expense'] as $item) {
+            $text .= "    - 【支出】{$item['category_name']}：{$item['currency_amount']}\n";
+        }
+        foreach ($recordByCategory['income'] as $item) {
+            $text .= "    - 【收入】{$item['category_name']}：{$item['currency_amount']}\n";
+        }
 
         return $text;
     }

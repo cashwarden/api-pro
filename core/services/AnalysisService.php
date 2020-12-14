@@ -81,7 +81,7 @@ class AnalysisService extends BaseObject
      * @return array
      * @throws ForbiddenHttpException
      */
-    public function getCategoryStatisticalData(array $date, int $transactionType, $ledgerId = null)
+    public function getCategoryStatisticalData(array $date, int $transactionType, $ledgerId = null): array
     {
         $conditions = [];
         $items = [];
@@ -200,7 +200,7 @@ class AnalysisService extends BaseObject
      * @throws InvalidArgumentException
      * @throws \Exception
      */
-    public function byCategory(array $params)
+    public function byCategory(array $params): array
     {
         $items = [];
         if ($ledgerId = data_get($params, 'ledger_id')) {

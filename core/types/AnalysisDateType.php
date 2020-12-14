@@ -2,6 +2,7 @@
 
 namespace app\core\types;
 
+use Carbon\Carbon;
 use Yii;
 use yii\base\InvalidConfigException;
 use yiier\helpers\DateHelper;
@@ -17,7 +18,7 @@ class AnalysisDateType
     public const EVERY_DAY_OF_MONTH = 'every_day_of_month';
 
 
-    public static function getItems()
+    public static function getItems(): array
     {
         return [
             self::TODAY,
@@ -28,7 +29,7 @@ class AnalysisDateType
         ];
     }
 
-    public static function texts()
+    public static function texts(): array
     {
         return [
             self::TODAY => Yii::t('app', 'Today'),
@@ -39,6 +40,28 @@ class AnalysisDateType
         ];
     }
 
+    /**
+     * @param string $type
+     * @return array
+     */
+    public static function getDateByType(string $type): array
+    {
+        switch ($type) {
+            case self::LAST_MONTH:
+                $d1 = Carbon::now()->subMonth()->firstOfMonth()->toDateString();
+                $d2 = Carbon::now()->subMonth()->lastOfMonth()->toDateString();
+                break;
+            case self::CURRENT_MONTH:
+                $d1 = Carbon::now()->firstOfMonth()->toDateString();
+                $d2 = Carbon::now()->lastOfMonth()->toDateString();
+                break;
+            default:
+                $d1 = $d2 = (new Carbon($type))->toDateString();
+                break;
+        }
+        return [$d1, $d2];
+    }
+
 
     /**
      * @param string $dateStr
@@ -46,7 +69,7 @@ class AnalysisDateType
      * @throws InvalidConfigException
      * @throws \Exception
      */
-    public static function getEveryDayByMonth(string $dateStr)
+    public static function getEveryDayByMonth(string $dateStr): array
     {
         $formatter = Yii::$app->formatter;
         $items = [];
