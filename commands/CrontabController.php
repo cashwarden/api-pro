@@ -29,6 +29,7 @@ class CrontabController extends Controller
      */
     public function actionRecurrence()
     {
+        $transactions = [];
         $items = Recurrence::find()
             ->where(['status' => RecurrenceStatus::ACTIVE])
             ->andWhere(['execution_date' => Yii::$app->formatter->asDatetime('now', 'php:Y-m-d')])
@@ -39,21 +40,27 @@ class CrontabController extends Controller
         try {
             foreach ($items as $item) {
                 \Yii::$app->user->setIdentity(User::findOne($item['user_id']));
-                if ($t = $this->transactionService->copy($item['transaction_id'], $item['user_id'])) {
-                    $keyboard = $this->telegramService->getRecordMarkup($t);
-                    $text = $this->telegramService->getMessageTextByTransaction($t, '定时记账成功');
-                    $this->telegramService->sendMessage($text, $keyboard);
-                    array_push($ids, $item['id']);
-                    $this->stdout("定时记账成功，transaction_id：{$t->id}\n");
+                array_push($ids, $item['id']);
+                if ($newTransaction = $this->transactionService->copy($item['transaction_id'], $item['user_id'])) {
+                    array_push($transactions, $newTransaction);
+                    $this->stdout("定时记账成功，transaction_id：{$newTransaction->id}\n");
                 }
             }
             RecurrenceService::updateAllExecutionDate($ids);
             $transaction->commit();
         } catch (\Exception $e) {
             $ids = implode(',', $ids);
-            $this->stdout("定时记账失败：{$ids}，{$e->getMessage()}\n");
+            $this->stdout("定时记账失败：依次执行的 Recurrence ID 为 {$ids}，{$e->getMessage()}\n");
             $transaction->rollBack();
             throw $e;
+        }
+
+        if (count($ids) === count($items)) {
+            foreach ($transactions as $transaction) {
+                $keyboard = $this->telegramService->getRecordMarkup($transaction);
+                $text = $this->telegramService->getMessageTextByTransaction($transaction, '定时记账成功');
+                $this->telegramService->sendMessage($text, $keyboard);
+            }
         }
     }
 
