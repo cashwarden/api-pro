@@ -2,7 +2,9 @@
 
 namespace app\core\models;
 
+use app\core\exceptions\CannotOperateException;
 use app\core\exceptions\InvalidArgumentException;
+use app\core\services\TransactionService;
 use app\core\types\ColorType;
 use app\core\types\TransactionType;
 use Yii;
@@ -132,6 +134,18 @@ class Category extends \yii\db\ActiveRecord
         } else {
             return false;
         }
+    }
+
+    /**
+     * @return bool
+     * @throws CannotOperateException
+     */
+    public function beforeDelete()
+    {
+        if (TransactionService::countTransactionByCategoryId($this->id, $this->ledger_id, $this->user_id)) {
+            throw new CannotOperateException(Yii::t('app', 'Cannot be deleted because it has been used.'));
+        }
+        return parent::beforeDelete();
     }
 
     /**
