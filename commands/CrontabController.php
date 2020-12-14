@@ -5,6 +5,7 @@ namespace app\commands;
 use app\core\exceptions\ThirdPartyServiceErrorException;
 use app\core\models\AuthClient;
 use app\core\models\Recurrence;
+use app\core\models\Transaction;
 use app\core\models\User;
 use app\core\services\RecurrenceService;
 use app\core\traits\ServiceTrait;
@@ -29,6 +30,7 @@ class CrontabController extends Controller
      */
     public function actionRecurrence()
     {
+        /** @var Transaction[] $transactions */
         $transactions = [];
         $items = Recurrence::find()
             ->where(['status' => RecurrenceStatus::ACTIVE])
@@ -57,6 +59,7 @@ class CrontabController extends Controller
 
         if (count($ids) === count($items)) {
             foreach ($transactions as $transaction) {
+                \Yii::$app->user->switchIdentity(User::findOne($transaction->user_id));
                 $keyboard = $this->telegramService->getRecordMarkup($transaction);
                 $text = $this->telegramService->getMessageTextByTransaction($transaction, '定时记账成功');
                 $this->telegramService->sendMessage($text, $keyboard);
