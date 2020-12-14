@@ -259,7 +259,6 @@ class TelegramService extends BaseObject
         $income = data_get($recordOverview, "{$type}.overview.income", 0);
         $surplus = data_get($recordOverview, "{$type}.overview.surplus", 0);
         $text .= "{$title}统计：已支出 {$expense}，已收入 {$income}，结余 {$surplus}\n";
-
         foreach ($recordByCategory['expense'] as $item) {
             $text .= "    - 【支出】{$item['category_name']}：{$item['currency_amount']}\n";
         }
@@ -273,7 +272,8 @@ class TelegramService extends BaseObject
         $income = data_get($recordOverview, "{$type}.overview.income", 0);
         $surplus = data_get($recordOverview, "{$type}.overview.surplus", 0);
         $text .= "{$title}统计：已支出 {$expense}，已收入 {$income}，结余 {$surplus}\n";
-        $date = AnalysisDateType::getDateByType(AnalysisDateType::TODAY);
+
+        $date = AnalysisDateType::getDateByType(AnalysisDateType::CURRENT_MONTH);
         $recordByCategory = $this->analysisService->byCategory(['date' => implode('~', $date)]);
         foreach ($recordByCategory['expense'] as $item) {
             $text .= "    - 【支出】{$item['category_name']}：{$item['currency_amount']}\n";
