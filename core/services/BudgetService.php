@@ -119,7 +119,7 @@ class BudgetService extends BaseObject
                     ->addParams([':tag' => $tag]);
             }
             if ($tag = $budgetConfig->exclude_tags) {
-                $query->andWhere(new Expression('NOT FIND_IN_SET(:tag, tags)'))
+                $query->andWhere(new Expression('NOT FIND_IN_SET(:tag, COALESCE(tags, \'\'))'))
                     ->addParams([':tag' => $tag]);
             }
             if ($actualAmountCent = $query->sum('amount_cent')) {
