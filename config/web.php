@@ -99,6 +99,8 @@ $config = [
                 "GET <module>/ledger/members" => '<module>/ledger-member/index',
                 "PUT <module>/ledger/members/<id:\d+>" => '<module>/ledger-member/update',
 
+                "POST <module>/budget-configs/<id:\d+>/copy" => '<module>/budget-config/copy',
+
                 [
                     'class' => 'yii\rest\UrlRule',
                     'controller' => [

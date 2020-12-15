@@ -10,8 +10,8 @@ namespace app\core\traits;
 
 use app\core\services\AccountService;
 use app\core\services\AnalysisService;
+use app\core\services\BudgetService;
 use app\core\services\CategoryService;
-use app\core\services\GroupService;
 use app\core\services\LedgerService;
 use app\core\services\MailerService;
 use app\core\services\RecurrenceService;
@@ -37,7 +37,7 @@ use yii\base\InvalidConfigException;
  * @property RecurrenceService $recurrenceService
  * @property UploadService $uploadService
  * @property MailerService $mailerService
- * @property GroupService $groupService
+ * @property BudgetService $budgetService
  * @property LedgerService $ledgerService
  */
 trait ServiceTrait
@@ -178,14 +178,14 @@ trait ServiceTrait
 
 
     /**
-     * @return GroupService|object
+     * @return BudgetService|object
      */
-    public function getGroupService()
+    public function getBudgetService()
     {
         try {
-            return Yii::createObject(GroupService::class);
+            return Yii::createObject(BudgetService::class);
         } catch (InvalidConfigException $e) {
-            return new GroupService();
+            return new BudgetService();
         }
     }
 

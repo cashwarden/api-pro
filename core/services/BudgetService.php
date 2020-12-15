@@ -11,6 +11,7 @@ use Carbon\Carbon;
 use yii\base\BaseObject;
 use yii\db\Exception;
 use yii\db\Expression;
+use yii\web\NotFoundHttpException;
 use yiier\helpers\Setup;
 
 class BudgetService extends BaseObject
@@ -157,5 +158,37 @@ class BudgetService extends BaseObject
         foreach ($budgetConfigs as $budgetConfig) {
             self::calculationAmount($budgetConfig);
         }
+    }
+
+    /**
+     * @param int $id
+     * @return BudgetConfig
+     * @throws NotFoundHttpException
+     * @throws Exception
+     */
+    public function copy(int $id): BudgetConfig
+    {
+        $model = $this->findCurrentOne($id);
+        $budgetConfig = new BudgetConfig();
+        $values = $model->toArray();
+        $budgetConfig->load($values, '');
+        $budgetConfig->name = $budgetConfig->name . ' Copy';
+        if (!$budgetConfig->save(false)) {
+            throw new Exception(Setup::errorMessage($budgetConfig->firstErrors));
+        }
+        return BudgetConfig::findOne($budgetConfig->id);
+    }
+
+    /**
+     * @param int $id
+     * @return BudgetConfig
+     * @throws NotFoundHttpException
+     */
+    public function findCurrentOne(int $id): BudgetConfig
+    {
+        if (!$model = BudgetConfig::find()->where(['id' => $id, 'user_id' => \Yii::$app->user->id])->one()) {
+            throw new NotFoundHttpException('No data found');
+        }
+        return $model;
     }
 }
