@@ -243,6 +243,7 @@ class BudgetConfig extends \yii\db\ActiveRecord
             'ended_at' => data_get($budget, '0.ended_at'),
             'actual_amount' => Setup::toYuan($actualAmountCent),
             'budget_amount' => Setup::toYuan($budgetAmountCent),
+            'surplus_amount' => Setup::toYuan($budgetAmountCent - $actualAmountCent),
             'progress' => $budgetAmountCent ? bcmul(bcdiv($actualAmountCent, $budgetAmountCent, 4), 100, 1) : 100
         ];
     }
