@@ -73,7 +73,7 @@ class RuleService
 
     /**
      * @param int $id
-     * @return Rule|object
+     * @return Rule
      * @throws NotFoundHttpException
      */
     public function findCurrentOne(int $id): Rule
