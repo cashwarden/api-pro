@@ -5,6 +5,7 @@ namespace app\modules\v1\controllers;
 use app\core\exceptions\InternalException;
 use app\core\exceptions\InvalidArgumentException;
 use app\core\helpers\RuleControlHelper;
+use app\core\helpers\SearchHelper;
 use app\core\models\Ledger;
 use app\core\requests\LedgerInvitingMember;
 use app\core\services\LedgerService;
@@ -25,6 +26,9 @@ class LedgerController extends ActiveController
     use ServiceTrait;
 
     public $modelClass = Ledger::class;
+    public $partialMatchAttributes = ['name'];
+    public $stringToIntAttributes = ['type' => LedgerType::class];
+
 
     public function actions()
     {
@@ -108,10 +112,16 @@ class LedgerController extends ActiveController
             'defaultOrder' => $this->defaultOrder,
             'model' => $modelClass,
             'scenario' => 'default',
+            'partialMatchAttributes' => $this->partialMatchAttributes,
             'pageSize' => $this->getPageSize()
         ]);
 
         $params = $this->formatParams(Yii::$app->request->queryParams);
+        foreach ($this->stringToIntAttributes as $attribute => $className) {
+            if ($type = data_get($params, $attribute)) {
+                $params[$attribute] = SearchHelper::stringToInt($type, $className);
+            }
+        }
         unset($params['sort']);
 
         $dataProvider = $searchModel->search(['SearchModel' => $params]);

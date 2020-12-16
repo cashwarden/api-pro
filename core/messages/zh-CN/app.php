@@ -89,5 +89,6 @@ return [
     'There is no user with this email address.' => '此用户邮箱未注册或者未激活。',
     'You have successfully joined this account, please do not repeat the process.' => '您已经成功加入此账本，请勿重复操作。',
     'You do not have permission to operate.' => '您没有权限操作。',
+    'Not found account.' => '账户未找到。',
 
 ];

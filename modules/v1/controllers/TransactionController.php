@@ -35,7 +35,7 @@ class TransactionController extends ActiveController
      * @return Transaction
      * @throws \Exception|\Throwable
      */
-    public function actionCreateByDescription()
+    public function actionCreateByDescription(): Transaction
     {
         $params = Yii::$app->request->bodyParams;
         $model = new TransactionCreateByDescRequest();
@@ -49,7 +49,7 @@ class TransactionController extends ActiveController
      * @return array
      * @throws \Exception
      */
-    public function actionTypes()
+    public function actionTypes(): array
     {
         $items = [];
         $texts = TransactionType::texts();
@@ -67,7 +67,7 @@ class TransactionController extends ActiveController
      * @throws InvalidArgumentException
      * @throws \Exception
      */
-    public function actionUpload()
+    public function actionUpload(): array
     {
         $fileParam = 'file';
         $uploadedFile = UploadedFile::getInstanceByName($fileParam);

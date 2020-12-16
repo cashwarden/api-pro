@@ -160,6 +160,10 @@ class Ledger extends \yii\db\ActiveRecord
             return (bool)$model->default;
         };
 
+        $fields['creator'] = function (self $model) {
+            return (bool)($model->user_id == Yii::$app->user->id);
+        };
+
         $fields['created_at'] = function (self $model) {
             return DateHelper::datetimeToIso8601($model->created_at);
         };

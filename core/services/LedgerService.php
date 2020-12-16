@@ -59,6 +59,26 @@ class LedgerService
     }
 
     /**
+     * @param int $ledgerId
+     * @return array
+     */
+    public static function getLedgerMemberUserIdsByType(int $ledgerId): array
+    {
+        $ledger = Ledger::find()->where(['id' => $ledgerId])->asArray()->one();
+        if (LedgerType::SHARE == $ledger['type']) {
+            $userIds = LedgerMember::find()
+                ->select('user_id')
+                ->where([
+                    'ledger_id' => $ledgerId,
+                    'status' => [LedgerMemberStatus::NORMAL, LedgerMemberStatus::ARCHIVED]
+                ])
+                ->column();
+            return array_map('intval', $userIds);
+        }
+        return [(int)$ledger['user_id']];
+    }
+
+    /**
      * @param int $userId
      * @return array
      */

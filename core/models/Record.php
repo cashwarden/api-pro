@@ -5,6 +5,7 @@ namespace app\core\models;
 use app\core\exceptions\CannotOperateException;
 use app\core\jobs\UpdateBudgetJob;
 use app\core\services\AccountService;
+use app\core\services\LedgerService;
 use app\core\services\RecurrenceService;
 use app\core\types\DirectionType;
 use app\core\types\RecordSource;
@@ -193,11 +194,12 @@ class Record extends ActiveRecord
     {
         parent::afterSave($insert, $changedAttributes);
         if ($this->transaction_id) {
+            $userIds = LedgerService::getLedgerMemberUserIdsByType($this->ledger_id);
             // Exclude balance adjustment transaction type
-            AccountService::updateAccountBalance($this->account_id);
+            AccountService::updateAccountBalance($this->account_id, $userIds);
             $accountId = data_get($changedAttributes, 'account_id');
             if ($accountId && $accountId !== $this->account_id) {
-                AccountService::updateAccountBalance($accountId);
+                AccountService::updateAccountBalance($accountId, $userIds);
             }
         }
     }
@@ -234,7 +236,8 @@ class Record extends ActiveRecord
             }
         }
         Yii::$app->queue->push(new UpdateBudgetJob(['ledgerId' => $this->ledger_id, 'datetime' => $this->date]));
-        $this->account_id ? AccountService::updateAccountBalance($this->account_id) : null;
+        $userIds = LedgerService::getLedgerMemberUserIdsByType($this->ledger_id);
+        $this->account_id ? AccountService::updateAccountBalance($this->account_id, $userIds) : null;
     }
 
     /**
@@ -294,6 +297,10 @@ class Record extends ActiveRecord
 
         $fields['updated_at'] = function (self $model) {
             return DateHelper::datetimeToIso8601($model->updated_at);
+        };
+
+        $fields['creator'] = function (self $model) {
+            return (bool)($model->user_id == Yii::$app->user->id);
         };
 
         return $fields;
