@@ -149,9 +149,8 @@ class Transaction extends \yii\db\ActiveRecord
             [
                 'ledger_id',
                 'exist',
-                'targetClass' => Ledger::class,
+                'targetClass' => LedgerMember::class,
                 'filter' => ['user_id' => Yii::$app->user->id],
-                'targetAttribute' => 'id',
             ],
             [['description', 'remark'], 'trim'],
             ['type', 'in', 'range' => TransactionType::names()],

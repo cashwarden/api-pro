@@ -67,13 +67,13 @@ class AccountService
 
     /**
      * @param int $id
+     * @param array|int $userIds
      * @return Account|ActiveRecord|null
      */
-    public static function findCurrentOne(int $id)
+    public static function findOne(int $id, $userIds = null)
     {
-        return Account::find()->where(['id' => $id])
-            ->andWhere(['user_id' => Yii::$app->user->id])
-            ->one();
+        $userIds = $userIds ?: Yii::$app->user->id;
+        return Account::find()->where(['id' => $id, 'user_id' => $userIds])->one();
     }
 
     public static function getDefaultAccount(int $userId = 0)
@@ -88,13 +88,14 @@ class AccountService
 
     /**
      * @param int $accountId
+     * @param array $userIds
      * @return bool
      * @throws \yii\db\Exception
      */
-    public static function updateAccountBalance(int $accountId): bool
+    public static function updateAccountBalance(int $accountId, array $userIds): bool
     {
-        if (!$model = self::findCurrentOne($accountId)) {
-            throw new \yii\db\Exception('not found account');
+        if (!$model = self::findOne($accountId, $userIds)) {
+            throw new \yii\db\Exception(Yii::t('app', 'Not found account.'));
         }
         $model->load($model->toArray(), '');
         $model->currency_balance = Setup::toYuan(self::getCalculateCurrencyBalanceCent($accountId));

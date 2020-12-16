@@ -4,10 +4,11 @@ namespace app\modules\v1\controllers;
 
 use app\core\exceptions\InternalException;
 use app\core\exceptions\InvalidArgumentException;
-use app\core\models\Ledger;
+use app\core\helpers\RuleControlHelper;
 use app\core\models\LedgerMember;
 use app\core\models\Recurrence;
 use app\core\requests\UpdateStatus;
+use app\core\services\LedgerService;
 use app\core\traits\ServiceTrait;
 use app\core\types\LedgerMemberStatus;
 use Yii;
@@ -77,12 +78,8 @@ class LedgerMemberController extends ActiveController
      */
     public function checkAccess($action, $model = null, $params = [])
     {
-        if (in_array($action, ['delete', 'update', 'view'])) {
-            if (!Ledger::find()->where(['user_id' => Yii::$app->user->id, 'id' => $model->ledger_id])->exists()) {
-                throw new ForbiddenHttpException(
-                    Yii::t('app', 'You can only ' . $action . ' data that you\'ve created.')
-                );
-            }
+        if (in_array($action, ['delete', 'update'])) {
+            LedgerService::checkAccess($model->ledger_id, RuleControlHelper::MANAGE);
         }
     }
 }

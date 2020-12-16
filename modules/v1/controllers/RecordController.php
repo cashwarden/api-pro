@@ -3,7 +3,9 @@
 namespace app\modules\v1\controllers;
 
 use app\core\exceptions\InvalidArgumentException;
+use app\core\helpers\RuleControlHelper;
 use app\core\models\Record;
+use app\core\services\LedgerService;
 use app\core\traits\ServiceTrait;
 use app\core\types\RecordSource;
 use app\core\types\TransactionType;
@@ -113,12 +115,9 @@ class RecordController extends ActiveController
      */
     public function checkAccess($action, $model = null, $params = [])
     {
-        if (in_array($action, ['delete', 'update', 'view'])) {
-            if ($model->user_id !== \Yii::$app->user->id) {
-                throw new ForbiddenHttpException(
-                    t('app', 'You can only ' . $action . ' data that you\'ve created.')
-                );
-            }
+        if (in_array($action, ['delete', 'update'])) {
+            LedgerService::checkAccessOnType($model->ledger_id, $model->user_id, $action);
+            LedgerService::checkAccess($model->ledger_id, RuleControlHelper::EDIT);
         }
     }
 }

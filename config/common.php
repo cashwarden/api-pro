@@ -18,10 +18,6 @@ return [
                 'config/console.php',
             ],
         ],
-        'telegram' => [
-            'class' => 'aki\telegram\Telegram',
-            'botToken' => env('TELEGRAM_TOKEN'),
-        ],
         'requestId' => [
             'class' => \yiier\helpers\RequestId::class,
         ],

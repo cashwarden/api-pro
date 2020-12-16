@@ -3,15 +3,20 @@
 namespace app\modules\v1\controllers;
 
 use app\core\helpers\DateHelper;
+use app\core\helpers\SearchHelper;
 use app\core\models\Account;
 use app\core\services\AccountService;
+use app\core\services\LedgerService;
 use app\core\traits\ServiceTrait;
 use app\core\types\AccountStatus;
 use app\core\types\AccountType;
 use Exception;
 use Yii;
 use yii\base\InvalidConfigException;
+use yii\data\ActiveDataProvider;
+use yii\db\ActiveRecord;
 use yii\web\NotFoundHttpException;
+use yiier\helpers\SearchModel;
 use yiier\helpers\Setup;
 
 /**
@@ -39,7 +44,7 @@ class AccountController extends ActiveController
      * @return Account
      * @throws Exception
      */
-    public function actionCreate()
+    public function actionCreate(): Account
     {
         $params = Yii::$app->request->bodyParams;
         $model = new Account();
@@ -59,10 +64,10 @@ class AccountController extends ActiveController
      * @throws NotFoundHttpException
      * @throws Exception
      */
-    public function actionUpdate(int $id)
+    public function actionUpdate(int $id): Account
     {
         $params = Yii::$app->request->bodyParams;
-        if (!$model = AccountService::findCurrentOne($id)) {
+        if ($model = AccountService::findOne($id)) {
             throw new NotFoundHttpException();
         }
 
@@ -80,9 +85,9 @@ class AccountController extends ActiveController
      * @return array
      * @throws NotFoundHttpException|InvalidConfigException
      */
-    public function actionBalancesTrend(int $id)
+    public function actionBalancesTrend(int $id): array
     {
-        if (!$model = AccountService::findCurrentOne($id)) {
+        if ($model = AccountService::findOne($id)) {
             throw new NotFoundHttpException();
         }
         $endDate = DateHelper::toDate('-1 month');
@@ -107,7 +112,7 @@ class AccountController extends ActiveController
     /**
      * @return array
      */
-    public function actionOverview()
+    public function actionOverview(): array
     {
         $balanceCentSum = Account::find()
             ->where(['user_id' => Yii::$app->user->id, 'exclude_from_stats' => false])
@@ -131,5 +136,40 @@ class AccountController extends ActiveController
             ->count('id');
 
         return $items;
+    }
+
+    /**
+     * @return ActiveDataProvider
+     * @throws \Exception
+     */
+    public function prepareDataProvider()
+    {
+        /** @var ActiveRecord $modelClass */
+        $modelClass = $this->modelClass;
+        $searchModel = new SearchModel([
+            'defaultOrder' => $this->defaultOrder,
+            'model' => $modelClass,
+            'scenario' => 'default',
+            'partialMatchAttributes' => $this->partialMatchAttributes,
+            'pageSize' => $this->getPageSize()
+        ]);
+
+        $params = $this->formatParams(Yii::$app->request->queryParams);
+        foreach ($this->stringToIntAttributes as $attribute => $className) {
+            if ($type = data_get($params, $attribute)) {
+                $params[$attribute] = SearchHelper::stringToInt($type, $className);
+            }
+        }
+        unset($params['sort']);
+        $userIds = Yii::$app->user->id;
+        if ($ledgerId = data_get($params, 'ledger_id')) {
+            LedgerService::checkAccess($ledgerId);
+            $userIds = LedgerService::getLedgerMemberUserIdsByType($ledgerId);
+        }
+        $dataProvider = $searchModel->search(['SearchModel' => $params]);
+
+        $dataProvider->query->andWhere(['user_id' => $userIds]);
+
+        return $dataProvider;
     }
 }

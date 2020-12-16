@@ -48,8 +48,8 @@ class RuleControlHelper
 
     /**
      * 判断是否有权限
-     * @param int $totalPermission
-     * @param int $permission
+     * @param int $totalPermission 权限集合
+     * @param int $permission 单个权限
      * @return bool
      */
     public static function can(int $totalPermission, int $permission): bool
