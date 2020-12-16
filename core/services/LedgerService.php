@@ -45,6 +45,16 @@ class LedgerService
         }
     }
 
+    public static function checkAccessOnType(int $ledgerId, int $userId, string $action)
+    {
+        $ledger = Ledger::find()->where(['id' => $ledgerId])->asArray()->one();
+        if ((LedgerType::SHARE != $ledger['type']) && (Yii::$app->user->id != $userId)) {
+            throw new ForbiddenHttpException(
+                Yii::t('app', 'You can only ' . $action . ' data that you\'ve created.')
+            );
+        }
+    }
+
     /**
      * @param int $ledgerId
      * @return array
@@ -75,7 +85,7 @@ class LedgerService
                 ->column();
             return array_map('intval', $userIds);
         }
-        return [(int)$ledger['user_id']];
+        return [(int)Yii::$app->user->id];
     }
 
     /**

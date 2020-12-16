@@ -85,6 +85,8 @@ return [
     '{attribute} cannot be blank.' => '{attribute} 参数不能为空。',
 
     'You can only view data that you\'ve created.' => '你只能查看自己的数据。',
+    'You can only update data that you\'ve created.' => '你只能更新自己的数据。',
+    'You can only delete data that you\'ve created.' => '你只能删除自己的数据。',
     'Default ledger not found.' => '默认账本未找到。',
     'There is no user with this email address.' => '此用户邮箱未注册或者未激活。',
     'You have successfully joined this account, please do not repeat the process.' => '您已经成功加入此账本，请勿重复操作。',

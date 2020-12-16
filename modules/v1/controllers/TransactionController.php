@@ -100,6 +100,7 @@ class TransactionController extends ActiveController
     public function checkAccess($action, $model = null, $params = [])
     {
         if (in_array($action, ['delete', 'update'])) {
+            LedgerService::checkAccessOnType($model->ledger_id, $model->user_id, $action);
             LedgerService::checkAccess($model->ledger_id, RuleControlHelper::EDIT);
         }
     }
