@@ -21,6 +21,7 @@ use yiier\helpers\DateHelper;
  * @property string|null $created_at
  * @property string|null $updated_at
  *
+ * @property-read LedgerMember[] $ledgerMembers
  * @property-read Category[] $categories
  */
 class Ledger extends \yii\db\ActiveRecord
@@ -132,6 +133,12 @@ class Ledger extends \yii\db\ActiveRecord
     {
         return $this->hasMany(Category::class, ['ledger_id' => 'id']);
     }
+
+    public function getLedgerMembers()
+    {
+        return $this->hasMany(LedgerMember::class, ['ledger_id' => 'id']);
+    }
+
 
     /**
      * @return array

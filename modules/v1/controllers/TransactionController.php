@@ -3,12 +3,15 @@
 namespace app\modules\v1\controllers;
 
 use app\core\exceptions\InvalidArgumentException;
+use app\core\helpers\RuleControlHelper;
 use app\core\models\Transaction;
 use app\core\requests\TransactionCreateByDescRequest;
 use app\core\requests\TransactionUploadRequest;
+use app\core\services\LedgerService;
 use app\core\traits\ServiceTrait;
 use app\core\types\TransactionType;
 use Yii;
+use yii\web\ForbiddenHttpException;
 use yii\web\UploadedFile;
 
 /**
@@ -83,8 +86,21 @@ class TransactionController extends ActiveController
      * @return array
      * @throws \Exception
      */
-    public function actionExport()
+    public function actionExport(): array
     {
         return $this->transactionService->exportData();
+    }
+
+    /**
+     * @param string $action
+     * @param null $model
+     * @param array $params
+     * @throws ForbiddenHttpException
+     */
+    public function checkAccess($action, $model = null, $params = [])
+    {
+        if (in_array($action, ['delete', 'update'])) {
+            LedgerService::checkAccess($model->ledger_id, RuleControlHelper::EDIT);
+        }
     }
 }

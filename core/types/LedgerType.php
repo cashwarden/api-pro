@@ -12,8 +12,8 @@ class LedgerType extends BaseType
     {
         return [
             self::GENERAL => 'general_ledger',
-//            self::SHARE => 'share_ledger',
-//            self::AA => 'AA_ledger',
+            self::SHARE => 'share_ledger',
+            self::AA => 'AA_ledger',
         ];
     }
 
@@ -21,8 +21,8 @@ class LedgerType extends BaseType
     {
         return [
             self::GENERAL => \Yii::t('app', 'General Ledger'),
-//            self::SHARE => \Yii::t('app', 'Share Ledger'),
-//            self::AA => \Yii::t('app', 'AA Ledger'),
+            self::SHARE => \Yii::t('app', 'Share Ledger'),
+            self::AA => \Yii::t('app', 'AA Ledger'),
         ];
     }
 }

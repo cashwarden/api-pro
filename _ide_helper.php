@@ -14,10 +14,11 @@ class Yii extends \yii\BaseYii
 
 /**
  * @property Mis\IdeHelper\IdeHelper $ideHelper
- * @property aki\telegram\Telegram $telegram
  * @property yiier\helpers\RequestId $requestId
+ * @property light\hashids\Hashids $hashids
  * @property yii\caching\FileCache $cache
  * @property yii\db\Connection $db
+ * @property yii\queue\db\Queue $queue
  * @property yii\web\Response $response
  * @property sizeg\jwt\Jwt $jwt
  * @property yii\web\User $user

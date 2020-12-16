@@ -3,6 +3,8 @@
 namespace app\core\services;
 
 use app\core\exceptions\InternalException;
+use app\core\exceptions\InvalidArgumentException;
+use app\core\helpers\RuleControlHelper;
 use app\core\models\Account;
 use app\core\models\Category;
 use app\core\models\Ledger;
@@ -11,11 +13,13 @@ use app\core\requests\LedgerInvitingMember;
 use app\core\types\ColorType;
 use app\core\types\LedgerMemberRule;
 use app\core\types\LedgerMemberStatus;
+use app\core\types\LedgerType;
 use app\core\types\TransactionType;
 use Yii;
 use yii\db\Exception as DBException;
 use yii\helpers\ArrayHelper;
 use yii\web\ForbiddenHttpException;
+use yii\web\NotFoundHttpException;
 use yiier\graylog\Log;
 use yiier\helpers\ModelHelper;
 use yiier\helpers\Setup;
@@ -24,18 +28,19 @@ class LedgerService
 {
     /**
      * @param int $ledgerId
+     * @param int $permission
      * @throws ForbiddenHttpException
      */
-    public static function checkAccess(int $ledgerId)
+    public static function checkAccess(int $ledgerId, $permission = RuleControlHelper::VIEW)
     {
         $userId = Yii::$app->user->id;
-        $rule = LedgerMember::find()
+        $userPermission = LedgerMember::find()
             ->select('permission')
             ->where(['user_id' => $userId, 'ledger_id' => $ledgerId])
             ->scalar();
-        if (!$rule) {
+        if (!RuleControlHelper::can($userPermission, $permission)) {
             throw new ForbiddenHttpException(
-                Yii::t('app', 'You can only view data that you\'ve created.')
+                Yii::t('app', 'You do not have permission to operate.')
             );
         }
     }
@@ -44,13 +49,27 @@ class LedgerService
      * @param int $ledgerId
      * @return array
      */
-    public static function getLedgerMemberUserIds(int $ledgerId)
+    public static function getLedgerMemberUserIds(int $ledgerId): array
     {
         $userIds = LedgerMember::find()
             ->select('user_id')
             ->where(['ledger_id' => $ledgerId, 'status' => [LedgerMemberStatus::NORMAL, LedgerMemberStatus::ARCHIVED]])
             ->column();
         return array_map('intval', $userIds);
+    }
+
+    /**
+     * @param int $userId
+     * @return array
+     */
+    public static function getLedgerIds(int $userId = 0): array
+    {
+        $userId = $userId ?: Yii::$app->user->id;
+        $ledgerIds = LedgerMember::find()
+            ->select('ledger_id')
+            ->where(['user_id' => $userId, 'status' => [LedgerMemberStatus::NORMAL, LedgerMemberStatus::ARCHIVED]])
+            ->column();
+        return array_map('intval', $ledgerIds);
     }
 
     /**
@@ -70,7 +89,7 @@ class LedgerService
      * @return bool
      * @throws InternalException
      */
-    public static function createLedgerAfter(Ledger $ledger)
+    public static function createLedgerAfter(Ledger $ledger): bool
     {
         try {
             $model = new LedgerMember();
@@ -135,7 +154,7 @@ class LedgerService
      * @return bool
      * @throws InternalException
      */
-    public function invitingMember(LedgerInvitingMember $model)
+    public function invitingMember(LedgerInvitingMember $model): bool
     {
         try {
             $ledgerMember = new LedgerMember();
@@ -154,7 +173,7 @@ class LedgerService
     /**
      * @return array
      */
-    public function getLedgersCategories()
+    public function getLedgersCategories(): array
     {
         $rows = [];
         /** @var Ledger[] $items */
@@ -171,5 +190,49 @@ class LedgerService
             array_push($rows, $row);
         }
         return $rows;
+    }
+
+
+    /**
+     * @param string $token
+     * @return Ledger
+     * @throws NotFoundHttpException
+     */
+    public function getLedgerByToken(string $token): Ledger
+    {
+        $id = Yii::$app->hashids->decode($token);
+        if (!$model = Ledger::find()->where(['id' => $id, 'type' => [LedgerType::SHARE, LedgerType::AA]])->one()) {
+            throw new NotFoundHttpException();
+        }
+
+        return $model;
+    }
+
+    /**
+     * @param string $token
+     * @return bool
+     * @throws DBException
+     * @throws InvalidArgumentException
+     * @throws NotFoundHttpException
+     */
+    public function joinLedgerByToken(string $token): bool
+    {
+        $userId = Yii::$app->user->id;
+        $ledger = $this->getLedgerByToken($token);
+        $ledgerMember = LedgerMember::find()->where(['ledger_id' => $ledger->id, 'user_id' => $userId])->one();
+        if ($ledgerMember) {
+            throw new InvalidArgumentException(
+                Yii::t('app', 'You have successfully joined this account, please do not repeat the process.')
+            );
+        }
+        $model = new LedgerMember();
+        $model->ledger_id = $ledger->id;
+        $model->user_id = $userId;
+        $model->rule = LedgerMemberRule::getName(LedgerMemberRule::VIEWER);
+        $model->status = LedgerMemberStatus::getName(LedgerMemberStatus::NORMAL);
+        if (!$model->save()) {
+            throw new \yii\db\Exception(Setup::errorMessage($model->firstErrors));
+        }
+        return true;
     }
 }
