@@ -353,12 +353,27 @@ class UserService
         $model->out_sn = UserProRecord::makeOrderNo();
         $model->amount_cent = UserProRecord::makeOrderNo();
         $model->status = UserProRecordStatus::UNACTIVATED;
-        $model->ended_at = Carbon::now()->addMonth()->endOfDay();
+
+        $model->ended_at = Carbon::parse(self::getUserProLastEndedAt())->addMonth()->endOfDay();
         if (!$model->save(false)) {
             throw new DBException(Setup::errorMessage($model->firstErrors));
         }
         return $model;
     }
+
+    public static function getUserProLastEndedAt()
+    {
+        $now = Carbon::now()->toDateTimeString();
+        $model = UserProRecord::find()
+            ->where(['user_id' => Yii::$app->user->id, 'status' => UserProRecordStatus::ACTIVE])
+            ->andWhere(['>=', 'ended_at', $now])
+            ->one();
+        if ($model) {
+            return $model->ended_at;
+        }
+        return $now;
+    }
+
 
     /**
      * @param string $outSn
