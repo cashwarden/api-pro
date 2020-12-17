@@ -20,6 +20,7 @@ class Yii extends \yii\BaseYii
  * @property yii\db\Connection $db
  * @property yii\queue\db\Queue $queue
  * @property yii\web\Response $response
+ * @property Guanguans\YiiPay\Pay $pay
  * @property sizeg\jwt\Jwt $jwt
  * @property yii\web\User $user
  * @property yii\swiftmailer\Mailer $mailer
