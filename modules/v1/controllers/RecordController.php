@@ -49,12 +49,10 @@ class RecordController extends ActiveController
         $transactionIds = params('useXunSearch')
             ? $this->transactionService->getIdsByXunSearch($params)
             : $this->transactionService->getIdsBySearch($params);
-        if ($transactionIds) {
-            if (!empty($params['account_id']) && empty($params['ledger_id'])) {
-                array_push($transactionIds, 0);
-            }
-            $dataProvider->query->andWhere(['transaction_id' => $transactionIds]);
+        if (!empty($params['account_id']) && empty($params['ledger_id'])) {
+            array_push($transactionIds, 0);
         }
+        $dataProvider->query->andWhere(['transaction_id' => $transactionIds]);
 
         $dataProvider->setModels($this->transactionService->formatRecords($dataProvider->getModels()));
         return $dataProvider;
