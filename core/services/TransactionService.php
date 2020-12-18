@@ -687,6 +687,8 @@ class TransactionService extends BaseObject
         $query = Transaction::find()->andWhere($baseConditions);
         if ($searchKeywords = trim(request('keyword'))) {
             $ids = data_get(Search::search($searchKeywords), 'id');
+            Log::info('xunsearch', Search::search($searchKeywords));
+            Log::info('xunsearch', $ids);
             $query->andWhere(['id' => array_map('intval', $ids)]);
         }
 
