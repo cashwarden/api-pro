@@ -685,7 +685,8 @@ class TransactionService extends BaseObject
         }
 
         $query = Transaction::find()->andWhere($baseConditions);
-        if (($searchKeywords = trim(request('keyword'))) && $search = Search::search($searchKeywords)) {
+        if (($searchKeywords = trim(request('keyword')))) {
+            $search = Search::search($searchKeywords);
             $ids = \yii\helpers\ArrayHelper::getColumn($search, function ($element) {
                 return (int)$element['id'];
             });
