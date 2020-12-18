@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "7fe1d2672a233194f3ec58c3bdceee4c",
+    "content-hash": "9fcdedf2de91426dc185d64ae8f8828c",
     "packages": [
         {
             "name": "bower-asset/inputmask",
@@ -677,6 +677,64 @@
                 "youtube"
             ],
             "time": "2017-10-28T11:24:20+00:00"
+        },
+        {
+            "name": "hightman/xunsearch",
+            "version": "1.4.15",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/hightman/xs-sdk-php.git",
+                "reference": "8ec1a3aa3ef58b83cd4e0e72a171f6446f4136b9"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/hightman/xs-sdk-php/zipball/8ec1a3aa3ef58b83cd4e0e72a171f6446f4136b9",
+                "reference": "8ec1a3aa3ef58b83cd4e0e72a171f6446f4136b9",
+                "shasum": ""
+            },
+            "require": {
+                "ext-mbstring": "*",
+                "lib-pcre": "*",
+                "php": ">=5.3.0"
+            },
+            "bin": [
+                "util/xs"
+            ],
+            "type": "library",
+            "extra": {
+                "branch-alias": {
+                    "dev-master": "1.4.x-dev"
+                }
+            },
+            "autoload": {
+                "classmap": [
+                    "lib/",
+                    "wrapper/yii-ext/"
+                ],
+                "psr-4": {
+                    "hightman\\xunsearch\\": "wrapper/yii2-ext/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "GPL-2.0+"
+            ],
+            "authors": [
+                {
+                    "name": "hightman",
+                    "email": "hightman@twomice.net",
+                    "role": "Founder and project leader"
+                }
+            ],
+            "description": "xunsearch php sdk, include yii, yii2 supports",
+            "homepage": "http://www.xunsearch.com/",
+            "keywords": [
+                "search engine",
+                "xunsearch",
+                "yii",
+                "yii2"
+            ],
+            "time": "2020-09-03T16:46:04+00:00"
         },
         {
             "name": "lcobucci/jwt",

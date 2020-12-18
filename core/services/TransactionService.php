@@ -9,6 +9,7 @@ use app\core\helpers\ArrayHelper;
 use app\core\models\Account;
 use app\core\models\Category;
 use app\core\models\Record;
+use app\core\models\Search;
 use app\core\models\Tag;
 use app\core\models\Transaction;
 use app\core\traits\ServiceTrait;
@@ -667,5 +668,57 @@ class TransactionService extends BaseObject
 
         $ids = $query->column();
         return array_map('intval', $ids);
+    }
+
+    /**
+     * @param array $params
+     * @return array
+     * @throws \yii\web\ForbiddenHttpException
+     * @throws Exception
+     */
+    public function getIdsByXunSearch(array $params): array
+    {
+        $baseConditions = ['user_id' => Yii::$app->user->id];
+        if ($ledgerId = data_get($params, 'ledger_id')) {
+            LedgerService::checkAccess($ledgerId);
+            $baseConditions = ['user_id' => LedgerService::getLedgerMemberUserIds($ledgerId), 'ledger_id' => $ledgerId];
+        }
+
+        $query = Transaction::find()->andWhere($baseConditions);
+        if ($searchKeywords = trim(request('keyword'))) {
+            $ids = data_get(Search::search($searchKeywords), 'id');
+            $query->andWhere(['id' => array_map('intval', $ids)]);
+        }
+
+        $query->andFilterWhere(['category_id' => data_get($params, 'category_id')]);
+
+        $ids = $query->column();
+        return array_map('intval', $ids);
+    }
+
+    /**
+     * @param array $ids
+     */
+    public static function updateXunSearch(array $ids): void
+    {
+        if ((!params('useXunSearch')) || !(count($ids))) {
+            return;
+        }
+        $items = Transaction::find()->where(['id' => $ids])->asArray()->all();
+        foreach ($items as $item) {
+            $content = implode([$item['description'], $item['remark']]);
+            Search::updateAll(['tags' => $items['tags'], 'content' => $content], ['id' => $item['id']]);
+        }
+    }
+
+    /**
+     * @param array $ids
+     */
+    public static function deleteXunSearch(array $ids): void
+    {
+        if ((!params('useXunSearch')) || !(count($ids))) {
+            return;
+        }
+        Search::deleteAll(['id' => $ids]);
     }
 }
