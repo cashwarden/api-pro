@@ -34,6 +34,7 @@ class AccountService
             ->column();
         Transaction::deleteAll($baseConditions + ['id' => $transactionIds]);
         Recurrence::deleteAll($baseConditions + ['transaction_id' => $transactionIds]);
+        TransactionService::deleteXunSearch($transactionIds);
 
         Rule::deleteAll([
             'and',

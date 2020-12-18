@@ -65,6 +65,7 @@ class TagService
             ->andWhere(new Expression('FIND_IN_SET(:tag, tags)'))->addParams([':tag' => $oldName])
             ->asArray()
             ->all();
+        $ids = [];
         /** @var Transaction $item */
         foreach ($items as $item) {
             $tags = str_replace($oldName, $newName, $item['tags']);
@@ -72,6 +73,8 @@ class TagService
                 ['tags' => $tags, 'updated_at' => Yii::$app->formatter->asDatetime('now')],
                 ['id' => $item['id']]
             );
+            array_push($ids, $item['id']);
         }
+        TransactionService::updateXunSearch($ids);
     }
 }

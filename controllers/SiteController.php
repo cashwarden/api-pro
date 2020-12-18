@@ -4,11 +4,17 @@ declare(strict_types=1);
 
 namespace app\controllers;
 
+use app\core\exceptions\PayException;
+use app\core\traits\ServiceTrait;
 use Yii;
+use yii\helpers\ArrayHelper;
 use yii\rest\Controller;
+use yiier\graylog\Log;
 
 class SiteController extends Controller
 {
+    use ServiceTrait;
+
     /**
      * @return string
      */
@@ -42,6 +48,53 @@ class SiteController extends Controller
             return ['code' => $exception->getCode(), 'message' => $exception->getMessage()];
         }
         return [];
+    }
+
+    /**
+     * @return string
+     * @throws \Exception
+     */
+    public function actionPayNotifyUrl(): string
+    {
+        $alipay = Yii::$app->pay->getAlipay();
+        try {
+            $data = $alipay->verify()->toArray();
+            $tradeStatus = ArrayHelper::getValue($data, 'trade_status');
+            if ($tradeStatus == 'TRADE_SUCCESS') {
+                $outTradeNo = explode('_', ArrayHelper::getValue($data, 'out_trade_no'));
+                $orderNo = current($outTradeNo);
+                $userId = end($outTradeNo);
+                $transaction = Yii::$app->db->beginTransaction();
+                try {
+                    $this->userService->paySuccess($orderNo, ['user_id' => $userId], $data);
+                    $transaction->commit();
+                } catch (\Exception $e) {
+                    $transaction->rollBack();
+                    throw $e;
+                }
+            }
+        } catch (\Exception $e) {
+            Log::error('pay_notify_data', $data ?? $alipay);
+            Log::error('pay_notify_data_error', $e);
+        }
+
+        return $alipay->success()->send();
+    }
+
+    /**
+     * @return string
+     * @throws PayException
+     */
+    public function actionPayReturnUrl(): string
+    {
+        try {
+            /** @var object $pay */
+            $pay = Yii::$app->pay->getAlipay()->verify();
+            return 'ok';
+        } catch (\Exception $e) {
+            Log::error('交易失败', $pay ?? []);
+            throw new PayException('交易失败: ' . $e->getMessage());
+        }
     }
 
 

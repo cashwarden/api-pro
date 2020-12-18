@@ -14,6 +14,7 @@ use app\core\services\BudgetService;
 use app\core\services\CategoryService;
 use app\core\services\LedgerService;
 use app\core\services\MailerService;
+use app\core\services\PayService;
 use app\core\services\RecurrenceService;
 use app\core\services\RuleService;
 use app\core\services\TagService;
@@ -39,6 +40,7 @@ use yii\base\InvalidConfigException;
  * @property MailerService $mailerService
  * @property BudgetService $budgetService
  * @property LedgerService $ledgerService
+ * @property PayService $payService
  */
 trait ServiceTrait
 {
@@ -198,6 +200,18 @@ trait ServiceTrait
             return Yii::createObject(LedgerService::class);
         } catch (InvalidConfigException $e) {
             return new LedgerService();
+        }
+    }
+
+    /**
+     * @return PayService()|object
+     */
+    public function getPayService(): PayService
+    {
+        try {
+            return Yii::createObject(PayService::class);
+        } catch (InvalidConfigException $e) {
+            return new PayService();
         }
     }
 }

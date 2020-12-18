@@ -9,6 +9,7 @@ use app\core\services\LedgerService;
 use app\core\traits\ServiceTrait;
 use app\core\types\RecordSource;
 use app\core\types\TransactionType;
+use app\models\Search;
 use Exception;
 use Yii;
 use yii\data\ActiveDataProvider;
@@ -43,9 +44,15 @@ class RecordController extends ActiveController
     public function prepareDataProvider()
     {
         $dataProvider = parent::prepareDataProvider();
-        if ($transactionIds = $this->transactionService->getIdsBySearch(Yii::$app->request->queryParams)) {
+
+        $params = Yii::$app->request->queryParams;
+        $transactionIds = params('useXunSearch')
+            ? $this->transactionService->getIdsByXunSearch($params)
+            : $this->transactionService->getIdsBySearch($params);
+        if ($transactionIds) {
             $dataProvider->query->andWhere(['transaction_id' => array_merge([0], $transactionIds)]);
         }
+
         $dataProvider->setModels($this->transactionService->formatRecords($dataProvider->getModels()));
         return $dataProvider;
     }

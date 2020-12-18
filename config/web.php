@@ -35,6 +35,29 @@ $config = [
                 ])->formatResponse();
             },
         ],
+        'pay' => [
+            'class' => 'Guanguans\YiiPay\Pay',
+            'alipayOption' => [
+                'app_id' => env('ALIPAY_APP_ID'),
+                'notify_url' => env('APP_URL') . '/pay-notify-url',
+                'return_url' => env('APP_URL') . '/pay-return-url',
+                'ali_public_key' => env('ALIPAY_ALI_PUBLIC_KEY'),
+                // 加密方式： **RSA2**
+                'private_key' => env('ALIPAY_PRIVATE_KEY'),
+                'log' => [ // optional
+                    'file' => './../runtime/logs/alipay/app.log',
+                    'level' => 'info', // 建议生产环境等级调整为 info，开发环境为 debug
+                    'type' => 'single', // optional, 可选 daily.
+                    'max_file' => 30, // optional, 当 type 为 daily 时有效，默认 30 天
+                ],
+                'http' => [ // optional
+                    'timeout' => 5.0,
+                    'connect_timeout' => 5.0,
+                    // 更多配置项请参考 [Guzzle](https://guzzle-cn.readthedocs.io/zh_CN/latest/request-options.html)
+                ],
+                // 'mode' => 'dev', // optional,设置此参数，将进入沙箱模式
+            ],
+        ],
         'jwt' => [
             'class' => \sizeg\jwt\Jwt::class,
             'key' => env('JWT_SECRET'),
@@ -79,6 +102,7 @@ $config = [
                 'POST <module>/users/password-reset-token-verification' =>
                     '<module>/user/password-reset-token-verification',
                 'POST <module>/users/password-reset-request' => '<module>/user/password-reset-request',
+                'POST <module>/users/upgrade-to-pro-request' => '<module>/user/upgrade-to-pro-request',
 
                 "GET <module>/transactions/<alias:types|export>" => '<module>/transaction/<alias>',
                 "POST <module>/transactions/upload" => '<module>/transaction/upload',
@@ -90,6 +114,8 @@ $config = [
                 "GET <module>/recurrences/frequencies" => '<module>/recurrence/frequency-types',
 
                 "GET <module>/site-config" => '/site/data',
+                "POST <module>/pay-notify-url" => '/site/pay-notify-url',
+                "POST <module>/pay-return-url" => '/site/pay-return-url',
                 "GET <module>/<alias:icons>" => '/site/<alias>',
                 "GET health-check" => 'site/health-check',
 

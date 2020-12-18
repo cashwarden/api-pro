@@ -31,7 +31,9 @@
         "guzzlehttp/guzzle": "^7.0",
         "light/hashids": "^2.0",
         "nesbot/carbon": "^2.42",
-        "yiisoft/yii2-queue": "^2.3"
+        "yiisoft/yii2-queue": "^2.3",
+        "guanguans/yii-pay": "^1.1",
+        "hightman/xunsearch": "^1.4"
     },
     "require-dev": {
         "yiisoft/yii2-debug": "~2.1.0",

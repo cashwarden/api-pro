@@ -17,6 +17,7 @@ use app\core\traits\ServiceTrait;
 use app\core\types\UserStatus;
 use Yii;
 use yii\base\Exception;
+use yiier\helpers\Setup;
 
 /**
  * User controller for the `v1` module
@@ -228,5 +229,23 @@ class UserController extends ActiveController
         /** @var ChangePassword $model */
         $model = $this->validate($model, $params);
         return $model->change();
+    }
+
+    /**
+     * @return array
+     * @throws Exception
+     * @throws \yii\db\Exception
+     */
+    public function actionUpgradeToProRequest(): array
+    {
+        $record = $this->userService->upgradeToPro();
+        $price = Setup::toYuan(params('proUser.priceCent'));
+        $qrCode = $this->payService->alipay($record, $price);
+
+        return [
+            'record' => $record,
+            'qrCode' => $qrCode,
+            'price' => $price,
+        ];
     }
 }
