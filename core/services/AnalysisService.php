@@ -293,7 +293,7 @@ class AnalysisService extends BaseObject
             $baseConditions = ['user_id' => LedgerService::getLedgerMemberUserIds($ledgerId), 'ledger_id' => $ledgerId];
         }
 
-        $condition = ['category_id' => request('category_id'), 'type' => request('transaction_type')];
+        $condition = ['category_id' => $params['category_id'], 'type' => $params['transaction_type']];
         $query = Transaction::find()->where($baseConditions)->andFilterWhere($condition);
         if (isset($params['keyword']) && $searchKeywords = trim($params['keyword'])) {
             $query->andWhere(
@@ -314,8 +314,8 @@ class AnalysisService extends BaseObject
                 'exclude_from_stats' => (int)false,
             ])
             ->andFilterWhere([
-                'account_id' => request('account_id'),
-                'source' => request('source'),
+                'account_id' => $params['account_id'],
+                'source' => $params['source'],
             ]);
     }
 }
