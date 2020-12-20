@@ -285,7 +285,7 @@ class AnalysisService extends BaseObject
      * @return \yii\db\ActiveQuery
      * @throws \Exception
      */
-    protected function getBaseQuery(array $params)
+    protected function getBaseQuery(array $params): \yii\db\ActiveQuery
     {
         $baseConditions = ['user_id' => Yii::$app->user->id];
         if ($ledgerId = data_get($params, 'ledger_id')) {
@@ -293,7 +293,10 @@ class AnalysisService extends BaseObject
             $baseConditions = ['user_id' => LedgerService::getLedgerMemberUserIds($ledgerId), 'ledger_id' => $ledgerId];
         }
 
-        $condition = ['category_id' => $params['category_id'], 'type' => $params['transaction_type']];
+        $condition = [
+            'category_id' => data_get($params, 'category_id'),
+            'type' => data_get($params, 'transaction_type')
+        ];
         $query = Transaction::find()->where($baseConditions)->andFilterWhere($condition);
         if (isset($params['keyword']) && $searchKeywords = trim($params['keyword'])) {
             $query->andWhere(
@@ -314,8 +317,8 @@ class AnalysisService extends BaseObject
                 'exclude_from_stats' => (int)false,
             ])
             ->andFilterWhere([
-                'account_id' => $params['account_id'],
-                'source' => $params['source'],
+                'account_id' => data_get($params, 'account_id'),
+                'source' => data_get($params, 'source'),
             ]);
     }
 }
