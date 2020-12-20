@@ -67,7 +67,7 @@ class AccountController extends ActiveController
     public function actionUpdate(int $id): Account
     {
         $params = Yii::$app->request->bodyParams;
-        if ($model = AccountService::findOne($id)) {
+        if (!$model = AccountService::findOne($id)) {
             throw new NotFoundHttpException();
         }
 
@@ -87,7 +87,7 @@ class AccountController extends ActiveController
      */
     public function actionBalancesTrend(int $id): array
     {
-        if ($model = AccountService::findOne($id)) {
+        if (!$model = AccountService::findOne($id)) {
             throw new NotFoundHttpException();
         }
         $endDate = DateHelper::toDate('-1 month');
