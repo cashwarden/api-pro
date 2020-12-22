@@ -51,10 +51,10 @@ class SiteController extends Controller
     }
 
     /**
-     * @return string
+     * @return object
      * @throws \Exception
      */
-    public function actionPayNotifyUrl(): string
+    public function actionPayNotifyUrl(): object
     {
         $alipay = Yii::$app->pay->getAlipay();
         try {
