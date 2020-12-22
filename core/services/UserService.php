@@ -423,7 +423,7 @@ class UserService
             throw new Exception('未找到订单');
         }
 
-        $key = (int)ArrayHelper::getValue($post, 'total_amount');
+        $key = ArrayHelper::getValue($post, 'total_amount');
         if ($record->amount_cent != Setup::toFen($key)) {
             throw new PayException('订单金额有误');
         }
