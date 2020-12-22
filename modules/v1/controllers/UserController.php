@@ -248,4 +248,9 @@ class UserController extends ActiveController
             'price' => $price,
         ];
     }
+
+    public function actionGetUserProRecord(string $out_sn)
+    {
+        return $this->userService->getUserProRecord($out_sn);
+    }
 }
