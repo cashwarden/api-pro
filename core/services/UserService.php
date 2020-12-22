@@ -58,6 +58,10 @@ class UserService
                 throw new DBException(Setup::errorMessage($user->firstErrors));
             }
             $this->createUserAfterInitData($user);
+
+            $endedAt = Carbon::parse("2020-12-31")->endOfDay();
+            UserService::upgradeToProBySystem($user->id, $endedAt);
+
             $transaction->commit();
         } catch (Exception $e) {
             $transaction->rollBack();
