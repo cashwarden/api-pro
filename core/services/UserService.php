@@ -30,6 +30,7 @@ use Yii;
 use yii\db\ActiveRecord;
 use yii\db\Exception as DBException;
 use yii\helpers\ArrayHelper;
+use yiier\graylog\Log;
 use yiier\helpers\ModelHelper;
 use yiier\helpers\Setup;
 
@@ -361,7 +362,30 @@ class UserService
         $model->source = UserProRecordSource::BUY;
         $model->amount_cent = params('proUser.priceCent');
         $model->ended_at = Carbon::now()->toDateTimeString();
-        if (!$model->save(false)) {
+        if (!$model->save()) {
+            Log::error('升级会员失败', [$model->attributes, $model->errors]);
+            throw new DBException(Setup::errorMessage($model->firstErrors));
+        }
+        return $model;
+    }
+
+    /**
+     * @param int $userId
+     * @param string $endedAt
+     * @return UserProRecord
+     * @throws DBException
+     */
+    public static function upgradeToProBySystem(int $userId, string $endedAt): UserProRecord
+    {
+        $model = new UserProRecord();
+        $model->out_sn = UserProRecord::makeOrderNo();
+        $model->status = UserProRecordStatus::PAID;
+        $model->user_id = $userId;
+        $model->source = UserProRecordSource::SYSTEM;
+        $model->amount_cent = 0;
+        $model->ended_at = $endedAt;
+        if (!$model->save()) {
+            Log::error('系统赠送会员失败', [$model->attributes, $model->errors]);
             throw new DBException(Setup::errorMessage($model->firstErrors));
         }
         return $model;

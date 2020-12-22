@@ -6,8 +6,10 @@ use app\core\models\Search;
 use app\core\models\Transaction;
 use app\core\models\User;
 use app\core\services\TelegramService;
+use app\core\services\UserService;
 use app\core\traits\FixDataTrait;
 use app\core\traits\ServiceTrait;
+use Carbon\Carbon;
 use yii\console\Controller;
 use yii\console\ExitCode;
 use yii\helpers\Url;
@@ -58,5 +60,24 @@ class InitController extends Controller
         );
         $search::getDb()->getIndex()->flushIndex();
         $this->stdout("刷新了 {$this->count} 条数据\n");
+    }
+
+    public function actionUserPro()
+    {
+        $query = User::find();
+        $this->migrate(
+            $query,
+            function ($item) {
+                return false;
+            },
+            function (User $item) {
+                $endedAt = Carbon::parse("2020-12-31")->endOfDay();
+                if (UserService::upgradeToProBySystem($item->id, $endedAt)) {
+                    $this->count++;
+                }
+            },
+            false
+        );
+        $this->stdout("添加了 {$this->count} 条数据\n");
     }
 }
