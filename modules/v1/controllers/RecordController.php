@@ -9,7 +9,6 @@ use app\core\services\LedgerService;
 use app\core\traits\ServiceTrait;
 use app\core\types\RecordSource;
 use app\core\types\TransactionType;
-use app\models\Search;
 use Exception;
 use Yii;
 use yii\data\ActiveDataProvider;
