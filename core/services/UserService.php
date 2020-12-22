@@ -432,6 +432,7 @@ class UserService
         $record->ended_at = Carbon::parse(self::getUserProLastEndedAt())->addMonth()->endOfDay();
         $record->status = UserProRecordStatus::PAID;
         if (!$record->save()) {
+            Log::error('支付更新失败', [$record->attributes, $record->errors]);
             throw new PayException('支付通知失败');
         }
         return true;
