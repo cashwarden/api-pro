@@ -19,7 +19,7 @@ class m201217_073634_create_user_pro_record_table extends Migration
             'source' => $this->smallInteger()->notNull()->comment('来源：1系统授予 2购买 3邀请'),
             'amount_cent' => $this->integer()->notNull(),
             'status' => $this->tinyInteger()->defaultValue(0)->comment('状态'),
-            'remark' => $this->string()->comment('备注'),
+            'remark' => $this->string(2048)->comment('备注'),
             'ended_at' => $this->timestamp()->defaultValue(null),
             'created_at' => $this->timestamp()->defaultValue(null),
             'updated_at' => $this->timestamp()->defaultValue(null),
