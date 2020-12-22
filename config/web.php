@@ -116,8 +116,8 @@ $config = [
                 "GET <module>/recurrences/frequencies" => '<module>/recurrence/frequency-types',
 
                 "GET <module>/site-config" => '/site/data',
-                "POST <module>/pay-notify-url" => '/site/pay-notify-url',
-                "POST <module>/pay-return-url" => '/site/pay-return-url',
+                "POST pay-notify-url" => '/site/pay-notify-url',
+                "POST pay-return-url" => '/site/pay-return-url',
                 "GET <module>/<alias:icons>" => '/site/<alias>',
                 "GET health-check" => 'site/health-check',
 
