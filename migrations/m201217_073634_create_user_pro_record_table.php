@@ -18,7 +18,7 @@ class m201217_073634_create_user_pro_record_table extends Migration
             'out_sn' => $this->string(20)->notNull()->unique()->comment('流水号'),
             'source' => $this->smallInteger()->notNull()->comment('来源：1系统授予 2购买 3邀请'),
             'amount_cent' => $this->integer()->notNull(),
-            'status' => $this->tinyInteger()->defaultValue(0)->comment('状态：1审核通过 0待审核'),
+            'status' => $this->tinyInteger()->defaultValue(0)->comment('状态'),
             'remark' => $this->string()->comment('备注'),
             'ended_at' => $this->timestamp()->defaultValue(null),
             'created_at' => $this->timestamp()->defaultValue(null),
