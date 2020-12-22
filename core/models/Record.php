@@ -193,7 +193,8 @@ class Record extends ActiveRecord
     public function afterSave($insert, $changedAttributes)
     {
         parent::afterSave($insert, $changedAttributes);
-        if ($this->transaction_id) {
+        $amountCent = data_get($changedAttributes, 'amount_cent');
+        if ($this->transaction_id && $amountCent) {
             $userIds = LedgerService::getLedgerMemberUserIdsByType($this->ledger_id);
             // Exclude balance adjustment transaction type
             AccountService::updateAccountBalance($this->account_id, $userIds);
