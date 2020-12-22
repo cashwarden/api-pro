@@ -53,7 +53,7 @@ class SiteController extends Controller
     /**
      * @throws \Exception
      */
-    public function actionPayNotifyUrl()
+    public function actionPayNotifyUrl(): void
     {
         $alipay = Yii::$app->pay->getAlipay();
         try {
@@ -77,7 +77,7 @@ class SiteController extends Controller
             Log::error('pay_notify_data_error', $e);
         }
 
-        return $alipay->success()->send();
+        $alipay->success()->send();
     }
 
     /**
