@@ -3,8 +3,10 @@
 namespace app\core\models;
 
 use app\core\helpers\FormatFactory;
+use app\core\types\UserProRecordStatus;
 use Yii;
 use yii\behaviors\TimestampBehavior;
+use yiier\helpers\DateHelper;
 
 /**
  * This is the model class for table "{{%user_pro_record}}".
@@ -95,5 +97,33 @@ class UserProRecord extends \yii\db\ActiveRecord
         } else {
             return false;
         }
+    }
+
+
+    /**
+     * @return array
+     */
+    public function fields()
+    {
+        $fields = parent::fields();
+        unset($fields['user_id']);
+
+        $fields['created_at'] = function (self $model) {
+            return DateHelper::datetimeToIso8601($model->created_at);
+        };
+
+        $fields['status'] = function (self $model) {
+            return UserProRecordStatus::getName($model->status);
+        };
+
+        $fields['ended_at'] = function (self $model) {
+            return DateHelper::datetimeToIso8601($model->ended_at);
+        };
+
+        $fields['updated_at'] = function (self $model) {
+            return DateHelper::datetimeToIso8601($model->updated_at);
+        };
+
+        return $fields;
     }
 }

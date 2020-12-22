@@ -347,14 +347,20 @@ class UserService
      */
     public function upgradeToPro(): UserProRecord
     {
-        $model = new UserProRecord();
-        $model->user_id = Yii::$app->user->id;
+        $userId = Yii::$app->user->id;
+        $model = UserProRecord::find()
+            ->where(['user_id' => $userId, 'status' => UserProRecordStatus::TO_BE_PAID])
+            ->andWhere(['<=', 'created_at', Carbon::now()->addMinutes(20)->toDateTimeString()])
+            ->one();
+        if (!$model) {
+            $model = new UserProRecord();
+            $model->out_sn = UserProRecord::makeOrderNo();
+            $model->status = UserProRecordStatus::TO_BE_PAID;
+        }
+        $model->user_id = $userId;
         $model->source = UserProRecordSource::BUY;
-        $model->out_sn = UserProRecord::makeOrderNo();
-        $model->amount_cent = UserProRecord::makeOrderNo();
-        $model->status = UserProRecordStatus::UNACTIVATED;
-
-        $model->ended_at = Carbon::parse(self::getUserProLastEndedAt())->addMonth()->endOfDay();
+        $model->amount_cent = params('proUser.priceCent');
+        $model->ended_at = Carbon::now()->toDateTimeString();
         if (!$model->save(false)) {
             throw new DBException(Setup::errorMessage($model->firstErrors));
         }
@@ -365,7 +371,7 @@ class UserService
     {
         $now = Carbon::now()->toDateTimeString();
         $model = UserProRecord::find()
-            ->where(['user_id' => Yii::$app->user->id, 'status' => UserProRecordStatus::ACTIVE])
+            ->where(['user_id' => Yii::$app->user->id, 'status' => UserProRecordStatus::PAID])
             ->andWhere(['>=', 'ended_at', $now])
             ->one();
         if ($model) {
@@ -373,7 +379,6 @@ class UserService
         }
         return $now;
     }
-
 
     /**
      * @param string $outSn
@@ -396,10 +401,18 @@ class UserService
         }
 
         $record->remark = json_encode($post);
-        $record->status = UserProRecordStatus::ACTIVE;
+        $record->ended_at = Carbon::parse(self::getUserProLastEndedAt())->addMonth()->endOfDay();
+        $record->status = UserProRecordStatus::PAID;
         if (!$record->save()) {
             throw new PayException('支付通知失败');
         }
         return true;
+    }
+
+    public function getUserProRecord(string $outSn)
+    {
+        return UserProRecord::find()
+            ->where(['user_id' => Yii::$app->user->id, 'out_sn' => $outSn])
+            ->one();
     }
 }
