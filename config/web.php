@@ -20,6 +20,7 @@ $config = [
     ],
     'components' => [
         'request' => [
+            'enableCsrfValidation' => false,
             'parsers' => [
                 'application/json' => 'yii\web\JsonParser',
             ],
@@ -157,6 +158,11 @@ if (YII_ENV_DEV) {
         'class' => 'yii\debug\Module',
         // uncomment the following to add your IP if you are not connecting from localhost.
         'allowedIPs' => ['*'],
+        'panels' => [
+            'xunsearch' => [
+                'class' => 'hightman\\xunsearch\\DebugPanel',
+            ],
+        ],
     ];
 
     $config['bootstrap'][] = 'gii';
