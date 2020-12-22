@@ -395,11 +395,11 @@ class UserService
         return $model;
     }
 
-    public static function getUserProLastEndedAt()
+    public static function getUserProLastEndedAt(int $userId)
     {
         $now = Carbon::now()->toDateTimeString();
         $model = UserProRecord::find()
-            ->where(['user_id' => Yii::$app->user->id, 'status' => UserProRecordStatus::PAID])
+            ->where(['user_id' => $userId, 'status' => UserProRecordStatus::PAID])
             ->andWhere(['>=', 'ended_at', $now])
             ->one();
         if ($model) {
@@ -429,7 +429,7 @@ class UserService
         }
 
         $record->remark = json_encode($post);
-        $record->ended_at = Carbon::parse(self::getUserProLastEndedAt())->addMonth()->endOfDay();
+        $record->ended_at = Carbon::parse(self::getUserProLastEndedAt($record->user_id))->addMonth()->endOfDay();
         $record->status = UserProRecordStatus::PAID;
         if (!$record->save()) {
             Log::error('支付更新失败', [$record->attributes, $record->errors]);
