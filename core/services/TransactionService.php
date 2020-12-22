@@ -678,25 +678,27 @@ class TransactionService extends BaseObject
      */
     public function getIdsByXunSearch(array $params): array
     {
-        $baseConditions = ['user_id' => Yii::$app->user->id];
+        $query = Search::find();
+        $userIds = [Yii::$app->user->id];
         if ($ledgerId = data_get($params, 'ledger_id')) {
             LedgerService::checkAccess($ledgerId);
-            $baseConditions = ['user_id' => LedgerService::getLedgerMemberUserIds($ledgerId), 'ledger_id' => $ledgerId];
+            $userIds = LedgerService::getLedgerMemberUserIds($ledgerId);
+            $query->andWhere(['ledger_id' => $ledgerId]);
         }
 
-        $query = Transaction::find()->andWhere($baseConditions);
+        $query->where(['IN', 'user_id', $userIds]);
         if (($searchKeywords = trim(data_get($params, 'keyword')))) {
-            $search = Search::search($searchKeywords);
-            $ids = \yii\helpers\ArrayHelper::getColumn($search, function ($element) {
-                return (int)$element['id'];
-            });
-            $query->andWhere(['id' => $ids]);
+            $query->andWhere($searchKeywords);
         }
 
         $query->andFilterWhere(['category_id' => data_get($params, 'category_id')]);
+        $search = $query->asArray()
+            ->orderBy(['date' => SORT_DESC, 'id' => SORT_DESC])
+            ->all();
 
-        $ids = $query->column();
-        return array_map('intval', $ids);
+        return \yii\helpers\ArrayHelper::getColumn($search, function ($element) {
+            return (int)$element['id'];
+        });
     }
 
     /**

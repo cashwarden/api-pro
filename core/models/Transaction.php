@@ -269,20 +269,7 @@ class Transaction extends \yii\db\ActiveRecord
         }
         Yii::$app->queue->push(new UpdateBudgetJob(['ledgerId' => $this->ledger_id, 'datetime' => $this->date]));
         if (params('useXunSearch')) {
-            /** @var object $search */
-            if ($insert) {
-                $search = new Search();
-                $search->id = $this->id;
-            } else {
-                $search = Search::findOne($this->id);
-                if (!$search) {
-                    // 如果立即修改 会因为在 xunsearch 找不到而不能 save
-                    return false;
-                }
-            }
-            $search->tags = is_array($this->tags) ? implode(',', $this->tags) : $this->tags;
-            $search->content = implode([$this->description, $this->remark]);
-            $search->save();
+            Search::createUpdate($insert, $this);
         }
     }
 

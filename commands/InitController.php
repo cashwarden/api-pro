@@ -2,8 +2,11 @@
 
 namespace app\commands;
 
+use app\core\models\Search;
+use app\core\models\Transaction;
 use app\core\models\User;
 use app\core\services\TelegramService;
+use app\core\traits\FixDataTrait;
 use app\core\traits\ServiceTrait;
 use yii\console\Controller;
 use yii\console\ExitCode;
@@ -12,6 +15,12 @@ use yii\helpers\Url;
 class InitController extends Controller
 {
     use ServiceTrait;
+    use FixDataTrait;
+
+    /**
+     * @var bool|mixed
+     */
+    private $count;
 
     public function actionTelegram()
     {
@@ -30,5 +39,24 @@ class InitController extends Controller
     {
         $this->userService->createUserAfterInitData(User::findOne($userId));
         $this->stdout("User Account and Category init success! \n");
+    }
+
+    public function actionXunSearch()
+    {
+        $query = Transaction::find();
+        $search = new Search();
+        $search::getDb()->getIndex()->clean();
+        $this->migrate(
+            $query,
+            function ($item) {
+                return false;
+            },
+            function (Transaction $item) {
+                $this->count += Search::createUpdate(true, $item);
+            },
+            false
+        );
+        $search::getDb()->getIndex()->flushIndex();
+        $this->stdout("刷新了 {$this->count} 条数据\n");
     }
 }
