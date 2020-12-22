@@ -2,7 +2,6 @@
 
 namespace app\core\models;
 
-use app\core\helpers\FormatFactory;
 use app\core\types\UserProRecordStatus;
 use Yii;
 use yii\behaviors\TimestampBehavior;
@@ -64,6 +63,7 @@ class UserProRecord extends \yii\db\ActiveRecord
             [['ended_at', 'created_at', 'updated_at'], 'safe'],
             [['out_sn'], 'string', 'max' => 20],
             [['remark'], 'string', 'max' => 255],
+            [['out_sn'], 'unique'],
         ];
     }
 
