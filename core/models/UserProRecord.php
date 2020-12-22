@@ -62,7 +62,7 @@ class UserProRecord extends \yii\db\ActiveRecord
             [['user_id', 'source', 'amount_cent', 'status'], 'integer'],
             [['ended_at', 'created_at', 'updated_at'], 'safe'],
             [['out_sn'], 'string', 'max' => 20],
-            [['remark'], 'string', 'max' => 255],
+            [['remark'], 'string', 'max' => 2048],
             [['out_sn'], 'unique'],
         ];
     }
