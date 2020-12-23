@@ -253,4 +253,10 @@ class UserController extends ActiveController
     {
         return $this->userProService->getUserProRecord($out_sn);
     }
+
+    public function actionGetUserPro()
+    {
+        $userPro = $this->userProService->getUserPro();
+        return $userPro ?: '';
+    }
 }
