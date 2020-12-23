@@ -537,11 +537,14 @@ class TransactionService extends BaseObject
                 array_push($accounts, ['id' => $model->id, 'sort' => $sort]);
             }
         }
-        if (count($accounts) == 2 && $accounts[1] != $accounts[0]) {
-            return \yii\helpers\ArrayHelper::getColumn(
+        if (count($accounts) == 2) {
+            $accountIds = \yii\helpers\ArrayHelper::getColumn(
                 \yiier\helpers\ArrayHelper::sort2DArray($accounts, 'sort'),
                 'id'
             );
+            if ($accountIds[0] != $accountIds[1]) {
+                return $accountIds;
+            }
         }
         return [];
     }
