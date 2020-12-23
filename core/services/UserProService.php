@@ -188,4 +188,13 @@ class UserProService
             ->where(['user_id' => Yii::$app->user->id, 'out_sn' => $outSn])
             ->one();
     }
+
+    public function getUserPro(int $userId = 0): ?UserProRecord
+    {
+        $userId = $userId ?: Yii::$app->user->id;
+        return UserProRecord::find()
+            ->where(['user_id' => $userId, 'status' => UserProRecordStatus::PAID])
+            ->andWhere(['<=', 'created_at', Carbon::now()->toDateTimeString()])
+            ->one();
+    }
 }
