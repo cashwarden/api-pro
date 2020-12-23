@@ -4,11 +4,13 @@ namespace app\modules\v1\controllers;
 
 use app\core\exceptions\InternalException;
 use app\core\exceptions\InvalidArgumentException;
+use app\core\exceptions\UserNotProException;
 use app\core\helpers\RuleControlHelper;
 use app\core\models\LedgerMember;
 use app\core\models\Recurrence;
 use app\core\requests\UpdateStatus;
 use app\core\services\LedgerService;
+use app\core\services\UserProService;
 use app\core\traits\ServiceTrait;
 use app\core\types\LedgerMemberStatus;
 use Yii;
@@ -74,10 +76,11 @@ class LedgerMemberController extends ActiveController
      * @param string $action
      * @param null $model
      * @param array $params
-     * @throws ForbiddenHttpException
+     * @throws ForbiddenHttpException|UserNotProException
      */
     public function checkAccess($action, $model = null, $params = [])
     {
+        UserProService::checkAccess($this->modelClass, $action, $model);
         if (in_array($action, ['delete', 'update'])) {
             LedgerService::checkAccess($model->ledger_id, RuleControlHelper::MANAGE);
         }

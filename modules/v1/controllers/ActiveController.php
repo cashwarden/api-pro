@@ -6,8 +6,10 @@ use app\core\actions\CreateAction;
 use app\core\actions\UpdateAction;
 use app\core\exceptions\InternalException;
 use app\core\exceptions\InvalidArgumentException;
+use app\core\exceptions\UserNotProException;
 use app\core\helpers\SearchHelper;
 use app\core\services\LedgerService;
+use app\core\services\UserProService;
 use sizeg\jwt\JwtHttpBearerAuth;
 use Yii;
 use yii\base\InvalidConfigException;
@@ -158,10 +160,11 @@ class ActiveController extends \yii\rest\ActiveController
      * @param string $action
      * @param null $model
      * @param array $params
-     * @throws ForbiddenHttpException
+     * @throws ForbiddenHttpException|UserNotProException
      */
     public function checkAccess($action, $model = null, $params = [])
     {
+        UserProService::checkAccess($this->modelClass, $action, $model);
         if (in_array($action, ['delete', 'update', 'view'])) {
             if ($model->user_id !== \Yii::$app->user->id) {
                 throw new ForbiddenHttpException(

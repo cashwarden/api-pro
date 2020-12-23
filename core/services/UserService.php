@@ -4,13 +4,11 @@ namespace app\core\services;
 
 use app\core\exceptions\InternalException;
 use app\core\exceptions\InvalidArgumentException;
-use app\core\exceptions\PayException;
 use app\core\models\Account;
 use app\core\models\AuthClient;
 use app\core\models\Category;
 use app\core\models\Ledger;
 use app\core\models\User;
-use app\core\models\UserProRecord;
 use app\core\requests\JoinRequest;
 use app\core\requests\PasswordResetRequest;
 use app\core\traits\ServiceTrait;
@@ -19,10 +17,7 @@ use app\core\types\AuthClientType;
 use app\core\types\ColorType;
 use app\core\types\LedgerType;
 use app\core\types\TransactionType;
-use app\core\types\UserProRecordSource;
-use app\core\types\UserProRecordStatus;
 use app\core\types\UserStatus;
-use app\models\PointsRecord;
 use Carbon\Carbon;
 use Exception;
 use sizeg\jwt\Jwt;
@@ -30,7 +25,6 @@ use Yii;
 use yii\db\ActiveRecord;
 use yii\db\Exception as DBException;
 use yii\helpers\ArrayHelper;
-use yiier\graylog\Log;
 use yiier\helpers\ModelHelper;
 use yiier\helpers\Setup;
 
@@ -60,7 +54,7 @@ class UserService
             $this->createUserAfterInitData($user);
 
             $endedAt = Carbon::parse("2020-12-31")->endOfDay();
-            UserService::upgradeToProBySystem($user->id, $endedAt);
+            UserProService::upgradeToProBySystem($user->id, $endedAt);
 
             $transaction->commit();
         } catch (Exception $e) {
@@ -344,104 +338,5 @@ class UserService
         $user = User::findOne(['status' => UserStatus::ACTIVE, 'email' => $request->email]);
         $this->setPasswordResetToken($user);
         return $this->getMailerService()->sendPasswordResetMessage($user);
-    }
-
-    /**
-     * @return UserProRecord
-     * @throws DBException
-     */
-    public function upgradeToPro(): UserProRecord
-    {
-        $userId = Yii::$app->user->id;
-        $model = UserProRecord::find()
-            ->where(['user_id' => $userId, 'status' => UserProRecordStatus::TO_BE_PAID])
-            ->andWhere(['<=', 'created_at', Carbon::now()->addMinutes(20)->toDateTimeString()])
-            ->one();
-        if (!$model) {
-            $model = new UserProRecord();
-            $model->out_sn = UserProRecord::makeOrderNo();
-            $model->status = UserProRecordStatus::TO_BE_PAID;
-        }
-        $model->user_id = $userId;
-        $model->source = UserProRecordSource::BUY;
-        $model->amount_cent = params('proUser.priceCent');
-        $model->ended_at = Carbon::now()->toDateTimeString();
-        if (!$model->save()) {
-            Log::error('升级会员失败', [$model->attributes, $model->errors]);
-            throw new DBException(Setup::errorMessage($model->firstErrors));
-        }
-        return $model;
-    }
-
-    /**
-     * @param int $userId
-     * @param string $endedAt
-     * @return UserProRecord
-     * @throws DBException
-     */
-    public static function upgradeToProBySystem(int $userId, string $endedAt): UserProRecord
-    {
-        $model = new UserProRecord();
-        $model->out_sn = UserProRecord::makeOrderNo();
-        $model->status = UserProRecordStatus::PAID;
-        $model->user_id = $userId;
-        $model->source = UserProRecordSource::SYSTEM;
-        $model->amount_cent = 0;
-        $model->ended_at = $endedAt;
-        if (!$model->save()) {
-            Log::error('系统赠送会员失败', [$model->attributes, $model->errors]);
-            throw new DBException(Setup::errorMessage($model->firstErrors));
-        }
-        return $model;
-    }
-
-    public static function getUserProLastEndedAt(int $userId)
-    {
-        $now = Carbon::now()->toDateTimeString();
-        $model = UserProRecord::find()
-            ->where(['user_id' => $userId, 'status' => UserProRecordStatus::PAID])
-            ->andWhere(['>=', 'ended_at', $now])
-            ->one();
-        if ($model) {
-            return $model->ended_at;
-        }
-        return $now;
-    }
-
-    /**
-     * @param string $outSn
-     * @param array $conditions
-     * @param array $post
-     * @return bool
-     * @throws PayException|Exception
-     */
-    public function paySuccess(string $outSn, array $conditions, $post = []): bool
-    {
-        /** @var UserProRecord $record */
-        $record = UserProRecord::find()->where(['out_sn' => $outSn])->andWhere($conditions)->limit(1)->one();
-        if (!$record) {
-            throw new Exception('未找到订单');
-        }
-
-        $key = ArrayHelper::getValue($post, 'total_amount');
-        if ($record->amount_cent != Setup::toFen($key)) {
-            throw new PayException('订单金额有误');
-        }
-
-        $record->remark = json_encode($post);
-        $record->ended_at = Carbon::parse(self::getUserProLastEndedAt($record->user_id))->addMonth()->endOfDay();
-        $record->status = UserProRecordStatus::PAID;
-        if (!$record->save()) {
-            Log::error('支付更新失败', [$record->attributes, $record->errors]);
-            throw new PayException('支付通知失败');
-        }
-        return true;
-    }
-
-    public function getUserProRecord(string $outSn)
-    {
-        return UserProRecord::find()
-            ->where(['user_id' => Yii::$app->user->id, 'out_sn' => $outSn])
-            ->one();
     }
 }

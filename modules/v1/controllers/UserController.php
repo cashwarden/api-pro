@@ -238,8 +238,8 @@ class UserController extends ActiveController
      */
     public function actionUpgradeToProRequest(): array
     {
-        $record = $this->userService->upgradeToPro();
-        $price = Setup::toYuan(params('proUser.priceCent'));
+        $record = $this->userProService->upgradeToPro();
+        $price = Setup::toYuan(params('proUserPriceCent'));
         $qrCode = $this->payService->alipay($record, $price);
 
         return [
@@ -251,6 +251,6 @@ class UserController extends ActiveController
 
     public function actionGetUserProRecord(string $out_sn)
     {
-        return $this->userService->getUserProRecord($out_sn);
+        return $this->userProService->getUserProRecord($out_sn);
     }
 }

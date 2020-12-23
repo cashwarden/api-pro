@@ -8,4 +8,5 @@ return [
     ErrorCodes::THIRD_PARTY_SERVICE_ERROR => '第三方服务异常',
     ErrorCodes::FILE_ENCODING_ERROR => '文件编码必须为 UTF-8 格式',
     ErrorCodes::PAY_ERROR => '交易异常',
+    ErrorCodes::USER_NOT_PRO_ERROR => '请升级为 Pro 会员',
 ];

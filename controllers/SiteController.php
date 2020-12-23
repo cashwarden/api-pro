@@ -65,7 +65,7 @@ class SiteController extends Controller
                 $userId = end($outTradeNo);
                 $transaction = Yii::$app->db->beginTransaction();
                 try {
-                    $this->userService->paySuccess($orderNo, ['user_id' => $userId], $data);
+                    $this->userProService->paySuccess($orderNo, ['user_id' => $userId], $data);
                     $transaction->commit();
                 } catch (\Exception $e) {
                     $transaction->rollBack();

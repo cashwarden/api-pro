@@ -45,7 +45,7 @@ class RecurrenceController extends ActiveController
      * @return array
      * @throws \Exception
      */
-    public function actionFrequencyTypes()
+    public function actionFrequencyTypes(): array
     {
         $items = [];
         $texts = RecurrenceFrequency::texts();
