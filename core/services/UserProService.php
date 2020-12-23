@@ -35,6 +35,7 @@ class UserProService
         return UserProRecord::find()
             ->where(['user_id' => $userId, 'status' => UserProRecordStatus::PAID])
             ->andWhere(['<=', 'created_at', Carbon::now()->toDateTimeString()])
+            ->orderBy(['ended_at' => SORT_DESC])
             ->exists();
     }
 
@@ -195,6 +196,7 @@ class UserProService
         return UserProRecord::find()
             ->where(['user_id' => $userId, 'status' => UserProRecordStatus::PAID])
             ->andWhere(['<=', 'created_at', Carbon::now()->toDateTimeString()])
+            ->orderBy(['ended_at' => SORT_DESC])
             ->one();
     }
 }
