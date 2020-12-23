@@ -174,7 +174,7 @@ class UserProService
         }
 
         $record->remark = json_encode($post);
-        $record->ended_at = Carbon::parse(self::getUserProLastEndedAt($record->user_id))->addMonth()->endOfDay();
+        $record->ended_at = Carbon::parse(self::getUserProLastEndedAt($record->user_id))->addMonths(12)->endOfDay();
         $record->status = UserProRecordStatus::PAID;
         if (!$record->save()) {
             Log::error('支付更新失败', [$record->attributes, $record->errors]);
