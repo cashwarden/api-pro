@@ -6,6 +6,7 @@ use app\core\models\Search;
 use app\core\models\Transaction;
 use app\core\models\User;
 use app\core\services\TelegramService;
+use app\core\services\UserProService;
 use app\core\services\UserService;
 use app\core\traits\FixDataTrait;
 use app\core\traits\ServiceTrait;
@@ -72,7 +73,7 @@ class InitController extends Controller
             },
             function (User $item) {
                 $endedAt = Carbon::parse("2020-12-31")->endOfDay();
-                if (UserService::upgradeToProBySystem($item->id, $endedAt)) {
+                if (UserProService::upgradeToProBySystem($item->id, $endedAt)) {
                     $this->count++;
                 }
             },

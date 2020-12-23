@@ -21,6 +21,7 @@ use app\core\services\TagService;
 use app\core\services\TelegramService;
 use app\core\services\TransactionService;
 use app\core\services\UploadService;
+use app\core\services\UserProService;
 use app\core\services\UserService;
 use Yii;
 use yii\base\InvalidConfigException;
@@ -28,6 +29,7 @@ use yii\base\InvalidConfigException;
 /**
  * Trait ServiceTrait
  * @property UserService $userService
+ * @property UserProService $userProService
  * @property AccountService $accountService
  * @property TransactionService $transactionService
  * @property CategoryService $categoryService
@@ -56,6 +58,17 @@ trait ServiceTrait
         }
     }
 
+    /**
+     * @return UserProService|object
+     */
+    public function getUserProService()
+    {
+        try {
+            return Yii::createObject(UserProService::class);
+        } catch (InvalidConfigException $e) {
+            return new UserProService();
+        }
+    }
 
     /**
      * @return AccountService|object

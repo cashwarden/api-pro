@@ -54,6 +54,7 @@ class AccountController extends ActiveController
         }
         /** @var Account $model */
         $model = $this->validate($model, $params);
+        $this->checkAccess($this->action->id, $model);
 
         return $this->accountService->createUpdate($model);
     }
@@ -76,6 +77,7 @@ class AccountController extends ActiveController
         }
         /** @var Account $model */
         $model = $this->validate($model, $params);
+        $this->checkAccess($this->action->id, $model);
 
         return $this->accountService->createUpdate($model);
     }

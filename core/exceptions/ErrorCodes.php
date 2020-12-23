@@ -13,4 +13,6 @@ class ErrorCodes
     public const FILE_ENCODING_ERROR = 911;
 
     public const PAY_ERROR = 920;
+
+    public const USER_NOT_PRO_ERROR = 930;
 }

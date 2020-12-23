@@ -26,7 +26,7 @@ class CategoryController extends ActiveController
      * @throws InvalidArgumentException
      * @throws \Exception
      */
-    public function actionAnalysis()
+    public function actionAnalysis(): array
     {
         $transactionType = request('transaction_type', TransactionType::getName(TransactionType::EXPENSE));
         $dateType = request('date_type', AnalysisDateType::CURRENT_MONTH);
