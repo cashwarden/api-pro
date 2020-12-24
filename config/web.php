@@ -132,6 +132,8 @@ $config = [
 
                 "POST <module>/budget-configs/<id:\d+>/copy" => '<module>/budget-config/copy',
 
+                "PUT <module>/wish-lists/<id:\d+>/status" => '<module>/wish-list/update-status',
+
                 [
                     'class' => 'yii\rest\UrlRule',
                     'controller' => [
@@ -144,6 +146,7 @@ $config = [
                         'v1/recurrence',
                         'v1/budget-config',
                         'v1/ledger',
+                        'v1/wish-list',
                     ]
                 ],
                 // '<module>/<controller:\w+>/<action:\w+>/<id:\d+>' => '<module>/<controller>/<action>',

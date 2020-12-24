@@ -23,6 +23,7 @@ use app\core\services\TransactionService;
 use app\core\services\UploadService;
 use app\core\services\UserProService;
 use app\core\services\UserService;
+use app\core\services\WishListService;
 use Yii;
 use yii\base\InvalidConfigException;
 
@@ -43,6 +44,7 @@ use yii\base\InvalidConfigException;
  * @property BudgetService $budgetService
  * @property LedgerService $ledgerService
  * @property PayService $payService
+ * @property WishListService $wishListService
  */
 trait ServiceTrait
 {
@@ -225,6 +227,19 @@ trait ServiceTrait
             return Yii::createObject(PayService::class);
         } catch (InvalidConfigException $e) {
             return new PayService();
+        }
+    }
+
+
+    /**
+     * @return WishListService()|object
+     */
+    public function getWishListService(): WishListService
+    {
+        try {
+            return Yii::createObject(WishListService::class);
+        } catch (InvalidConfigException $e) {
+            return new WishListService();
         }
     }
 }

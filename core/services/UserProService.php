@@ -11,6 +11,7 @@ use app\core\models\LedgerMember;
 use app\core\models\Recurrence;
 use app\core\models\Rule;
 use app\core\models\UserProRecord;
+use app\core\models\WishList;
 use app\core\traits\ServiceTrait;
 use app\core\types\AccountType;
 use app\core\types\LedgerType;
@@ -86,6 +87,7 @@ class UserProService
                 break;
             case BudgetConfig::class:
             case LedgerMember::class:
+            case WishList::class:
                 throw new UserNotProException();
         }
         return true;
