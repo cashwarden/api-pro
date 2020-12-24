@@ -32,7 +32,9 @@ return [
     'Today' => '今天',
     'Grand total' => '累计',
 
-
+    'Todo Buy' => '待买',
+    'Done Buy' => '已买',
+    'Cancelled Buy' => '放弃',
     'Base Currency Code' => '基础货币',
     'Food and drink' => '餐饮食品',
     'Home life' => '居家生活',

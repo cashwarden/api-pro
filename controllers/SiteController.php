@@ -168,6 +168,11 @@ class SiteController extends Controller
                             'link' => '/budget/index',
                             'icon' => 'anticon-funnel-plot',
                         ],
+                        [
+                            'text' => '愿望清单',
+                            'link' => '/wish-list/index',
+                            'icon' => 'anticon-unordered-list',
+                        ],
                     ],
                 ],
                 [
