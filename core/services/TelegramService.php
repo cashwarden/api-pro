@@ -350,6 +350,8 @@ class TelegramService extends BaseObject
             ],
         ];
 
+        Log::error('测试', $items);
+
         return new InlineKeyboardMarkup([$items]);
     }
 }
