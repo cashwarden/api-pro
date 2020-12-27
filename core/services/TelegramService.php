@@ -151,7 +151,7 @@ class TelegramService extends BaseObject
                 }
 
                 break;
-            case TelegramAction::FIND_CATEGORY_RECORD:
+            case TelegramAction::FIND_CATEGORY_RECORDS:
                 $transaction = new Transaction();
                 $transaction->load($data, '');
                 $page = data_get($data, 'page', 0) + 1;
@@ -342,7 +342,7 @@ class TelegramService extends BaseObject
             [
                 'text' => '查看更多',
                 'callback_data' => Json::encode([
-                    'action' => TelegramAction::FIND_CATEGORY_RECORD,
+                    'action' => TelegramAction::FIND_CATEGORY_RECORDS,
                     'ledger_id' => $model->ledger_id,
                     'category_id' => $model->category_id,
                     'page' => $page
