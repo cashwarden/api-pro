@@ -20,13 +20,12 @@ class DateHelper
     }
 
     /**
-     * @param string|int $value
+     * @param string $value
      * @return string
      * @throws \Exception
      */
-    public static function toDateTime($value): string
+    public static function toDateTime(string $value): string
     {
-        $value = is_numeric($value) ? $value : strtotime($value);
         $datetime = new DateTime($value, new \DateTimeZone(\Yii::$app->timeZone));
         return $datetime->format('Y-m-d H:i');
     }
