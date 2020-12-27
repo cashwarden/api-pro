@@ -92,7 +92,7 @@ class TelegramService extends BaseObject
             ->andWhere(['category_id' => $transaction->category_id])
             ->limit($limit)
             ->offset($page * $limit)
-            ->orderBy(['date' => SORT_DESC])
+            ->orderBy(['date' => SORT_DESC, 'id' => SORT_DESC])
             ->all();
         if (!count($records)) {
             return '没有数据';
