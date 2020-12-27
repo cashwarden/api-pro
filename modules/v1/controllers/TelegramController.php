@@ -176,6 +176,7 @@ class TelegramController extends ActiveController
                 return false;
             });
 
+            // 记账
             $bot->on(function (Update $Update) use ($bot) {
                 $message = $Update->getMessage();
                 $keyboard = null;
@@ -185,9 +186,16 @@ class TelegramController extends ActiveController
                         $message->getFrom()->getId()
                     );
                     \Yii::$app->user->setIdentity($user);
-                    $model = $this->transactionService->createByDesc($message->getText(), RecordSource::TELEGRAM);
-                    $keyboard = $this->telegramService->getRecordMarkup($model);
-                    $text = $this->telegramService->getMessageTextByTransaction($model);
+                    $t = $message->getText();
+                    if (strpos($t, '#') !== false) {
+                        $model = $this->transactionService->createBaseTransactionByDesc($t);
+                        $keyboard = $this->telegramService->getRecordsMarkup($model);
+                        $text = $this->telegramService->getRecordsTextByTransaction($model);
+                    } else {
+                        $model = $this->transactionService->createByDesc($t, RecordSource::TELEGRAM);
+                        $keyboard = $this->telegramService->getTransactionMarkup($model);
+                        $text = $this->telegramService->getMessageTextByTransaction($model);
+                    }
                 } catch (\Exception $e) {
                     $text = $e->getMessage();
                 }

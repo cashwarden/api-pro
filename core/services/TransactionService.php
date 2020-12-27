@@ -218,87 +218,8 @@ class TransactionService extends BaseObject
      */
     public function createByDesc(string $desc, $source = null): Transaction
     {
-        $model = new Transaction();
         try {
-            $model->description = $desc;
-            $model->user_id = Yii::$app->user->id;
-            $rules = $this->getRuleService()->getRulesByDesc($desc);
-            $model->ledger_id = $this->getDataByDesc(
-                $rules,
-                'ledger_id',
-                [$this, 'getLedgerIdByDesc']
-            );
-            if (!$model->ledger_id) {
-                throw new CannotOperateException(Yii::t('app', 'Default ledger not found.'));
-            }
-
-            $model->type = $this->getDataByDesc(
-                $rules,
-                'then_transaction_type',
-                function () use ($desc) {
-                    if (ArrayHelper::strPosArr($desc, ['收到', '收入', '退款']) !== false) {
-                        return TransactionType::getName(TransactionType::INCOME);
-                    }
-                    return TransactionType::getName(TransactionType::EXPENSE);
-                }
-            );
-
-            $isTransfer = ArrayHelper::strPosArr($desc, ['还款', '转账', '借出']) !== false;
-            if ($isTransfer && $transferAccountIds = $this->getTransferAccountIdsByDesc($desc)) {
-                $model->type = TransactionType::getName(TransactionType::TRANSFER);
-                $model->from_account_id = $transferAccountIds[0];
-                $model->to_account_id = $transferAccountIds[1];
-                $transactionType = $transactionType = TransactionType::toEnumValue($model->type);
-            } else {
-                $transactionType = TransactionType::toEnumValue($model->type);
-                // 先去账号根据关键词查找
-                $accountId = $this->accountService->getAccountIdByDesc($desc);
-                if (in_array($transactionType, [TransactionType::EXPENSE, TransactionType::TRANSFER])) {
-                    $model->from_account_id = $accountId ?: $this->getDataByDesc(
-                        $rules,
-                        'then_from_account_id',
-                        [$this, 'getAccountIdByDesc']
-                    );
-                    if (!$model->from_account_id) {
-                        throw new CannotOperateException(Yii::t('app', 'Default account not found.'));
-                    }
-                }
-
-                if (in_array($transactionType, [TransactionType::INCOME, TransactionType::TRANSFER])) {
-                    $model->to_account_id = $accountId ?: $this->getDataByDesc(
-                        $rules,
-                        'then_to_account_id',
-                        [$this, 'getAccountIdByDesc']
-                    );
-                    if (!$model->to_account_id) {
-                        throw new CannotOperateException(Yii::t('app', 'Default account not found.'));
-                    }
-                }
-            }
-
-            $categoryId = $this->categoryService->getCategoryIdByDesc($desc, $model->ledger_id, $transactionType);
-            $model->category_id = $categoryId ?: $this->getDataByDesc(
-                $rules,
-                'then_category_id',
-                function () use ($transactionType) {
-                    return (int)data_get(CategoryService::getDefaultCategory($transactionType), 'id', 0);
-                }
-            );
-
-            if (!$model->category_id) {
-                throw new CannotOperateException(Yii::t('app', 'Category not found.'));
-            }
-
-            $model->date = $this->getDateByDesc($desc);
-
-            $model->tags = $this->getDataByDesc($rules, 'then_tags');
-            $model->status = $this->getDataByDesc($rules, 'then_transaction_status');
-            $model->reimbursement_status = $this->getDataByDesc($rules, 'then_reimbursement_status');
-
-            $currencyAmount = $this->getAmountByDesc($desc);
-            $model->currency_amount = $currencyAmount ?: $this->getDataByDesc($rules, 'then_currency_amount');
-
-            $model->currency_code = user('base_currency_code');
+            $model = $this->createBaseTransactionByDesc($desc);
             if (!$model->save()) {
                 throw new DBException(Setup::errorMessage($model->firstErrors));
             }
@@ -306,12 +227,110 @@ class TransactionService extends BaseObject
             return $model;
         } catch (Exception $e) {
             Yii::error(
-                ['request_id' => Yii::$app->requestId->id, $model->attributes, $model->errors, (string)$e],
+                [
+                    'request_id' => Yii::$app->requestId->id,
+                    empty($model) ? '' : $model->attributes,
+                    empty($model) ? '' : $model->errors,
+                    (string)$e
+                ],
                 __FUNCTION__
             );
             throw new InternalException($e->getMessage());
         }
     }
+
+    /**
+     * @param string $desc
+     * @return Transaction
+     * @throws CannotOperateException
+     * @throws InvalidArgumentException
+     * @throws InvalidConfigException
+     * @throws \Throwable
+     */
+    public function createBaseTransactionByDesc(string $desc): Transaction
+    {
+        $model = new Transaction();
+        $model->description = $desc;
+        $model->user_id = Yii::$app->user->id;
+        $rules = $this->getRuleService()->getRulesByDesc($desc);
+        $model->ledger_id = $this->getDataByDesc(
+            $rules,
+            'ledger_id',
+            [$this, 'getLedgerIdByDesc']
+        );
+        if (!$model->ledger_id) {
+            throw new CannotOperateException(Yii::t('app', 'Default ledger not found.'));
+        }
+
+        $model->type = $this->getDataByDesc(
+            $rules,
+            'then_transaction_type',
+            function () use ($desc) {
+                if (ArrayHelper::strPosArr($desc, ['收到', '收入', '退款']) !== false) {
+                    return TransactionType::getName(TransactionType::INCOME);
+                }
+                return TransactionType::getName(TransactionType::EXPENSE);
+            }
+        );
+
+        $isTransfer = ArrayHelper::strPosArr($desc, ['还款', '转账', '借出']) !== false;
+        if ($isTransfer && $transferAccountIds = $this->getTransferAccountIdsByDesc($desc)) {
+            $model->type = TransactionType::getName(TransactionType::TRANSFER);
+            $model->from_account_id = $transferAccountIds[0];
+            $model->to_account_id = $transferAccountIds[1];
+            $transactionType = $transactionType = TransactionType::toEnumValue($model->type);
+        } else {
+            $transactionType = TransactionType::toEnumValue($model->type);
+            // 先去账号根据关键词查找
+            $accountId = $this->accountService->getAccountIdByDesc($desc);
+            if (in_array($transactionType, [TransactionType::EXPENSE, TransactionType::TRANSFER])) {
+                $model->from_account_id = $accountId ?: $this->getDataByDesc(
+                    $rules,
+                    'then_from_account_id',
+                    [$this, 'getAccountIdByDesc']
+                );
+                if (!$model->from_account_id) {
+                    throw new CannotOperateException(Yii::t('app', 'Default account not found.'));
+                }
+            }
+
+            if (in_array($transactionType, [TransactionType::INCOME, TransactionType::TRANSFER])) {
+                $model->to_account_id = $accountId ?: $this->getDataByDesc(
+                    $rules,
+                    'then_to_account_id',
+                    [$this, 'getAccountIdByDesc']
+                );
+                if (!$model->to_account_id) {
+                    throw new CannotOperateException(Yii::t('app', 'Default account not found.'));
+                }
+            }
+        }
+
+        $categoryId = $this->categoryService->getCategoryIdByDesc($desc, $model->ledger_id, $transactionType);
+        $model->category_id = $categoryId ?: $this->getDataByDesc(
+            $rules,
+            'then_category_id',
+            function () use ($transactionType) {
+                return (int)data_get(CategoryService::getDefaultCategory($transactionType), 'id', 0);
+            }
+        );
+
+        if (!$model->category_id) {
+            throw new CannotOperateException(Yii::t('app', 'Category not found.'));
+        }
+
+        $model->date = $this->getDateByDesc($desc);
+
+        $model->tags = $this->getDataByDesc($rules, 'then_tags');
+        $model->status = $this->getDataByDesc($rules, 'then_transaction_status');
+        $model->reimbursement_status = $this->getDataByDesc($rules, 'then_reimbursement_status');
+
+        $currencyAmount = $this->getAmountByDesc($desc);
+        $model->currency_amount = $currencyAmount ?: $this->getDataByDesc($rules, 'then_currency_amount');
+
+        $model->currency_code = user('base_currency_code');
+    }
+
 
     /**
      * @param Record[] $records
