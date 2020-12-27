@@ -3,6 +3,8 @@
 namespace app\core\services;
 
 use app\core\models\AuthClient;
+use app\core\models\Category;
+use app\core\models\Record;
 use app\core\models\Transaction;
 use app\core\models\User;
 use app\core\traits\ServiceTrait;
@@ -72,6 +74,45 @@ class TelegramService extends BaseObject
         User::updateAll(['password_reset_token' => null], ['id' => $user->id]);
     }
 
+
+    /**
+     * @param Transaction $transaction
+     * @param int $page
+     * @return string
+     * @throws \app\core\exceptions\InvalidArgumentException
+     */
+    public function getRecordsTextByTransaction(Transaction $transaction, $page = 0): string
+    {
+        $limit = 10;
+        if ((!$transaction->category_id) || (!$transaction->ledger_id)) {
+            throw new \app\core\exceptions\InvalidArgumentException('未匹配到分类');
+        }
+        $records = Record::find()
+            ->where(['ledger_id' => $transaction->ledger_id])
+            ->andWhere(['category_id' => $transaction->category_id])
+            ->limit($limit)
+            ->offset($page * $limit)
+            ->orderBy(['date' => SORT_DESC])
+            ->all();
+        if (!count($records)) {
+            return '没有数据';
+        }
+
+        $categoryName = Category::find()->select('name')->where(['id' => $transaction->category_id])->scalar();
+        $text = "[{$categoryName}]分类最近交易明细\n";
+        $text .= '交易时间|交易类型|账户｜金额' . "\n";
+        $types = TransactionType::texts();
+        /** @var Record $record */
+        foreach ($records as $record) {
+            $text .= $record->date . '|';
+            $text .= $types[$record->transaction_type] . '|';
+            $text .= $types[$record->account->name] . '|';
+            $text .= $types[$record->amount] . "\n";
+        }
+
+        return $text;
+    }
+
     /**
      * @param CallbackQuery $message
      * @param Client $bot
@@ -110,10 +151,20 @@ class TelegramService extends BaseObject
                 }
 
                 break;
+            case TelegramAction::FIND_CATEGORY_RECORD:
+                $transaction = new Transaction();
+                $transaction->load($data, '');
+                $page = data_get($data, 'page', 0) + 1;
+                $text = $this->getRecordsTextByTransaction($transaction, $page);
+                $keyboard = $this->getRecordsMarkup($transaction, $page);
+                $replyToMessageId = $message->getMessage()->getMessageId();
+                $bot->sendMessage($message->getFrom()->getId(), $text, null, false, $replyToMessageId, $keyboard);
+
+                break;
             case TelegramAction::TRANSACTION_RATING:
                 $id = data_get($data, 'id');
                 if ($this->transactionService->updateRating($id, data_get($data, 'value'))) {
-                    $replyMarkup = $this->getRecordMarkup(Transaction::findOne($id));
+                    $replyMarkup = $this->getTransactionMarkup(Transaction::findOne($id));
                     $bot->editMessageReplyMarkup(
                         $message->getFrom()->getId(),
                         $message->getMessage()->getMessageId(),
@@ -132,7 +183,7 @@ class TelegramService extends BaseObject
         }
     }
 
-    public function getRecordMarkup(Transaction $model)
+    public function getTransactionMarkup(Transaction $model): InlineKeyboardMarkup
     {
         $tests = TransactionRating::texts();
         $rating = [];
@@ -209,7 +260,7 @@ class TelegramService extends BaseObject
     }
 
 
-    public function getMessageTextByTransaction(Transaction $model, string $title = '记账成功')
+    public function getMessageTextByTransaction(Transaction $model, string $title = '记账成功'): string
     {
         $text = "{$title}\n";
         $text .= '交易类目： #' . $model->category->name . "\n";
@@ -283,5 +334,22 @@ class TelegramService extends BaseObject
         }
 
         return $text;
+    }
+
+    public function getRecordsMarkup(Transaction $model, int $page = 0): InlineKeyboardMarkup
+    {
+        $items = [
+            [
+                'text' => '查看更多',
+                'callback_data' => Json::encode([
+                    'action' => TelegramAction::FIND_CATEGORY_RECORD,
+                    'ledger_id' => $model->ledger_id,
+                    'category_id' => $model->category_id,
+                    'page' => $page
+                ]),
+            ],
+        ];
+
+        return new InlineKeyboardMarkup([$items]);
     }
 }
