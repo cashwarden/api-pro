@@ -106,8 +106,8 @@ class TelegramService extends BaseObject
         foreach ($records as $record) {
             $text .= $record->date . '|';
             $text .= $types[$record->transaction_type] . '|';
-            $text .= $types[$record->account->name] . '|';
-            $text .= $types[$record->amount] . "\n";
+            $text .= $record->account->name . '|';
+            $text .= $record->amount . "\n";
         }
 
         return $text;
@@ -349,8 +349,6 @@ class TelegramService extends BaseObject
                 ]),
             ],
         ];
-
-        Log::error('测试', $items);
 
         return new InlineKeyboardMarkup([$items]);
     }
