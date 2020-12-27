@@ -107,7 +107,7 @@ class TelegramService extends BaseObject
             $text .= $record->date . '|';
             $text .= $types[$record->transaction_type] . '|';
             $text .= $record->account->name . '|';
-            $text .= $record->amount . "\n";
+            $text .= Setup::toYuan($record->amount_cent) . "\n";
         }
 
         return $text;
