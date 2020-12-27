@@ -2,6 +2,7 @@
 
 namespace app\core\helpers;
 
+use DateTime;
 use Yii;
 use yii\base\InvalidConfigException;
 
@@ -21,12 +22,13 @@ class DateHelper
     /**
      * @param string|int $value
      * @return string
-     * @throws InvalidConfigException
+     * @throws \Exception
      */
-    public static function toDateTime($value)
+    public static function toDateTime($value): string
     {
         $value = is_numeric($value) ? $value : strtotime($value);
-        return Yii::$app->formatter->asDatetime($value, 'php:Y-m-d H:i');
+        $datetime = new DateTime($value, new \DateTimeZone(\Yii::$app->timeZone));
+        return $datetime->format('Y-m-d H:i');
     }
 
 
