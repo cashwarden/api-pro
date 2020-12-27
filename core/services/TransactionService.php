@@ -329,6 +329,7 @@ class TransactionService extends BaseObject
         $model->currency_amount = $currencyAmount ?: $this->getDataByDesc($rules, 'then_currency_amount');
 
         $model->currency_code = user('base_currency_code');
+        return $model;
     }
 
 
