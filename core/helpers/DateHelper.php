@@ -18,6 +18,17 @@ class DateHelper
         return Yii::$app->formatter->asDatetime($value, 'php:Y-m-d');
     }
 
+    /**
+     * @param string|int $value
+     * @return string
+     * @throws InvalidConfigException
+     */
+    public static function toDateTime($value)
+    {
+        $value = is_numeric($value) ? $value : strtotime($value);
+        return Yii::$app->formatter->asDatetime($value, 'php:Y-m-d H:i');
+    }
+
 
     /**
      * 最近N天的数组

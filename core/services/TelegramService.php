@@ -2,6 +2,7 @@
 
 namespace app\core\services;
 
+use app\core\helpers\DateHelper;
 use app\core\models\AuthClient;
 use app\core\models\Category;
 use app\core\models\Record;
@@ -79,7 +80,7 @@ class TelegramService extends BaseObject
      * @param Transaction $transaction
      * @param int $page
      * @return string
-     * @throws \app\core\exceptions\InvalidArgumentException
+     * @throws \app\core\exceptions\InvalidArgumentException|InvalidConfigException
      */
     public function getRecordsTextByTransaction(Transaction $transaction, $page = 0): string
     {
@@ -104,7 +105,7 @@ class TelegramService extends BaseObject
         $types = TransactionType::texts();
         /** @var Record $record */
         foreach ($records as $record) {
-            $text .= $record->date . '|';
+            $text .= DateHelper::toDateTime($record->date) . '|';
             $text .= $types[$record->transaction_type] . '|';
             $text .= $record->account->name . '|';
             $text .= Setup::toYuan($record->amount_cent) . "\n";
