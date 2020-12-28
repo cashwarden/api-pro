@@ -94,7 +94,6 @@ class TelegramService extends BaseObject
         }
         $query = Record::find()
             ->where(['ledger_id' => $transaction->ledger_id])
-            ->andFilterWhere(['category_id' => $transaction->category_id])
             ->limit($limit)
             ->offset($page * $limit)
             ->orderBy(['date' => SORT_DESC, 'id' => SORT_DESC]);
@@ -102,10 +101,12 @@ class TelegramService extends BaseObject
         if ($transaction->date) {
             $t = Carbon::parse($transaction->date);
             $dateRange = [
-                $t->toDateTimeString(),
+                $t->toDateString(),
                 $t->endOfDay()->toDateTimeString(),
             ];
             $query->andWhere(['between', 'date', $dateRange[0], $dateRange[1]]);
+        } else {
+            $query->andFilterWhere(['category_id' => $transaction->category_id]);
         }
         Yii::error('111111', $query->createCommand()->rawSql);
 
