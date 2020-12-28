@@ -4,8 +4,9 @@ namespace app\modules\v1\controllers;
 
 use app\core\exceptions\InvalidArgumentException;
 use app\core\models\Rule;
-use app\core\requests\RuleUpdateStatusRequest;
+use app\core\requests\UpdateStatus;
 use app\core\traits\ServiceTrait;
+use app\core\types\RuleStatus;
 use Yii;
 use yii\db\Exception;
 use yii\web\NotFoundHttpException;
@@ -37,13 +38,13 @@ class RuleController extends ActiveController
      * @return Rule
      * @throws Exception
      * @throws InvalidArgumentException
-     * @throws NotFoundHttpException
+     * @throws \app\core\exceptions\InternalException|NotFoundHttpException
      */
     public function actionUpdateStatus(int $id): Rule
     {
         $params = Yii::$app->request->bodyParams;
-        $model = new RuleUpdateStatusRequest();
-        /** @var RuleUpdateStatusRequest $model */
+        $model = new UpdateStatus(RuleStatus::names());
+        /** @var UpdateStatus $model */
         $model = $this->validate($model, $params);
 
         return $this->ruleService->updateStatus($id, $model->status);

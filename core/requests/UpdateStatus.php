@@ -6,7 +6,11 @@ use app\core\exceptions\InternalException;
 
 class UpdateStatus extends \yii\base\Model
 {
+    /**
+     * @var string
+     */
     public $status;
+
     /**
      * @var array
      */

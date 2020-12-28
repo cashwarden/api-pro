@@ -8,6 +8,7 @@ use app\core\models\Record;
 use app\core\models\Transaction;
 use app\core\types\AnalysisDateType;
 use app\core\types\DirectionType;
+use app\core\types\ReimbursementStatus;
 use app\core\types\TransactionType;
 use Yii;
 use yii\base\BaseObject;
@@ -313,8 +314,9 @@ class AnalysisService extends BaseObject
         return Record::find()
             ->where($baseConditions)
             ->andWhere([
-                'transaction_id' => $transactionIds,
+                'transaction_id' => array_map('intval', $transactionIds),
                 'exclude_from_stats' => (int)false,
+                'reimbursement_status' => [ReimbursementStatus::NONE, ReimbursementStatus::TODO],
             ])
             ->andFilterWhere([
                 'account_id' => data_get($params, 'account_id'),

@@ -21,4 +21,13 @@ class ReimbursementStatus extends BaseType
             self::DONE => 'done',
         ];
     }
+
+    public static function text(): array
+    {
+        return [
+            self::NONE => \Yii::t('app', 'No reimbursement'),
+            self::TODO => \Yii::t('app', 'To be reimbursed'),
+            self::DONE => \Yii::t('app', 'Reimbursed'),
+        ];
+    }
 }

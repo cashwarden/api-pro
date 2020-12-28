@@ -2,17 +2,21 @@
 
 namespace app\modules\v1\controllers;
 
+use app\core\exceptions\InternalException;
 use app\core\exceptions\InvalidArgumentException;
 use app\core\helpers\RuleControlHelper;
 use app\core\models\Record;
+use app\core\requests\UpdateStatus;
 use app\core\services\LedgerService;
 use app\core\traits\ServiceTrait;
 use app\core\types\RecordSource;
+use app\core\types\ReimbursementStatus;
 use app\core\types\TransactionType;
 use Exception;
 use Yii;
 use yii\data\ActiveDataProvider;
 use yii\web\ForbiddenHttpException;
+use yiier\helpers\Setup;
 
 /**
  * Record controller for the `v1` module
@@ -24,7 +28,10 @@ class RecordController extends ActiveController
     public $modelClass = Record::class;
     public $noAuthActions = [];
     public $defaultOrder = ['date' => SORT_DESC, 'id' => SORT_DESC];
-    public $stringToIntAttributes = ['transaction_type' => TransactionType::class];
+    public $stringToIntAttributes = [
+        'transaction_type' => TransactionType::class,
+        'reimbursement_status' => ReimbursementStatus::class
+    ];
 
     public function actions()
     {
@@ -37,7 +44,7 @@ class RecordController extends ActiveController
      * @return ActiveDataProvider
      * @throws ForbiddenHttpException
      * @throws InvalidArgumentException
-     * @throws \app\core\exceptions\InternalException
+     * @throws InternalException
      * @throws \yii\base\InvalidConfigException
      */
     public function prepareDataProvider()
@@ -62,7 +69,7 @@ class RecordController extends ActiveController
      * @return array
      * @throws Exception
      */
-    protected function formatParams(array $params)
+    protected function formatParams(array $params): array
     {
         if (($date = explode('~', data_get($params, 'date'))) && count($date) == 2) {
             $start = $date[0] . ' 00:00:00';
@@ -76,7 +83,7 @@ class RecordController extends ActiveController
      * @return array
      * @throws Exception
      */
-    public function actionOverview()
+    public function actionOverview(): array
     {
         $params = Yii::$app->request->queryParams;
         return array_values($this->analysisService->getRecordOverview($params));
@@ -88,7 +95,7 @@ class RecordController extends ActiveController
      * @throws InvalidArgumentException
      * @throws Exception
      */
-    public function actionAnalysis()
+    public function actionAnalysis(): array
     {
         $transactionType = request('transaction_type', TransactionType::getName(TransactionType::EXPENSE));
         $date = request('date', Yii::$app->formatter->asDatetime('now'));
@@ -104,7 +111,7 @@ class RecordController extends ActiveController
      * @return array
      * @throws Exception
      */
-    public function actionSources()
+    public function actionSources(): array
     {
         $items = [];
         $names = RecordSource::names();
@@ -112,6 +119,48 @@ class RecordController extends ActiveController
             $items[] = ['type' => $key, 'name' => $name];
         }
         return $items;
+    }
+
+    /**
+     * @return array
+     * @throws Exception
+     */
+    public function actionReimbursementStatuses(): array
+    {
+        $items = [];
+        $texts = ReimbursementStatus::text();
+        foreach ($texts as $key => $text) {
+            $items[] = ['type' => ReimbursementStatus::getName($key), 'name' => $text];
+        }
+        return $items;
+    }
+
+    /**
+     * @param int $id
+     * @return bool
+     * @throws ForbiddenHttpException
+     * @throws InvalidArgumentException
+     * @throws \yii\db\Exception
+     * @throws InternalException
+     */
+    public function actionUpdateReimbursementStatus(int $id): bool
+    {
+        $params = Yii::$app->request->bodyParams;
+        $model = new UpdateStatus(ReimbursementStatus::names());
+        /** @var UpdateStatus $requestModel */
+        $requestModel = $this->validate($model, $params);
+
+        $model = Record::findOne($id);
+        $this->checkAccess('update', $model);
+        if ($model->transaction_type != TransactionType::EXPENSE) {
+            throw new InvalidArgumentException();
+        }
+
+        $model->reimbursement_status = ReimbursementStatus::toEnumValue($requestModel->status);
+        if (!$model->save(false)) {
+            throw new \yii\db\Exception(Setup::errorMessage($model->firstErrors));
+        }
+        return true;
     }
 
     /**

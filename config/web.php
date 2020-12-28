@@ -85,7 +85,6 @@ $config = [
             'rules' => [
                 "POST <module>/<alias:login|join>" => '<module>/user/<alias>',
                 "POST <module>/token/refresh" => '<module>/user/refresh-token',
-                "POST <module>/transactions/by-description" => '<module>/transaction/create-by-description',
                 "POST <module>/rules/<id:\d+>/copy" => '<module>/rule/copy',
                 "PUT <module>/rules/<id:\d+>/status" => '<module>/rule/update-status',
                 "GET <module>/accounts/types" => '<module>/account/types',
@@ -109,10 +108,14 @@ $config = [
 
                 "GET <module>/transactions/<alias:types|export>" => '<module>/transaction/<alias>',
                 "POST <module>/transactions/upload" => '<module>/transaction/upload',
-                "GET <module>/records/overview" => '<module>/record/overview',
+                "POST <module>/transactions/by-description" => '<module>/transaction/create-by-description',
+
                 "GET <module>/categories/analysis" => '<module>/category/analysis',
-                "GET <module>/records/analysis" => '<module>/record/analysis',
-                "GET <module>/records/sources" => '<module>/record/sources',
+
+                "GET <module>/records/<alias:sources|overview|analysis|reimbursement-statuses>" =>
+                    '<module>/record/<alias>',
+                "PUT <module>/records/<id:\d+>/reimbursement-status" => '<module>/record/update-reimbursement-status',
+
                 "PUT <module>/recurrences/<id:\d+>/status" => '<module>/recurrence/update-status',
                 "GET <module>/recurrences/frequencies" => '<module>/recurrence/frequency-types',
 

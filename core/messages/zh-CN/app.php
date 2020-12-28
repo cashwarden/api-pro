@@ -59,6 +59,10 @@ return [
     'Archived status' => '已归档',
     'Frozen state' => '冻结状态',
 
+    'No reimbursement' => '不需要',
+    'To be reimbursed' => '待报销',
+    'Reimbursed' => '已报销',
+
     'Owner' => '所有者',
     'Editor' => '使用',
     'Viewer' => '查看',
