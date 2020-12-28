@@ -108,8 +108,6 @@ class TelegramService extends BaseObject
         } else {
             $query->andFilterWhere(['category_id' => $transaction->category_id]);
         }
-        Yii::error('111111', $query->createCommand()->rawSql);
-
 
         $records = $query->all();
         if (!count($records)) {
@@ -118,7 +116,7 @@ class TelegramService extends BaseObject
         $text = '';
         if ($transaction->date) {
             $date = DateHelper::toDateTime($transaction->date);
-            $text = "[{$date}的最近交易明细\n";
+            $text = "[{$date}]的最近交易明细\n";
         } elseif ($transaction->category_id) {
             $categoryName = Category::find()->select('name')->where(['id' => $transaction->category_id])->scalar();
             $text = "[{$categoryName}]分类最近交易明细\n";
