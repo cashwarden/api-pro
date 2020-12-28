@@ -2,13 +2,16 @@
 
 namespace app\modules\v1\controllers;
 
+use app\core\exceptions\InternalException;
 use app\core\exceptions\InvalidArgumentException;
+use app\core\exceptions\UserNotProException;
 use app\core\helpers\RuleControlHelper;
 use app\core\models\WishList;
-use app\core\requests\WishListUpdateStatusRequest;
+use app\core\requests\UpdateStatus;
 use app\core\services\LedgerService;
 use app\core\services\UserProService;
 use app\core\traits\ServiceTrait;
+use app\core\types\WishListStatus;
 use Yii;
 use yii\db\Exception;
 use yii\web\ForbiddenHttpException;
@@ -31,12 +34,13 @@ class WishListController extends ActiveController
      * @throws Exception
      * @throws InvalidArgumentException
      * @throws NotFoundHttpException
+     * @throws InternalException
      */
     public function actionUpdateStatus(int $id): WishList
     {
         $params = Yii::$app->request->bodyParams;
-        $model = new WishListUpdateStatusRequest();
-        /** @var WishListUpdateStatusRequest $model */
+        $model = new UpdateStatus(WishListStatus::names());
+        /** @var UpdateStatus $model */
         $model = $this->validate($model, $params);
 
         return $this->wishListService->updateStatus($id, $model->status);
@@ -46,7 +50,7 @@ class WishListController extends ActiveController
      * @param string $action
      * @param null $model
      * @param array $params
-     * @throws ForbiddenHttpException|\app\core\exceptions\UserNotProException
+     * @throws ForbiddenHttpException|UserNotProException
      */
     public function checkAccess($action, $model = null, $params = [])
     {

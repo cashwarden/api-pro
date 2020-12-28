@@ -114,6 +114,7 @@ $config = [
 
                 "GET <module>/records/<alias:sources|overview|analysis|reimbursement-statuses>" =>
                     '<module>/record/<alias>',
+                "PUT <module>/records/<id:\d+>/reimbursement-status" => '<module>/record/update-reimbursement-status',
 
                 "PUT <module>/recurrences/<id:\d+>/status" => '<module>/recurrence/update-status',
                 "GET <module>/recurrences/frequencies" => '<module>/recurrence/frequency-types',

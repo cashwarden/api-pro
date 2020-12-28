@@ -2,11 +2,11 @@
 
 namespace app\modules\v1\controllers;
 
+use app\core\exceptions\InternalException;
 use app\core\exceptions\InvalidArgumentException;
 use app\core\helpers\RuleControlHelper;
 use app\core\models\Record;
-use app\core\models\WishList;
-use app\core\requests\WishListUpdateStatusRequest;
+use app\core\requests\UpdateStatus;
 use app\core\services\LedgerService;
 use app\core\traits\ServiceTrait;
 use app\core\types\RecordSource;
@@ -16,7 +16,7 @@ use Exception;
 use Yii;
 use yii\data\ActiveDataProvider;
 use yii\web\ForbiddenHttpException;
-use yii\web\NotFoundHttpException;
+use yiier\helpers\Setup;
 
 /**
  * Record controller for the `v1` module
@@ -44,7 +44,7 @@ class RecordController extends ActiveController
      * @return ActiveDataProvider
      * @throws ForbiddenHttpException
      * @throws InvalidArgumentException
-     * @throws \app\core\exceptions\InternalException
+     * @throws InternalException
      * @throws \yii\base\InvalidConfigException
      */
     public function prepareDataProvider()
@@ -137,19 +137,30 @@ class RecordController extends ActiveController
 
     /**
      * @param int $id
-     * @return WishList
-     * @throws \yii\db\Exception
+     * @return bool
+     * @throws ForbiddenHttpException
      * @throws InvalidArgumentException
-     * @throws NotFoundHttpException
+     * @throws \yii\db\Exception
+     * @throws InternalException
      */
-    public function actionUpdateStatus(int $id): WishList
+    public function actionUpdateReimbursementStatus(int $id): bool
     {
         $params = Yii::$app->request->bodyParams;
-        $model = new WishListUpdateStatusRequest();
-        /** @var WishListUpdateStatusRequest $model */
-        $model = $this->validate($model, $params);
+        $model = new UpdateStatus(ReimbursementStatus::names());
+        /** @var UpdateStatus $requestModel */
+        $requestModel = $this->validate($model, $params);
 
-        return $this->wishListService->updateStatus($id, $model->status);
+        $model = Record::findOne($id);
+        $this->checkAccess('update', $model);
+        if ($model->transaction_type != TransactionType::EXPENSE) {
+            throw new InvalidArgumentException();
+        }
+
+        $model->reimbursement_status = ReimbursementStatus::toEnumValue($requestModel->status);
+        if (!$model->save(false)) {
+            throw new \yii\db\Exception(Setup::errorMessage($model->firstErrors));
+        }
+        return true;
     }
 
     /**
