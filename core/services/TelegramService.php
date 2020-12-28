@@ -107,6 +107,8 @@ class TelegramService extends BaseObject
             ];
             $query->andWhere(['between', 'date', $dateRange[0], $dateRange[1]]);
         }
+        Yii::error('111111', $query->createCommand()->rawSql);
+
 
         $records = $query->all();
         if (!count($records)) {
