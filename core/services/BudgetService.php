@@ -123,16 +123,16 @@ class BudgetService extends BaseObject
                 $query->andWhere(new Expression('NOT FIND_IN_SET(:tag, COALESCE(tags, \'\'))'))
                     ->addParams([':tag' => $tag]);
             }
-            if ($actualAmountCent = $query->sum('amount_cent')) {
-                $budget->actual_amount_cent = $actualAmountCent;
-                $recordIds = Record::find()
+            if ($query->sum('amount_cent')) {
+                $recordQuery = Record::find()
                     ->where(['user_id' => $budgetConfig->user_id])
                     ->andWhere([
                         'transaction_id' => array_map('intval', $query->column()),
                         'exclude_from_stats' => (int)false,
                         'reimbursement_status' => [ReimbursementStatus::NONE, ReimbursementStatus::TODO],
-                    ])
-                    ->column();
+                    ]);
+                $recordIds = $recordQuery->column();
+                $budget->actual_amount_cent = $recordQuery->sum('amount_cent');
                 $budget->record_ids = implode(',', $recordIds);
             }
 
