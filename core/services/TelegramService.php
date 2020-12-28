@@ -16,6 +16,7 @@ use app\core\types\ReportType;
 use app\core\types\TelegramAction;
 use app\core\types\TransactionRating;
 use app\core\types\TransactionType;
+use Carbon\Carbon;
 use TelegramBot\Api\BotApi;
 use TelegramBot\Api\Client;
 use TelegramBot\Api\Exception;
@@ -80,23 +81,34 @@ class TelegramService extends BaseObject
      * @param Transaction $transaction
      * @param int $page
      * @return string
-     * @throws InvalidArgumentException|InvalidConfigException
+     * @throws InvalidConfigException
      */
     public function getRecordsTextByTransaction(Transaction $transaction, $page = 0): string
     {
         $limit = 10;
-        if ((!$transaction->date) || (!$transaction->ledger_id)) {
-            throw new InvalidArgumentException('未匹配到时间');
-        } elseif ((!$transaction->category_id) || (!$transaction->ledger_id)) {
-            throw new InvalidArgumentException('未匹配到分类');
+        if (strpos($transaction->description, '今天') !== false) {
+            $transaction->date = TransactionService::getCreateRecordDate();
         }
-        $records = Record::find()
+        if ((!$transaction->ledger_id) || !($transaction->category_id || $transaction->date)) {
+            return '未匹配到';
+        }
+        $query = Record::find()
             ->where(['ledger_id' => $transaction->ledger_id])
-            ->andWhere(['category_id' => $transaction->category_id])
+            ->andFilterWhere(['category_id' => $transaction->category_id])
             ->limit($limit)
             ->offset($page * $limit)
-            ->orderBy(['date' => SORT_DESC, 'id' => SORT_DESC])
-            ->all();
+            ->orderBy(['date' => SORT_DESC, 'id' => SORT_DESC]);
+
+        if ($transaction->date) {
+            $t = Carbon::parse($transaction->date);
+            $dateRange = [
+                $t->toDateTimeString(),
+                $t->endOfDay()->toDateTimeString(),
+            ];
+            $query->andWhere(['between', 'date', $dateRange[0], $dateRange[1]]);
+        }
+
+        $records = $query->all();
         if (!count($records)) {
             return '没有数据';
         }

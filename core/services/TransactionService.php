@@ -221,6 +221,9 @@ class TransactionService extends BaseObject
     {
         try {
             $model = $this->createBaseTransactionByDesc($desc);
+            if (!$model->category_id) {
+                throw new CannotOperateException(Yii::t('app', 'Category not found.'));
+            }
             $model->date = $model->date ?: self::getCreateRecordDate();
             if (!$model->save()) {
                 throw new DBException(Setup::errorMessage($model->firstErrors));
@@ -317,9 +320,6 @@ class TransactionService extends BaseObject
             }
         );
 
-        if (!$model->category_id) {
-            throw new CannotOperateException(Yii::t('app', 'Category not found.'));
-        }
 
         $model->date = $this->getDateByDesc($desc);
 
