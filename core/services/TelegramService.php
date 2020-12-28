@@ -115,11 +115,11 @@ class TelegramService extends BaseObject
         }
         $text = '';
         if ($transaction->date) {
-            $date = DateHelper::toDateTime($transaction->date);
-            $text = "[{$date}]的最近交易明细\n";
+            $date = DateHelper::toDate($transaction->date);
+            $text = "[{$date}] 的最近交易明细\n";
         } elseif ($transaction->category_id) {
             $categoryName = Category::find()->select('name')->where(['id' => $transaction->category_id])->scalar();
-            $text = "[{$categoryName}]分类最近交易明细\n";
+            $text = "[{$categoryName}] 分类最近交易明细\n";
         }
 
         $text .= '交易时间|分类|交易类型|账户|金额' . "\n";
