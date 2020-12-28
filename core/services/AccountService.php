@@ -81,8 +81,8 @@ class AccountService
     {
         $userId = $userId ?: Yii::$app->user->id;
         return Account::find()
-            ->where(['user_id' => $userId, 'default' => Account::DEFAULT])
-            ->orderBy(['id' => SORT_ASC])
+            ->where(['user_id' => $userId])
+            ->orderBy(['default' => SORT_DESC, 'id' => SORT_ASC])
             ->asArray()
             ->one();
     }
@@ -133,7 +133,7 @@ class AccountService
     /**
      * @return array
      */
-    public static function getCurrentMap()
+    public static function getCurrentMap(): array
     {
         $accounts = Account::find()->where(['user_id' => Yii::$app->user->id])->asArray()->all();
         return ArrayHelper::map($accounts, 'id', 'name');

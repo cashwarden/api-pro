@@ -80,13 +80,15 @@ class TelegramService extends BaseObject
      * @param Transaction $transaction
      * @param int $page
      * @return string
-     * @throws \app\core\exceptions\InvalidArgumentException|InvalidConfigException
+     * @throws InvalidArgumentException|InvalidConfigException
      */
     public function getRecordsTextByTransaction(Transaction $transaction, $page = 0): string
     {
         $limit = 10;
-        if ((!$transaction->category_id) || (!$transaction->ledger_id)) {
-            throw new \app\core\exceptions\InvalidArgumentException('未匹配到分类');
+        if ((!$transaction->date) || (!$transaction->ledger_id)) {
+            throw new InvalidArgumentException('未匹配到时间');
+        } elseif ((!$transaction->category_id) || (!$transaction->ledger_id)) {
+            throw new InvalidArgumentException('未匹配到分类');
         }
         $records = Record::find()
             ->where(['ledger_id' => $transaction->ledger_id])
@@ -98,14 +100,22 @@ class TelegramService extends BaseObject
         if (!count($records)) {
             return '没有数据';
         }
+        $text = '';
+        if ($transaction->date) {
+            $date = DateHelper::toDateTime($transaction->date);
+            $text = "[{$date}的最近交易明细\n";
+        } elseif ($transaction->category_id) {
+            $categoryName = Category::find()->select('name')->where(['id' => $transaction->category_id])->scalar();
+            $text = "[{$categoryName}]分类最近交易明细\n";
+        }
 
-        $categoryName = Category::find()->select('name')->where(['id' => $transaction->category_id])->scalar();
-        $text = "[{$categoryName}]分类最近交易明细\n";
-        $text .= '交易时间|交易类型|账户｜金额' . "\n";
+        $text .= '交易时间|分类|交易类型|账户|金额' . "\n";
         $types = TransactionType::texts();
+        $categoryMap = CategoryService::getMapByLedgerId($transaction->ledger_id);
         /** @var Record $record */
         foreach ($records as $record) {
-            $text .= DateHelper::toDateTime($record->date) . '|';
+            $text .= DateHelper::toDateTime($record->date, 'php:m-d H:i') . '|';
+            $text .= $categoryMap[$record->category_id] . '|';
             $text .= $types[$record->transaction_type] . '|';
             $text .= $record->account->name . '|';
             $text .= Setup::toYuan($record->amount_cent) . "\n";

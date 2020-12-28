@@ -20,13 +20,14 @@ class DateHelper
 
     /**
      * @param string|int $value
+     * @param string $format
      * @return string
      * @throws InvalidConfigException
      */
-    public static function toDateTime($value): string
+    public static function toDateTime($value, string $format = 'php:Y-m-d H:i'): string
     {
         $value = is_numeric($value) ? $value : strtotime($value);
-        return Yii::$app->formatter->asDatetime($value, 'php:Y-m-d H:i');
+        return Yii::$app->formatter->asDatetime($value, $format);
     }
 
 

@@ -221,6 +221,7 @@ class TransactionService extends BaseObject
     {
         try {
             $model = $this->createBaseTransactionByDesc($desc);
+            $model->date = $model->date ?: self::getCreateRecordDate();
             if (!$model->save()) {
                 throw new DBException(Setup::errorMessage($model->firstErrors));
             }
@@ -330,6 +331,7 @@ class TransactionService extends BaseObject
         $model->currency_amount = $currencyAmount ?: $this->getDataByDesc($rules, 'then_currency_amount');
 
         $model->currency_code = user('base_currency_code');
+
         return $model;
     }
 
@@ -541,7 +543,7 @@ class TransactionService extends BaseObject
             Log::warning('未识别到日期', $desc);
         }
 
-        return self::getCreateRecordDate();
+        return '';
     }
 
     /**
