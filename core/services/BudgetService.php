@@ -7,6 +7,7 @@ use app\core\models\BudgetConfig;
 use app\core\models\Record;
 use app\core\models\Transaction;
 use app\core\types\BudgetPeriod;
+use app\core\types\ReimbursementStatus;
 use Carbon\Carbon;
 use yii\base\BaseObject;
 use yii\db\Exception;
@@ -125,7 +126,12 @@ class BudgetService extends BaseObject
             if ($actualAmountCent = $query->sum('amount_cent')) {
                 $budget->actual_amount_cent = $actualAmountCent;
                 $recordIds = Record::find()
-                    ->where(['user_id' => $budgetConfig->user_id, 'transaction_id' => $query->column()])
+                    ->where(['user_id' => $budgetConfig->user_id])
+                    ->andWhere([
+                        'transaction_id' => array_map('intval', $query->column()),
+                        'exclude_from_stats' => (int)false,
+                        'reimbursement_status' => [ReimbursementStatus::NONE, ReimbursementStatus::TODO],
+                    ])
                     ->column();
                 $budget->record_ids = implode(',', $recordIds);
             }

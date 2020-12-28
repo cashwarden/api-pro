@@ -64,6 +64,7 @@ class TransactionService extends BaseObject
             $_model->currency_code = $transaction->currency_code;
             $_model->date = $transaction->date;
             $_model->exclude_from_stats = $transaction->exclude_from_stats;
+            $_model->reimbursement_status = $transaction->reimbursement_status;
             $_model->transaction_type = $transaction->type;
             $_model->load($datum, '');
             if (!$_model->save()) {

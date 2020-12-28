@@ -9,6 +9,7 @@ use app\core\services\LedgerService;
 use app\core\services\RecurrenceService;
 use app\core\types\DirectionType;
 use app\core\types\RecordSource;
+use app\core\types\ReimbursementStatus;
 use Yii;
 use yii\behaviors\TimestampBehavior;
 use yii\db\ActiveRecord;
@@ -33,6 +34,7 @@ use yiier\helpers\Setup;
  * @property string $date
  * @property int $source
  * @property int $exclude_from_stats
+ * @property int $reimbursement_status
  * @property string|null $created_at
  * @property string|null $updated_at
  *
@@ -109,6 +111,7 @@ class Record extends ActiveRecord
             ],
             ['direction', 'in', 'range' => [DirectionType::INCOME, DirectionType::EXPENSE]],
             ['source', 'in', 'range' => array_keys(RecordSource::names())],
+            ['reimbursement_status', 'in', 'range' => array_keys(ReimbursementStatus::names())],
             [['date'], 'datetime', 'format' => 'php:Y-m-d H:i'],
             ['exclude_from_stats', 'boolean', 'trueValue' => true, 'falseValue' => false, 'strict' => true],
         ];
@@ -134,6 +137,7 @@ class Record extends ActiveRecord
             'date' => Yii::t('app', 'Date'),
             'source' => Yii::t('app', 'Source'),
             'exclude_from_stats' => Yii::t('app', 'Exclude From Stats'),
+            'reimbursement_status' => Yii::t('app', 'Reimbursement Status'),
             'created_at' => Yii::t('app', 'Created At'),
             'updated_at' => Yii::t('app', 'Updated At'),
         ];
@@ -264,7 +268,10 @@ class Record extends ActiveRecord
         $fields['transaction'] = function (self $model) {
             return $model->transaction ? ArrayHelper::merge(
                 ArrayHelper::toArray($model->transaction),
-                ['exclude_from_stats' => (bool)$model->exclude_from_stats]
+                [
+                    'exclude_from_stats' => (bool)$model->exclude_from_stats,
+                    'reimbursement_status' => ReimbursementStatus::getName($model->reimbursement_status)
+                ]
             ) : null;
         };
 
@@ -290,6 +297,10 @@ class Record extends ActiveRecord
 
         $fields['exclude_from_stats'] = function (self $model) {
             return (bool)$model->exclude_from_stats;
+        };
+
+        $fields['reimbursement_status'] = function (self $model) {
+            return ReimbursementStatus::getName($model->reimbursement_status);
         };
 
         $fields['created_at'] = function (self $model) {

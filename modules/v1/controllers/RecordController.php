@@ -5,14 +5,18 @@ namespace app\modules\v1\controllers;
 use app\core\exceptions\InvalidArgumentException;
 use app\core\helpers\RuleControlHelper;
 use app\core\models\Record;
+use app\core\models\WishList;
+use app\core\requests\WishListUpdateStatusRequest;
 use app\core\services\LedgerService;
 use app\core\traits\ServiceTrait;
 use app\core\types\RecordSource;
+use app\core\types\ReimbursementStatus;
 use app\core\types\TransactionType;
 use Exception;
 use Yii;
 use yii\data\ActiveDataProvider;
 use yii\web\ForbiddenHttpException;
+use yii\web\NotFoundHttpException;
 
 /**
  * Record controller for the `v1` module
@@ -24,7 +28,10 @@ class RecordController extends ActiveController
     public $modelClass = Record::class;
     public $noAuthActions = [];
     public $defaultOrder = ['date' => SORT_DESC, 'id' => SORT_DESC];
-    public $stringToIntAttributes = ['transaction_type' => TransactionType::class];
+    public $stringToIntAttributes = [
+        'transaction_type' => TransactionType::class,
+        'reimbursement_status' => ReimbursementStatus::class
+    ];
 
     public function actions()
     {
@@ -62,7 +69,7 @@ class RecordController extends ActiveController
      * @return array
      * @throws Exception
      */
-    protected function formatParams(array $params)
+    protected function formatParams(array $params): array
     {
         if (($date = explode('~', data_get($params, 'date'))) && count($date) == 2) {
             $start = $date[0] . ' 00:00:00';
@@ -76,7 +83,7 @@ class RecordController extends ActiveController
      * @return array
      * @throws Exception
      */
-    public function actionOverview()
+    public function actionOverview(): array
     {
         $params = Yii::$app->request->queryParams;
         return array_values($this->analysisService->getRecordOverview($params));
@@ -88,7 +95,7 @@ class RecordController extends ActiveController
      * @throws InvalidArgumentException
      * @throws Exception
      */
-    public function actionAnalysis()
+    public function actionAnalysis(): array
     {
         $transactionType = request('transaction_type', TransactionType::getName(TransactionType::EXPENSE));
         $date = request('date', Yii::$app->formatter->asDatetime('now'));
@@ -104,7 +111,7 @@ class RecordController extends ActiveController
      * @return array
      * @throws Exception
      */
-    public function actionSources()
+    public function actionSources(): array
     {
         $items = [];
         $names = RecordSource::names();
@@ -112,6 +119,37 @@ class RecordController extends ActiveController
             $items[] = ['type' => $key, 'name' => $name];
         }
         return $items;
+    }
+
+    /**
+     * @return array
+     * @throws Exception
+     */
+    public function actionReimbursementStatuses(): array
+    {
+        $items = [];
+        $texts = ReimbursementStatus::text();
+        foreach ($texts as $key => $text) {
+            $items[] = ['type' => ReimbursementStatus::getName($key), 'name' => $text];
+        }
+        return $items;
+    }
+
+    /**
+     * @param int $id
+     * @return WishList
+     * @throws \yii\db\Exception
+     * @throws InvalidArgumentException
+     * @throws NotFoundHttpException
+     */
+    public function actionUpdateStatus(int $id): WishList
+    {
+        $params = Yii::$app->request->bodyParams;
+        $model = new WishListUpdateStatusRequest();
+        /** @var WishListUpdateStatusRequest $model */
+        $model = $this->validate($model, $params);
+
+        return $this->wishListService->updateStatus($id, $model->status);
     }
 
     /**

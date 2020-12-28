@@ -16,7 +16,7 @@ class SearchHelper
      * @throws InvalidArgumentException
      * @throws InvalidConfigException|InternalException
      */
-    public static function stringToInt(string $searchStr, $typeClassName)
+    public static function stringToInt(string $searchStr, $typeClassName): string
     {
         $items = [];
         /** @var BaseType $type */
@@ -24,12 +24,13 @@ class SearchHelper
         if (!$type instanceof BaseType) {
             throw new InternalException('search string to Int fail');
         }
-        $searchArr = explode(', ', $searchStr);
+        $searchArr = explode(',', $searchStr);
         foreach ($searchArr as $search) {
-            if (in_array($search, $type::names())) {
-                $items[] = $type::toEnumValue($search);
+            $v = trim($search);
+            if (in_array($v, $type::names())) {
+                $items[] = $type::toEnumValue($v);
             }
         }
-        return implode(', ', $items);
+        return implode(',', $items);
     }
 }

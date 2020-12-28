@@ -34,7 +34,6 @@ use yiier\validators\MoneyValidator;
  * @property string|null $remark
  * @property string|null $image
  * @property int|null $status
- * @property int|null $reimbursement_status
  * @property int|null $rating
  * @property string $date
  * @property string|null $created_at
@@ -62,6 +61,11 @@ class Transaction extends \yii\db\ActiveRecord
      * @var bool
      */
     public $exclude_from_stats;
+
+    /**
+     * @var string
+     */
+    public $reimbursement_status;
 
     /**
      * @var integer
@@ -195,7 +199,6 @@ class Transaction extends \yii\db\ActiveRecord
             'remark' => Yii::t('app', 'Remark'),
             'image' => Yii::t('app', 'Image'),
             'status' => Yii::t('app', 'Status'),
-            'reimbursement_status' => Yii::t('app', 'Reimbursement Status'),
             'rating' => Yii::t('app', 'Rating'),
             'date' => Yii::t('app', 'Date'),
             'created_at' => Yii::t('app', 'Created At'),
@@ -337,10 +340,6 @@ class Transaction extends \yii\db\ActiveRecord
 
         $fields['tags'] = function (self $model) {
             return $model->tags ? explode(',', $model->tags) : [];
-        };
-
-        $fields['reimbursement_status'] = function (self $model) {
-            return ReimbursementStatus::getName($model->reimbursement_status);
         };
 
         $fields['status'] = function (self $model) {
