@@ -12,6 +12,7 @@ use app\core\traits\ServiceTrait;
 use app\core\types\AnalysisDateType;
 use app\core\types\AuthClientStatus;
 use app\core\types\AuthClientType;
+use app\core\types\DirectionType;
 use app\core\types\ReportType;
 use app\core\types\TelegramAction;
 use app\core\types\TransactionRating;
@@ -122,16 +123,18 @@ class TelegramService extends BaseObject
             $text = "[{$categoryName}] 分类最近交易明细\n";
         }
 
-        $text .= '交易时间|分类|交易类型|账户|金额' . "\n";
-        $types = TransactionType::texts();
+        $text .= '交易时间|分类|账户|金额' . "\n";
         $categoryMap = CategoryService::getMapByLedgerId($transaction->ledger_id);
         /** @var Record $record */
         foreach ($records as $record) {
             $text .= DateHelper::toDateTime($record->date, 'php:m-d H:i') . '|';
             $text .= $categoryMap[$record->category_id] . '|';
-            $text .= $types[$record->transaction_type] . '|';
             $text .= $record->account->name . '|';
+            $text .= $record->direction == DirectionType::EXPENSE ? '-' : '';
             $text .= Setup::toYuan($record->amount_cent) . "\n";
+            $text .= "           ";
+            $transaction = $record->transaction;
+            $text .= "{$transaction->description}（{$transaction->remark}）$\n";
         }
 
         return $text;
