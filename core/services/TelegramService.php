@@ -13,7 +13,6 @@ use app\core\types\AnalysisDateType;
 use app\core\types\AuthClientStatus;
 use app\core\types\AuthClientType;
 use app\core\types\DirectionType;
-use app\core\types\ReportType;
 use app\core\types\TelegramAction;
 use app\core\types\TransactionRating;
 use app\core\types\TransactionType;
@@ -132,7 +131,7 @@ class TelegramService extends BaseObject
             $text .= $record->account->name . '|';
             $text .= $record->direction == DirectionType::EXPENSE ? '-' : '';
             $text .= Setup::toYuan($record->amount_cent) . "\n";
-            $text .= "           ";
+            $text .= "                 ";
             $transaction = $record->transaction;
             $remark = $transaction->remark ? "（{$transaction->remark}）" : "";
             $text .= "{$transaction->description}$remark\n";
