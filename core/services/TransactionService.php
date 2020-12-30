@@ -520,6 +520,13 @@ class TransactionService extends BaseObject
         if (ArrayHelper::strPosArr($desc, ['大前天']) !== false) {
             return self::getCreateRecordDate(time() - 3600 * 24 * 3);
         }
+        if (ArrayHelper::strPosArr($desc, ['明天']) !== false) {
+            return self::getCreateRecordDate(time() + 3600 * 24 * 1);
+        }
+
+        if (ArrayHelper::strPosArr($desc, ['后天']) !== false) {
+            return self::getCreateRecordDate(time() + 3600 * 24 * 2);
+        }
 
         try {
             $time = self::getCreateRecordDate('now', 'php:H:i');
