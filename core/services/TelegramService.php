@@ -134,7 +134,8 @@ class TelegramService extends BaseObject
             $text .= Setup::toYuan($record->amount_cent) . "\n";
             $text .= "           ";
             $transaction = $record->transaction;
-            $text .= "{$transaction->description}（{$transaction->remark}）$\n";
+            $remark = $transaction->remark ? "（{$transaction->remark}）" : "";
+            $text .= "{$transaction->description}$remark\n";
         }
 
         return $text;
