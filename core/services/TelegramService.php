@@ -130,8 +130,7 @@ class TelegramService extends BaseObject
             $text .= $categoryMap[$record->category_id] . '|';
             $text .= $record->account->name . '|';
             $text .= $record->direction == DirectionType::EXPENSE ? '-' : '';
-            $text .= Setup::toYuan($record->amount_cent) . "\n";
-            $text .= "                 ";
+            $text .= Setup::toYuan($record->amount_cent) . "|";
             $transaction = $record->transaction;
             $remark = $transaction->remark ? "（{$transaction->remark}）" : "";
             $text .= "{$transaction->description}$remark\n";
