@@ -25,7 +25,6 @@ class m201102_065340_create_ledger_table extends Migration
         ]);
 
         $this->createIndex('ledger_user_id', '{{%ledger}}', ['user_id']);
-
     }
 
     /**

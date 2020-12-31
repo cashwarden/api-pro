@@ -30,5 +30,6 @@ return [
     'userAccountTotal' => env('USER_ACCOUNT_TOTAL', 5),
     'userRecurrenceTotal' => env('USER_RECURRENCE_TOTAL', 1),
     'userRuleTotal' => env('USER_RULE_TOTAL', 5),
-    'useXunSearch' => env('USE_XUN_SEARCH', 0)
+    'useXunSearch' => env('USE_XUN_SEARCH', 0),
+    'rapidapiKey' => env('RAPIDAPI_KEY')
 ];
