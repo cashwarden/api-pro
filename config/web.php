@@ -83,6 +83,8 @@ $config = [
             'showScriptName' => false,
             'hostInfo' => getenv('APP_URL'),
             'rules' => [
+                'OPTIONS <module>/<controller:.+?>' => '<module>/user/options',
+
                 "POST <module>/<alias:login|join>" => '<module>/user/<alias>',
                 "POST <module>/token/refresh" => '<module>/user/refresh-token',
                 "POST <module>/rules/<id:\d+>/copy" => '<module>/rule/copy',

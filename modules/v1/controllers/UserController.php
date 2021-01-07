@@ -27,7 +27,7 @@ class UserController extends ActiveController
     use ServiceTrait;
 
     public $modelClass = User::class;
-    public $noAuthActions = ['join', 'login', 'confirm', 'password-reset-request', 'password-reset'];
+    public $noAuthActions = ['join', 'login', 'confirm', 'password-reset-request', 'password-reset', 'options'];
 
     public function actions()
     {

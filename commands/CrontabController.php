@@ -8,6 +8,7 @@ use app\core\models\Recurrence;
 use app\core\models\Transaction;
 use app\core\models\User;
 use app\core\services\RecurrenceService;
+use app\core\services\StockService;
 use app\core\traits\ServiceTrait;
 use app\core\types\AnalysisDateType;
 use app\core\types\AuthClientType;
@@ -88,6 +89,13 @@ class CrontabController extends Controller
             $this->stdout("定时发送报告失败：{$e->getMessage()}\n");
             $transaction->rollBack();
             throw $e;
+        }
+    }
+
+    public function actionUpdateStock()
+    {
+        foreach (StockService::getItems() as $key => $item) {
+            StockService::getHistoricalData($key);
         }
     }
 }

@@ -193,6 +193,7 @@ class Transaction extends \yii\db\ActiveRecord
             'category_id' => Yii::t('app', 'Category ID'),
             'amount_cent' => Yii::t('app', 'Amount Cent'),
             'currency_amount_cent' => Yii::t('app', 'Currency Amount Cent'),
+            'currency_amount' => Yii::t('app', 'Currency Amount'),
             'currency_code' => Yii::t('app', 'Currency Code'),
             'tags' => Yii::t('app', 'Tags'),
             'description' => Yii::t('app', 'Description'),
