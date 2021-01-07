@@ -31,8 +31,8 @@ use yiier\validators\ArrayValidator;
  */
 class Category extends \yii\db\ActiveRecord
 {
-    public const NOT_DEFAULT = 0;
     public const DEFAULT = 1;
+    public const NO_DEFAULT = 0;
 
     /**
      * {@inheritdoc}
@@ -63,10 +63,11 @@ class Category extends \yii\db\ActiveRecord
     {
         return [
             [['ledger_id', 'transaction_type', 'name', 'icon_name'], 'required'],
-            [['ledger_id', 'user_id', 'status', 'default', 'sort'], 'integer'],
+            [['ledger_id', 'user_id', 'status', 'sort'], 'integer'],
             ['transaction_type', 'in', 'range' => TransactionType::names()],
             [['name', 'icon_name'], 'string', 'max' => 120],
             ['color', 'in', 'range' => ColorType::items()],
+            ['default', 'boolean', 'trueValue' => true, 'falseValue' => false, 'strict' => true],
             [['keywords'], ArrayValidator::class],
             [
                 'ledger_id',
@@ -133,6 +134,30 @@ class Category extends \yii\db\ActiveRecord
             return true;
         } else {
             return false;
+        }
+    }
+
+    /**
+     * @param bool $insert
+     * @param array $changedAttributes
+     * @throws \Exception
+     */
+    public function afterSave($insert, $changedAttributes)
+    {
+        parent::afterSave($insert, $changedAttributes);
+        if ($this->default) {
+            Category::updateAll(
+                ['default' => self::NO_DEFAULT, 'updated_at' => Yii::$app->formatter->asDatetime('now')],
+                [
+                    'and',
+                    [
+                        'ledger_id' => $this->ledger_id,
+                        'default' => self::DEFAULT,
+                        'transaction_type' => $this->transaction_type
+                    ],
+                    ['!=', 'id', $this->id]
+                ]
+            );
         }
     }
 

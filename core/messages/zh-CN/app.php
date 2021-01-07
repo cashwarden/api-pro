@@ -20,6 +20,7 @@ return [
     'Income' => '收入',
     'Transfer' => '转账',
     'Adjust Balance' => '调整余额',
+    'Currency Amount' => '金额',
     'Adjust' => '调整',
     # 'Cash' => '',
     'Must' => '必须',
