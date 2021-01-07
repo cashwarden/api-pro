@@ -49,9 +49,7 @@ class ActiveController extends \yii\rest\ActiveController
     public function behaviors()
     {
         $behaviors = parent::behaviors();
-
         // 跨区请求 必须先删掉 authenticator
-        $behaviors['authenticator'];
         unset($behaviors['authenticator']);
 
         $behaviors['corsFilter'] = [

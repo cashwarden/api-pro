@@ -43,6 +43,7 @@ class SiteController extends Controller
                 'exception' => $exception->getMessage(),
                 'line' => $exception->getLine(),
                 'file' => $exception->getFile(),
+                'method' => Yii::$app->request->method
             ], 'response_data_error');
 
             return ['code' => $exception->getCode(), 'message' => $exception->getMessage()];
