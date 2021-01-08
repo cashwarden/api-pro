@@ -119,12 +119,9 @@ class UserController extends ActiveController
         return $model->save();
     }
 
-    /**
-     * @return User|array|\yii\db\ActiveRecord
-     */
-    public function actionMe()
+    public function actionMe(): ?\yii\web\IdentityInterface
     {
-        return User::find()->where(['id' => Yii::$app->user->id])->one();
+        return Yii::$app->user->identity;
     }
 
     /**
@@ -249,6 +246,19 @@ class UserController extends ActiveController
         ];
     }
 
+
+    public function actionUpdateSettings()
+    {
+        $setting = Yii::$app->userSetting;
+
+        $params = Yii::$app->request->bodyParams;
+        $userId = Yii::$app->user->id;
+        foreach ($params as $key => $value) {
+            $setting->set($key, $value, $userId, 'Not allowed Update Post');
+        }
+        return $setting->getAllByUserId($userId);
+    }
+
     public function actionGetUserProRecord(string $out_sn)
     {
         return $this->userProService->getUserProRecord($out_sn);
@@ -256,7 +266,7 @@ class UserController extends ActiveController
 
     public function actionGetUserPro()
     {
-        $userPro = $this->userProService->getUserPro();
-        return $userPro ?: '';
+        $user = Yii::$app->user->identity;
+        return $user->pro;
     }
 }

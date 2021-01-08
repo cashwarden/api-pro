@@ -11,6 +11,7 @@ use app\core\models\Rule;
 use app\core\models\Transaction;
 use app\core\types\AccountStatus;
 use app\core\types\DirectionType;
+use app\core\types\ReimbursementStatus;
 use Exception;
 use Yii;
 use yii\base\InvalidConfigException;
@@ -120,11 +121,13 @@ class AccountService
         $in = Record::find()->where([
             'account_id' => $accountId,
             'direction' => DirectionType::INCOME,
+            'reimbursement_status' => [ReimbursementStatus::NONE, ReimbursementStatus::TODO],
         ])->sum('currency_amount_cent');
 
         $out = Record::find()->where([
             'account_id' => $accountId,
             'direction' => DirectionType::EXPENSE,
+            'reimbursement_status' => [ReimbursementStatus::NONE, ReimbursementStatus::TODO],
         ])->sum('currency_amount_cent');
 
         return ($in - $out) ?: 0;
