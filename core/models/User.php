@@ -2,7 +2,9 @@
 
 namespace app\core\models;
 
+use app\core\types\UserProRecordStatus;
 use app\core\types\UserStatus;
+use Carbon\Carbon;
 use Yii;
 use yii\behaviors\TimestampBehavior;
 use yii\db\ActiveRecord;
@@ -25,6 +27,7 @@ use yiier\helpers\DateHelper;
  * @property int|null $updated_at
  *
  * @property-write string $password
+ * @property-read null|\app\core\models\UserProRecord $pro
  * @property-read string $authKey
  */
 class User extends ActiveRecord implements IdentityInterface
@@ -190,6 +193,20 @@ class User extends ActiveRecord implements IdentityInterface
         $timestamp = (int)substr($token, strrpos($token, '_') + 1);
         $expire = Yii::$app->params['userPasswordResetTokenExpire'];
         return $timestamp + $expire >= time();
+    }
+
+    public function extraFields()
+    {
+        return ['pro'];
+    }
+
+    public function getPro(): ?UserProRecord
+    {
+        return UserProRecord::find()
+            ->where(['user_id' => $this->id, 'status' => UserProRecordStatus::PAID])
+            ->andWhere(['<=', 'created_at', Carbon::now()->toDateTimeString()])
+            ->orderBy(['ended_at' => SORT_DESC])
+            ->one();
     }
 
     /**
