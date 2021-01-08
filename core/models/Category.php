@@ -32,7 +32,7 @@ use yiier\validators\ArrayValidator;
 class Category extends \yii\db\ActiveRecord
 {
     public const DEFAULT = 1;
-    public const NO_DEFAULT = 0;
+    public const NOT_DEFAULT = 0;
 
     /**
      * {@inheritdoc}
@@ -147,7 +147,7 @@ class Category extends \yii\db\ActiveRecord
         parent::afterSave($insert, $changedAttributes);
         if ($this->default) {
             Category::updateAll(
-                ['default' => self::NO_DEFAULT, 'updated_at' => Yii::$app->formatter->asDatetime('now')],
+                ['default' => self::NOT_DEFAULT, 'updated_at' => Yii::$app->formatter->asDatetime('now')],
                 [
                     'and',
                     [
