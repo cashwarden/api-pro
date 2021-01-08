@@ -199,7 +199,8 @@ class Record extends ActiveRecord
         parent::afterSave($insert, $changedAttributes);
         $amountCent = data_get($changedAttributes, 'amount_cent');
         $accountId = data_get($changedAttributes, 'account_id');
-        if ($this->transaction_id && ($amountCent || $insert || $accountId)) {
+        $reimbursementStatus = data_get($changedAttributes, 'reimbursement_status');
+        if ($this->transaction_id && ($amountCent || $insert || $accountId || $reimbursementStatus)) {
             $userIds = LedgerService::getLedgerMemberUserIdsByType($this->ledger_id);
             // Exclude balance adjustment transaction type
             AccountService::updateAccountBalance($this->account_id, $userIds);
