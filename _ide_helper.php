@@ -18,6 +18,8 @@ class Yii extends \yii\BaseYii
  * @property light\hashids\Hashids $hashids
  * @property yii\caching\FileCache $cache
  * @property yii\db\Connection $db
+ * @property hightman\xunsearch\Connection $xunsearch
+ * @property yiier\userSetting\UserSetting $userSetting
  * @property yii\queue\db\Queue $queue
  * @property yii\web\Response $response
  * @property Guanguans\YiiPay\Pay $pay
