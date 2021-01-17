@@ -51,7 +51,7 @@ class RecordController extends ActiveController
     {
         $dataProvider = parent::prepareDataProvider();
 
-        $params = Yii::$app->request->queryParams;
+        $params = $this->formatParams(Yii::$app->request->queryParams);
         $transactionIds = params('useXunSearch')
             ? $this->transactionService->getIdsByXunSearch($params)
             : $this->transactionService->getIdsBySearch($params);
