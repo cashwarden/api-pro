@@ -242,7 +242,7 @@ class Record extends ActiveRecord
             }
         }
         Yii::$app->queue->push(new UpdateBudgetJob(['ledgerId' => $this->ledger_id, 'datetime' => $this->date]));
-        $userIds = LedgerService::getLedgerMemberUserIdsByType($this->ledger_id);
+        $userIds = $this->ledger_id ? LedgerService::getLedgerMemberUserIdsByType($this->ledger_id) : [$this->user_id];
         $this->account_id ? AccountService::updateAccountBalance($this->account_id, $userIds) : null;
     }
 
