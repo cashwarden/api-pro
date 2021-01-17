@@ -701,8 +701,8 @@ class TransactionService extends BaseObject
             $query->andWhere([
                 'or',
                 ['like', 'remark', $searchKeywords],
-                ['tags', 'remark', $searchKeywords],
-                ['remark', 'remark', $searchKeywords],
+                ['like', 'tags', $searchKeywords],
+                ['like', 'description', $searchKeywords],
             ]);
         }
 
