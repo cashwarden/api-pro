@@ -724,7 +724,7 @@ class TransactionService extends BaseObject
             $query->andWhere($searchKeywords);
         }
         if (($date = explode('~', data_get($params, 'date'))) && count($date) == 2) {
-            $query->andWhere(['between', 'date', strtotime($date[0], strtotime($date[1]))]);
+            $query->andWhere(['between', 'date', strtotime($date[0]), strtotime($date[1])]);
         }
 
         $query->andFilterWhere(['category_id' => data_get($params, 'category_id')]);
