@@ -730,8 +730,8 @@ class TransactionService extends BaseObject
         $query->andFilterWhere(['category_id' => data_get($params, 'category_id')]);
         $search = $query->asArray()
             ->orderBy(['date' => SORT_DESC, 'id' => SORT_DESC])
-            ->limit(500)
             ->all();
+        Log::error('xxxxxx', $search);
 
         return \yii\helpers\ArrayHelper::getColumn($search, function ($element) {
             return (int)$element['id'];
