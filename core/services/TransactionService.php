@@ -693,11 +693,18 @@ class TransactionService extends BaseObject
         }
 
         $query = Transaction::find()->andWhere($baseConditions);
-        if ($searchKeywords = trim(request('keyword'))) {
-            $query->andWhere("MATCH(`description`, `tags`, `remark`) AGAINST ('*$searchKeywords*' IN BOOLEAN MODE)");
+        if (($date = explode('~', data_get($params, 'date'))) && count($date) == 2) {
+            $query->andWhere(['between', 'date', strtotime($date[0]), strtotime($date[1])]);
         }
-
         $query->andFilterWhere(['category_id' => data_get($params, 'category_id')]);
+        if ($searchKeywords = trim(request('keyword'))) {
+            $query->andWhere([
+                'or',
+                ['like', 'remark', $searchKeywords],
+                ['tags', 'remark', $searchKeywords],
+                ['remark', 'remark', $searchKeywords],
+            ]);
+        }
 
         $ids = $query->column();
         return array_map('intval', $ids);
@@ -732,7 +739,6 @@ class TransactionService extends BaseObject
         $search = $query->asArray()
             ->orderBy(['date' => SORT_DESC, 'id' => SORT_DESC])
             ->all();
-        Log::error('xxxxxx', data_column($search, 'id'));
 
         return \yii\helpers\ArrayHelper::getColumn($search, function ($element) {
             return (int)$element['id'];
