@@ -694,7 +694,7 @@ class TransactionService extends BaseObject
 
         $query = Transaction::find()->andWhere($baseConditions);
         if (($date = explode('~', data_get($params, 'date'))) && count($date) == 2) {
-            $query->andWhere(['between', 'date', strtotime($date[0]), strtotime($date[1])]);
+            $query->andWhere(['between', 'date', $date[0] . ' 00:00:00', $date[1] . ' 23:59:59']);
         }
         $query->andFilterWhere(['category_id' => data_get($params, 'category_id')]);
         if ($searchKeywords = trim(request('keyword'))) {
