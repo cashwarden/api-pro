@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "e020d75e4b844c4c59446f1fa553ef71",
+    "content-hash": "4a58cb293788b3aee167608aa6d79f91",
     "packages": [
         {
             "name": "bower-asset/inputmask",
@@ -2648,19 +2648,20 @@
         },
         {
             "name": "yiier/yii2-user-setting",
-            "version": "v0.1.1",
+            "version": "v0.2.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/yiier/yii2-user-setting.git",
-                "reference": "06f02b8112a237eaf36fed930c74b0fb3ba8db6c"
+                "reference": "2a5707b1f658bbe9f305b40eeeddaa7f1b2ed0bd"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/yiier/yii2-user-setting/zipball/06f02b8112a237eaf36fed930c74b0fb3ba8db6c",
-                "reference": "06f02b8112a237eaf36fed930c74b0fb3ba8db6c",
+                "url": "https://api.github.com/repos/yiier/yii2-user-setting/zipball/2a5707b1f658bbe9f305b40eeeddaa7f1b2ed0bd",
+                "reference": "2a5707b1f658bbe9f305b40eeeddaa7f1b2ed0bd",
                 "shasum": ""
             },
             "require": {
+                "yiier/yii2-user-setting": "*",
                 "yiisoft/yii2": "~2.0.0"
             },
             "type": "yii2-extension",
@@ -2685,7 +2686,7 @@
                 "setting",
                 "yii2"
             ],
-            "time": "2021-01-07T03:43:10+00:00"
+            "time": "2021-01-27T09:31:19+00:00"
         },
         {
             "name": "yiier/yii2-validators",
@@ -7091,12 +7092,12 @@
             "version": "1.9.1",
             "source": {
                 "type": "git",
-                "url": "https://github.com/webmozart/assert.git",
+                "url": "https://github.com/webmozarts/assert.git",
                 "reference": "bafc69caeb4d49c39fd0779086c03a3738cbb389"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/webmozart/assert/zipball/bafc69caeb4d49c39fd0779086c03a3738cbb389",
+                "url": "https://api.github.com/repos/webmozarts/assert/zipball/bafc69caeb4d49c39fd0779086c03a3738cbb389",
                 "reference": "bafc69caeb4d49c39fd0779086c03a3738cbb389",
                 "shasum": ""
             },

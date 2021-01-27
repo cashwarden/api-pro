@@ -107,6 +107,7 @@ $config = [
                 'POST <module>/users/upgrade-to-pro-request' => '<module>/user/upgrade-to-pro-request',
                 "GET <module>/users/pro-record/<out_sn:\w+>" => '<module>/user/get-user-pro-record',
                 "GET <module>/users/pro" => '<module>/user/get-user-pro',
+                'GET <module>/users/settings' => '<module>/user/get-settings',
                 'POST <module>/users/settings' => '<module>/user/update-settings',
 
                 "GET <module>/transactions/<alias:types|export>" => '<module>/transaction/<alias>',
