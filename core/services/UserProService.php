@@ -35,7 +35,7 @@ class UserProService
         // todo 缓存
         return UserProRecord::find()
             ->where(['user_id' => $userId, 'status' => UserProRecordStatus::PAID])
-            ->andWhere(['<=', 'created_at', Carbon::now()->toDateTimeString()])
+            ->andWhere(['>=', 'ended_at', Carbon::now()->toDateTimeString()])
             ->orderBy(['ended_at' => SORT_DESC])
             ->exists();
     }
