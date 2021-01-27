@@ -693,11 +693,18 @@ class TransactionService extends BaseObject
         }
 
         $query = Transaction::find()->andWhere($baseConditions);
-        if ($searchKeywords = trim(request('keyword'))) {
-            $query->andWhere("MATCH(`description`, `tags`, `remark`) AGAINST ('*$searchKeywords*' IN BOOLEAN MODE)");
+        if (($date = explode('~', data_get($params, 'date'))) && count($date) == 2) {
+            $query->andWhere(['between', 'date', $date[0] . ' 00:00:00', $date[1] . ' 23:59:59']);
         }
-
         $query->andFilterWhere(['category_id' => data_get($params, 'category_id')]);
+        if ($searchKeywords = trim(request('keyword'))) {
+            $query->andWhere([
+                'or',
+                ['like', 'remark', $searchKeywords],
+                ['like', 'tags', $searchKeywords],
+                ['like', 'description', $searchKeywords],
+            ]);
+        }
 
         $ids = $query->column();
         return array_map('intval', $ids);
@@ -723,15 +730,15 @@ class TransactionService extends BaseObject
         if (($searchKeywords = trim(data_get($params, 'keyword')))) {
             $query->andWhere($searchKeywords);
         }
-        if (($date = explode('~', data_get($params, 'date'))) && count($date) == 2) {
-            $query->andWhere(['between', 'date', strtotime($date[0]), strtotime($date[1])]);
-        }
+
+//        if (($date = explode('~', data_get($params, 'date'))) && count($date) == 2) {
+//            $query->andWhere(['between', 'date', strtotime($date[0]), strtotime($date[1])]);
+//        }
 
         $query->andFilterWhere(['category_id' => data_get($params, 'category_id')]);
         $search = $query->asArray()
             ->orderBy(['date' => SORT_DESC, 'id' => SORT_DESC])
             ->all();
-        Log::error('xxxxxx', $search);
 
         return \yii\helpers\ArrayHelper::getColumn($search, function ($element) {
             return (int)$element['id'];

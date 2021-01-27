@@ -172,8 +172,16 @@ class RecordController extends ActiveController
     public function checkAccess($action, $model = null, $params = [])
     {
         if (in_array($action, ['delete', 'update'])) {
-            LedgerService::checkAccessOnType($model->ledger_id, $model->user_id, $action);
-            LedgerService::checkAccess($model->ledger_id, RuleControlHelper::EDIT);
+            if ($model->ledger_id) {
+                LedgerService::checkAccessOnType($model->ledger_id, $model->user_id, $action);
+                LedgerService::checkAccess($model->ledger_id, RuleControlHelper::EDIT);
+            } else {
+                if ($model->user_id !== \Yii::$app->user->id) {
+                    throw new ForbiddenHttpException(
+                        t('app', 'You can only ' . $action . ' data that you\'ve created.')
+                    );
+                }
+            }
         }
     }
 }
