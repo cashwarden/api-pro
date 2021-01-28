@@ -53,6 +53,9 @@ return [
             'class' => 'hightman\xunsearch\Connection',
             'iniDirectory' => '@app/config',    // 搜索 ini 文件目录，默认：@vendor/hightman/xunsearch/app
         ],
+        'userSetting' => [
+            'class' => 'yiier\userSetting\UserSetting',
+        ],
         'queue' => [
             'class' => \yii\queue\db\Queue::class,
             'db' => 'db', // DB connection component or its config

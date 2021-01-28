@@ -44,6 +44,7 @@ chmod 777 -R runtime/
 chmod 777 -R web/uploads/
 php yii migrate
 php yii queue-migrate
+php yii migrate --migrationPath=@yiier/userSetting/migrations/
 php yii generate/key # optional 
 ~~~
 
@@ -66,6 +67,7 @@ chmod 777 -R runtime/
 chmod 777 -R web/uploads/
 php yii migrate
 php yii queue-migrate
+php yii migrate --migrationPath=@yiier/userSetting/migrations/
 php yii generate/key # optional 
 ```
 

@@ -4,14 +4,14 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "9fcdedf2de91426dc185d64ae8f8828c",
+    "content-hash": "4a58cb293788b3aee167608aa6d79f91",
     "packages": [
         {
             "name": "bower-asset/inputmask",
             "version": "3.3.11",
             "source": {
                 "type": "git",
-                "url": "git@github.com:RobinHerbots/Inputmask.git",
+                "url": "https://github.com/RobinHerbots/Inputmask.git",
                 "reference": "5e670ad62f50c738388d4dcec78d2888505ad77b"
             },
             "dist": {
@@ -32,7 +32,7 @@
             "version": "3.5.1",
             "source": {
                 "type": "git",
-                "url": "https://github.com/jquery/jquery-dist.git",
+                "url": "git@github.com:jquery/jquery-dist.git",
                 "reference": "4c0e4becb8263bb5b3e6dadc448d8e7305ef8215"
             },
             "dist": {
@@ -50,7 +50,7 @@
             "version": "v1.3.2",
             "source": {
                 "type": "git",
-                "url": "git@github.com:bestiejs/punycode.js.git",
+                "url": "https://github.com/bestiejs/punycode.js.git",
                 "reference": "38c8d3131a82567bfef18da09f7f4db68c84f8a3"
             },
             "dist": {
@@ -2645,6 +2645,48 @@
                 "yii2"
             ],
             "time": "2020-08-23T11:02:11+00:00"
+        },
+        {
+            "name": "yiier/yii2-user-setting",
+            "version": "v0.2.1",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/yiier/yii2-user-setting.git",
+                "reference": "2a5707b1f658bbe9f305b40eeeddaa7f1b2ed0bd"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/yiier/yii2-user-setting/zipball/2a5707b1f658bbe9f305b40eeeddaa7f1b2ed0bd",
+                "reference": "2a5707b1f658bbe9f305b40eeeddaa7f1b2ed0bd",
+                "shasum": ""
+            },
+            "require": {
+                "yiier/yii2-user-setting": "*",
+                "yiisoft/yii2": "~2.0.0"
+            },
+            "type": "yii2-extension",
+            "autoload": {
+                "psr-4": {
+                    "yiier\\userSetting\\": "src"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "BSD-4-Clause"
+            ],
+            "authors": [
+                {
+                    "name": "forecho",
+                    "email": "caizhenghai@gmail.com"
+                }
+            ],
+            "description": "User Settings For Yii2",
+            "keywords": [
+                "extension",
+                "setting",
+                "yii2"
+            ],
+            "time": "2021-01-27T09:31:19+00:00"
         },
         {
             "name": "yiier/yii2-validators",
@@ -7050,12 +7092,12 @@
             "version": "1.9.1",
             "source": {
                 "type": "git",
-                "url": "https://github.com/webmozart/assert.git",
+                "url": "https://github.com/webmozarts/assert.git",
                 "reference": "bafc69caeb4d49c39fd0779086c03a3738cbb389"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/webmozart/assert/zipball/bafc69caeb4d49c39fd0779086c03a3738cbb389",
+                "url": "https://api.github.com/repos/webmozarts/assert/zipball/bafc69caeb4d49c39fd0779086c03a3738cbb389",
                 "reference": "bafc69caeb4d49c39fd0779086c03a3738cbb389",
                 "shasum": ""
             },

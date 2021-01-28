@@ -12,6 +12,7 @@ class TelegramKeyword
     public const TODAY = '/' . AnalysisDateType::TODAY;
     public const YESTERDAY = '/' . AnalysisDateType::YESTERDAY;
     public const LAST_MONTH = '/' . AnalysisDateType::LAST_MONTH;
+    public const CURRENT_MONTH = '/' . AnalysisDateType::CURRENT_MONTH;
     public const PASSWORD_RESET = '/password_reset';
 
     /**
@@ -28,6 +29,7 @@ class TelegramKeyword
             self::TODAY,
             self::YESTERDAY,
             self::LAST_MONTH,
+            self::CURRENT_MONTH,
             self::PASSWORD_RESET,
         ];
     }

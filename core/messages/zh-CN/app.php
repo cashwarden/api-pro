@@ -29,6 +29,7 @@ return [
 
     'Current month' => '本月',
     'Last month' => '上个月',
+    'Last week' => '上周',
     'Yesterday' => '昨天',
     'Today' => '今天',
     'Grand total' => '累计',

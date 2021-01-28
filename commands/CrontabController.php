@@ -13,11 +13,13 @@ use app\core\traits\ServiceTrait;
 use app\core\types\AnalysisDateType;
 use app\core\types\AuthClientType;
 use app\core\types\RecurrenceStatus;
+use app\core\types\UserSettingKeys;
 use Yii;
 use yii\base\InvalidConfigException;
 use yii\console\Controller;
 use yii\db\Exception;
 use yii\web\NotFoundHttpException;
+use yiier\userSetting\models\UserSettingModel;
 
 class CrontabController extends Controller
 {
@@ -69,20 +71,38 @@ class CrontabController extends Controller
     }
 
     /**
+     * 0 10 * * * 每天的 10:00 执行 php yii crontab/report yesterday
+     * 5 10 * * 1 每周一的 10:05 执行 php yii crontab/report last_week
+     * 10 10 1 * * 每月1日的 10:10 执行 php yii crontab/report last_month
      * @param string $type
      * @throws Exception
      */
     public function actionReport(string $type = AnalysisDateType::YESTERDAY)
     {
-        $items = AuthClient::find()
-            ->where(['type' => AuthClientType::TELEGRAM])
-            ->asArray()
-            ->all();
+        $userIds = AuthClient::find()->where(['type' => AuthClientType::TELEGRAM])->select('user_id')->column();
         $transaction = Yii::$app->db->beginTransaction();
         try {
-            foreach ($items as $item) {
-                $this->telegramService->sendReport($item['user_id'], $type);
-                $this->stdout("定时发送报告成功，user_id：{$item['user_id']}\n");
+            switch ($type) {
+                case AnalysisDateType::LAST_WEEK:
+                    $key = UserSettingKeys::WEEKLY_REPORT;
+                    break;
+                case AnalysisDateType::LAST_MONTH:
+                    $key = UserSettingKeys::MONTHLY_REPORT;
+                    break;
+                case AnalysisDateType::YESTERDAY:
+                    $key = UserSettingKeys::DAILY_REPORT;
+                    break;
+                default:
+                    $key = 0;
+                    break;
+            }
+            $sendUserIds = UserSettingModel::find()
+                ->select('user_id')
+                ->where(['user_id' => $userIds, 'key' => $key, 'value' => '1'])
+                ->column();
+            foreach ($sendUserIds as $sendUserId) {
+                $this->telegramService->sendReport($sendUserId, $type);
+                $this->stdout("定时发送报告成功，user_id：{$sendUserId}\n");
             }
             $transaction->commit();
         } catch (\Exception $e) {

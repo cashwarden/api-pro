@@ -54,7 +54,15 @@ class TelegramController extends ActiveController
 
             $bot->command(ltrim(TelegramKeyword::REPORT, '/'), function (Message $message) use ($bot) {
                 $keyboard = new ReplyKeyboardMarkup(
-                    [[TelegramKeyword::TODAY, TelegramKeyword::YESTERDAY, TelegramKeyword::LAST_MONTH]],
+                    [
+                        [
+                            TelegramKeyword::TODAY,
+                            TelegramKeyword::YESTERDAY,
+                            TelegramKeyword::LAST_MONTH,
+                            TelegramKeyword::CURRENT_MONTH
+                        ]
+                    ],
+                    true,
                     true
                 );
                 /** @var BotApi $bot */
@@ -91,6 +99,10 @@ class TelegramController extends ActiveController
                 $text = "我能做什么？
 /help - 查看帮助
 /cmd - 列出所有指令
+/today - 今日消费报告
+/yesterday - 昨日消费报告
+/current_month - 本月消费报告
+/last_month - 上个月消费报告
 /start - 开始使用
 /password_reset - 重置密码
 
@@ -138,7 +150,12 @@ class TelegramController extends ActiveController
                 $bot->sendMessage($message->getChat()->getId(), $text);
             }, function (Update $message) {
                 $msg = $message->getMessage();
-                $report = [TelegramKeyword::TODAY, TelegramKeyword::YESTERDAY, TelegramKeyword::LAST_MONTH];
+                $report = [
+                    TelegramKeyword::TODAY,
+                    TelegramKeyword::YESTERDAY,
+                    TelegramKeyword::LAST_MONTH,
+                    TelegramKeyword::CURRENT_MONTH
+                ];
                 if ($msg && in_array($msg->getText(), $report)) {
                     return true;
                 }
