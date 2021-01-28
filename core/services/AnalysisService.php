@@ -33,9 +33,7 @@ class AnalysisService extends BaseObject
     {
         $items = [];
         foreach (AnalysisDateType::texts() as $key => $item) {
-            if (!$date = AnalysisService::getDateRange($key)) {
-                continue;
-            }
+            $date = AnalysisService::getDateRange($key);
             $items[$key]['overview'] = $this->getRecordOverviewByDate($date, $params);
             $items[$key]['key'] = $key;
             $items[$key]['text'] = $item;

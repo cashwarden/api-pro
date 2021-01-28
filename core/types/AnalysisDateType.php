@@ -36,9 +36,9 @@ class AnalysisDateType
         return [
             self::TODAY => Yii::t('app', 'Today'),
             self::YESTERDAY => Yii::t('app', 'Yesterday'),
+            //self::LAST_WEEK => Yii::t('app', 'Last week'),
             self::CURRENT_MONTH => Yii::t('app', 'Current month'),
             self::LAST_MONTH => Yii::t('app', 'Last month'),
-            self::LAST_WEEK => Yii::t('app', 'Last week'),
             self::GRAND_TOTAL => Yii::t('app', 'Grand total')
         ];
     }
