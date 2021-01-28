@@ -54,7 +54,15 @@ class TelegramController extends ActiveController
 
             $bot->command(ltrim(TelegramKeyword::REPORT, '/'), function (Message $message) use ($bot) {
                 $keyboard = new ReplyKeyboardMarkup(
-                    [[TelegramKeyword::TODAY, TelegramKeyword::YESTERDAY, TelegramKeyword::LAST_MONTH]],
+                    [
+                        [
+                            TelegramKeyword::TODAY,
+                            TelegramKeyword::YESTERDAY,
+                            TelegramKeyword::LAST_MONTH,
+                            TelegramKeyword::CURRENT_MONTH
+                        ]
+                    ],
+                    true,
                     true
                 );
                 /** @var BotApi $bot */
