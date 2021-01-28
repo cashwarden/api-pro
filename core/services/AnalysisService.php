@@ -33,7 +33,9 @@ class AnalysisService extends BaseObject
     {
         $items = [];
         foreach (AnalysisDateType::texts() as $key => $item) {
-            $date = AnalysisService::getDateRange($key);
+            if (!$date = AnalysisService::getDateRange($key)) {
+                continue;
+            }
             $items[$key]['overview'] = $this->getRecordOverviewByDate($date, $params);
             $items[$key]['key'] = $key;
             $items[$key]['text'] = $item;
@@ -190,9 +192,9 @@ class AnalysisService extends BaseObject
                 break;
         }
 
-        return array_map(function ($i) use ($formatter) {
+        return $date ? array_map(function ($i) use ($formatter) {
             return $formatter->asDatetime($i);
-        }, $date);
+        }, $date) : [];
     }
 
     /**
