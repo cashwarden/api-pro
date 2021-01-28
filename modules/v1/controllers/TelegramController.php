@@ -89,6 +89,7 @@ class TelegramController extends ActiveController
             $bot->command(ltrim(TelegramKeyword::CMD, '/'), function (Message $message) use ($bot) {
                 $keyboard = new ReplyKeyboardMarkup(
                     [[TelegramKeyword::REPORT]],
+                    true,
                     true
                 );
                 /** @var BotApi $bot */
