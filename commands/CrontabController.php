@@ -71,9 +71,9 @@ class CrontabController extends Controller
     }
 
     /**
-     * 0 10 * * * 每天的 10:00 执行
-     * 5 10 * * 1 每周一的 10:05 执行
-     * 10 10 1 * * 每月1日的 10:10 执行
+     * 0 10 * * * 每天的 10:00 执行 php yii crontab/report yesterday
+     * 5 10 * * 1 每周一的 10:05 执行 php yii crontab/report last_week
+     * 10 10 1 * * 每月1日的 10:10 执行 php yii crontab/report last_month
      * @param string $type
      * @throws Exception
      */
