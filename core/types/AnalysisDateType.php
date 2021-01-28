@@ -13,6 +13,7 @@ class AnalysisDateType
     public const YESTERDAY = 'yesterday';
     public const CURRENT_MONTH = 'current_month';
     public const LAST_MONTH = 'last_month';
+    public const LAST_WEEK = 'last_week';
     public const GRAND_TOTAL = 'grand_total';
 
     public const EVERY_DAY_OF_MONTH = 'every_day_of_month';
@@ -25,6 +26,7 @@ class AnalysisDateType
             self::YESTERDAY,
             self::CURRENT_MONTH,
             self::LAST_MONTH,
+            self::LAST_WEEK,
             self::GRAND_TOTAL,
         ];
     }
@@ -36,6 +38,7 @@ class AnalysisDateType
             self::YESTERDAY => Yii::t('app', 'Yesterday'),
             self::CURRENT_MONTH => Yii::t('app', 'Current month'),
             self::LAST_MONTH => Yii::t('app', 'Last month'),
+            self::LAST_WEEK => Yii::t('app', 'Last week'),
             self::GRAND_TOTAL => Yii::t('app', 'Grand total')
         ];
     }
@@ -50,6 +53,10 @@ class AnalysisDateType
             case self::LAST_MONTH:
                 $d1 = Carbon::now()->subMonth()->firstOfMonth()->toDateString();
                 $d2 = Carbon::now()->subMonth()->lastOfMonth()->toDateString();
+                break;
+            case self::LAST_WEEK:
+                $d1 = Carbon::now()->subWeek()->startOfWeek()->toDateString();
+                $d2 = Carbon::now()->subWeek()->endOfWeek()->toDateString();
                 break;
             case self::CURRENT_MONTH:
                 $d1 = Carbon::now()->firstOfMonth()->toDateString();
