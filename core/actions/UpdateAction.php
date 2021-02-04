@@ -9,6 +9,7 @@ use yii\db\ActiveRecord;
 use yii\rest\Action;
 use yii\web\NotFoundHttpException;
 use yii\web\ServerErrorHttpException;
+use yiier\helpers\Setup;
 
 class UpdateAction extends Action
 {
@@ -34,8 +35,8 @@ class UpdateAction extends Action
 
         $model->scenario = $this->scenario;
         $model->load(Yii::$app->getRequest()->getBodyParams(), '');
-        if ($model->save() === false && !$model->hasErrors()) {
-            throw new ServerErrorHttpException('Failed to update the object for unknown reason.');
+        if ($model->save() === false && $model->errors) {
+            throw new ServerErrorHttpException(Setup::errorMessage($model->firstErrors));
         }
         return $model->findOne($id);
     }
