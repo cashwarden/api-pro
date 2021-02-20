@@ -233,6 +233,7 @@ class TransactionService extends BaseObject
             if (!$model->save()) {
                 throw new DBException(Setup::errorMessage($model->firstErrors));
             }
+            event(new CreateRecordSuccessEvent(), $model);
             $source ? Record::updateAll(['source' => $source], ['transaction_id' => $model->id]) : null;
             return $model;
         } catch (Exception $e) {
