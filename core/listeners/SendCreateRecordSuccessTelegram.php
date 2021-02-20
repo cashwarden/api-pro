@@ -3,7 +3,6 @@
 namespace app\core\listeners;
 
 use app\core\models\Record;
-use app\core\models\User;
 use app\core\traits\ServiceTrait;
 use Guanguans\YiiEvent\ListenerInterface;
 use yii\base\Event;
@@ -17,7 +16,6 @@ class SendCreateRecordSuccessTelegram implements ListenerInterface
         /** @var Record $record */
         $record = $event->data;
         $transaction = $record->transaction;
-        \Yii::$app->user->switchIdentity(User::findOne($record->user_id));
         if ($transaction) {
             $keyboard = $this->getTelegramService()->getTransactionMarkup($record->transaction);
             $text = $this->getTelegramService()->getMessageTextByTransaction($transaction);
@@ -25,6 +23,6 @@ class SendCreateRecordSuccessTelegram implements ListenerInterface
             $keyboard = $this->getTelegramService()->getRecordMarkup($record);
             $text = $this->getTelegramService()->getMessageTextByRecord($record);
         }
-        $this->getTelegramService()->sendMessage($text, $keyboard);
+        $this->getTelegramService()->sendMessage($text, $keyboard, $record->user_id);
     }
 }
