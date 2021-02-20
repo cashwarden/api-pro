@@ -76,7 +76,7 @@ class TransactionController extends ActiveController
         $this->validate($model, $params);
         $filename = Yii::$app->user->id . 'record.csv';
         $this->uploadService->uploadRecord($uploadedFile, $filename);
-        $data = $this->transactionService->createByCSV($filename);
+        $data = $this->transactionService->createByCSV($filename, request('ledger_id'));
         $this->uploadService->deleteLocalFile($filename);
         return $data;
     }

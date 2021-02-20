@@ -74,7 +74,7 @@ class TransactionService extends BaseObject
         return true;
     }
 
-    public function createByCSV($filename): array
+    public function createByCSV(string $filename, int $ledgerId): array
     {
         ini_set("memory_limit", "1024M");
         ini_set("set_time_limit", "0");
@@ -101,6 +101,7 @@ class TransactionService extends BaseObject
                     // 账单日期,类别,收入/支出,金额(CNY),标签（多个英文逗号隔开）,描述,备注,账户1,账户2
                     //2020-08-20,餐饮食品,支出,28.9,,买菜28.9,,
                     $baseConditions = ['user_id' => Yii::$app->user->id];
+                    $_model->ledger_id = $ledgerId;
                     $_model->date = Yii::$app->formatter->asDatetime(strtotime($newData[0]), 'php:Y-m-d H:i');
                     $_model->category_id = Category::find()->where($baseConditions + ['name' => $newData[1]])->scalar();
                     if (!$_model->category_id) {
