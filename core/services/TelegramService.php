@@ -403,7 +403,7 @@ class TelegramService extends BaseObject
     {
         $items = [
             [
-                'text' => '删除',
+                'text' => '🚮删除',
                 'callback_data' => Json::encode([
                     'action' => TelegramAction::NEW_RECORD_DELETE,
                     'id' => $record->id

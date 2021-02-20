@@ -6,6 +6,7 @@ use app\core\events\CreateRecordSuccessEvent;
 use app\core\exceptions\CannotOperateException;
 use app\core\exceptions\InternalException;
 use app\core\exceptions\InvalidArgumentException;
+use app\core\exceptions\UserNotProException;
 use app\core\helpers\ArrayHelper;
 use app\core\models\Account;
 use app\core\models\Category;
@@ -223,6 +224,9 @@ class TransactionService extends BaseObject
     {
         try {
             if (strpos($desc, '余额') !== false) {
+                if (!UserProService::isPro()) {
+                    throw new UserNotProException();
+                }
                 return $this->updateAccountByDesc($desc);
             }
             $model = $this->createBaseTransactionByDesc($desc);
