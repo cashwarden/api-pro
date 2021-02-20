@@ -69,6 +69,14 @@ return [
                 \yiier\graylog\Log::error('队列执行失败2', $event->error);
             }
         ],
+        'event' => [
+            'class' => \Guanguans\YiiEvent\Event::class,
+            'listen' => [
+                \app\core\events\CreateRecordSuccessEvent::class => [
+                    \app\core\listeners\SendCreateRecordSuccessTelegram::class,
+                ],
+            ],
+        ],
         'i18n' => [
             'translations' => [
                 'app*' => [

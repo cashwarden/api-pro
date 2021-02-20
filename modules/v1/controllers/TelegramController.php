@@ -198,6 +198,7 @@ class TelegramController extends ActiveController
             $bot->on(function (Update $Update) use ($bot) {
                 $message = $Update->getMessage();
                 $keyboard = null;
+                $text = '';
                 try {
                     $user = $this->userService->getUserByClientId(
                         AuthClientType::TELEGRAM,
@@ -210,15 +211,15 @@ class TelegramController extends ActiveController
                         $keyboard = $this->telegramService->getRecordsMarkup($model);
                         $text = $this->telegramService->getRecordsTextByTransaction($model);
                     } else {
-                        $model = $this->transactionService->createByDesc($t, RecordSource::TELEGRAM);
-                        $keyboard = $this->telegramService->getTransactionMarkup($model);
-                        $text = $this->telegramService->getMessageTextByTransaction($model);
+                        $this->transactionService->createByDesc($t, RecordSource::TELEGRAM);
                     }
                 } catch (\Exception $e) {
                     $text = $e->getMessage();
                 }
-                /** @var BotApi $bot */
-                $bot->sendMessage($message->getChat()->getId(), $text, null, false, null, $keyboard);
+                if ($text) {
+                    /** @var BotApi $bot */
+                    $bot->sendMessage($message->getChat()->getId(), $text, null, false, null, $keyboard);
+                }
             }, function (Update $message) {
                 if ($message->getMessage()) {
                     if (ArrayHelper::strPosArr($message->getMessage()->getText(), TelegramKeyword::items()) === 0) {
