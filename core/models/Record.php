@@ -240,8 +240,8 @@ class Record extends ActiveRecord
             if ($record) {
                 $record->delete();
             }
+            Yii::$app->queue->push(new UpdateBudgetJob(['ledgerId' => $this->ledger_id, 'datetime' => $this->date]));
         }
-        Yii::$app->queue->push(new UpdateBudgetJob(['ledgerId' => $this->ledger_id, 'datetime' => $this->date]));
         $userIds = $this->ledger_id ? LedgerService::getLedgerMemberUserIdsByType($this->ledger_id) : [$this->user_id];
         $this->account_id ? AccountService::updateAccountBalance($this->account_id, $userIds) : null;
     }
