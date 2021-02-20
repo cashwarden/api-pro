@@ -411,12 +411,15 @@ class TelegramService extends BaseObject
             ],
             [
                 'text' => '占位',
+                'callback_data' => '占位',
             ],
             [
                 'text' => '占位',
+                'callback_data' => '占位',
             ],
             [
                 'text' => '占位',
+                'callback_data' => '占位',
             ],
         ];
 
