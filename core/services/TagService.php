@@ -11,7 +11,7 @@ use yiier\helpers\Setup;
 
 class TagService
 {
-    public static function getTagNames(int $ledgerId)
+    public static function getTagNames(int $ledgerId): array
     {
         return Tag::find()->select('name')->where(['ledger_id' => $ledgerId])->column();
     }

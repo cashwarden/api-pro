@@ -451,6 +451,8 @@ class TransactionService extends BaseObject
     {
         if ($tags = TagService::getTagNames($ledgerId)) {
             $tags = implode('|', $tags);
+            $tags = preg_quote($tags); // 转义特殊字符
+            $tags = str_replace('\|', '|', $tags); // 正则改为或的关系
             preg_match_all("!({$tags})!", $desc, $matches);
             return data_get($matches, '0', []);
         }
