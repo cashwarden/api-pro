@@ -185,7 +185,11 @@ class SiteController extends Controller
                             'link' => '/account/index',
                             'icon' => 'anticon-wallet',
                         ],
-
+                        [
+                            'text' => '投资',
+                            'link' => '/assets/index',
+                            'icon' => 'anticon-wallet',
+                        ],
                         [
                             'text' => '账本',
                             'link' => '/ledger/index',

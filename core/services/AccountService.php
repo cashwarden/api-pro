@@ -12,6 +12,7 @@ use app\core\models\Transaction;
 use app\core\types\AccountStatus;
 use app\core\types\DirectionType;
 use app\core\types\ReimbursementStatus;
+use app\core\types\TransactionType;
 use Exception;
 use Yii;
 use yii\base\InvalidConfigException;
@@ -129,6 +130,40 @@ class AccountService
             'direction' => DirectionType::EXPENSE,
             'reimbursement_status' => [ReimbursementStatus::NONE, ReimbursementStatus::TODO],
         ])->sum('currency_amount_cent');
+
+        return ($in - $out) ?: 0;
+    }
+
+    public static function getCalculateIncomeSumCent(int $accountId): int
+    {
+        $firstId = Record::find()
+            ->where([
+                'account_id' => $accountId,
+                'transaction_type' => TransactionType::ADJUST,
+                'reimbursement_status' => [ReimbursementStatus::NONE, ReimbursementStatus::TODO],
+            ])
+            ->orderBy(['date' => SORT_ASC])
+            ->scalar();
+
+        $in = Record::find()
+            ->where([
+                'account_id' => $accountId,
+                'transaction_type' => TransactionType::ADJUST,
+                'direction' => DirectionType::INCOME,
+                'reimbursement_status' => [ReimbursementStatus::NONE, ReimbursementStatus::TODO],
+            ])
+            ->andWhere(['!=', 'id', $firstId])
+            ->sum('currency_amount_cent');
+
+        $out = Record::find()
+            ->where([
+                'account_id' => $accountId,
+                'transaction_type' => TransactionType::ADJUST,
+                'direction' => DirectionType::EXPENSE,
+                'reimbursement_status' => [ReimbursementStatus::NONE, ReimbursementStatus::TODO],
+            ])
+            ->andWhere(['!=', 'id', $firstId])
+            ->sum('currency_amount_cent');
 
         return ($in - $out) ?: 0;
     }
