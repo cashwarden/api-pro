@@ -134,16 +134,23 @@ class AccountService
         return ($in - $out) ?: 0;
     }
 
+    /**
+     * @param int $accountId
+     * @return int
+     * @throws Exception
+     */
     public static function getCalculateIncomeSumCent(int $accountId): int
     {
-        $firstId = Record::find()
+        $first = Record::find()
             ->where([
                 'account_id' => $accountId,
                 'transaction_type' => TransactionType::ADJUST,
                 'reimbursement_status' => [ReimbursementStatus::NONE, ReimbursementStatus::TODO],
             ])
             ->orderBy(['date' => SORT_ASC])
-            ->scalar();
+            ->limit(1)
+            ->asArray()
+            ->one();
 
         $in = Record::find()
             ->where([
@@ -152,7 +159,7 @@ class AccountService
                 'direction' => DirectionType::INCOME,
                 'reimbursement_status' => [ReimbursementStatus::NONE, ReimbursementStatus::TODO],
             ])
-            ->andWhere(['!=', 'id', $firstId])
+            ->andFilterWhere(['!=', 'id', data_get($first, 'id')])
             ->sum('currency_amount_cent');
 
         $out = Record::find()
@@ -162,7 +169,7 @@ class AccountService
                 'direction' => DirectionType::EXPENSE,
                 'reimbursement_status' => [ReimbursementStatus::NONE, ReimbursementStatus::TODO],
             ])
-            ->andWhere(['!=', 'id', $firstId])
+            ->andFilterWhere(['!=', 'id', data_get($first, 'id')])
             ->sum('currency_amount_cent');
 
         return ($in - $out) ?: 0;
