@@ -2,8 +2,10 @@
 
 namespace app\modules\v1\controllers;
 
+use app\core\exceptions\UserNotProException;
 use app\core\models\Account;
 use app\core\models\Record;
+use app\core\services\UserProService;
 use app\core\traits\ServiceTrait;
 use app\core\types\AccountType;
 use app\core\types\DirectionType;
@@ -15,7 +17,21 @@ class InvestmentController extends ActiveController
 {
     use ServiceTrait;
 
-    public $modelClass = [];
+    public $modelClass = '';
+
+    /**
+     * @param \yii\base\Action $action
+     * @return bool
+     * @throws UserNotProException
+     * @throws \yii\web\BadRequestHttpException
+     */
+    public function beforeAction($action)
+    {
+        if (!UserProService::isPro()) {
+            throw new UserNotProException();
+        }
+        return parent::beforeAction($action);
+    }
 
     /**
      * @return array
@@ -43,6 +59,7 @@ class InvestmentController extends ActiveController
             $items['expense'][$id] = $sum ? (float)Setup::toYuan($sum) : 0;
         }
         bcscale(2);
+        $items['count'] = count($items['expense']);
         $items['income_sum'] = bcsub(array_sum($items['income']), array_sum($items['expense']));
         $items['init_balance_sum'] = bcsub($items['balance_sum'], $items['income_sum']);
         unset($items['expense'], $items['income']);

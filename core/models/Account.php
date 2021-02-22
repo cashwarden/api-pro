@@ -223,6 +223,16 @@ class Account extends \yii\db\ActiveRecord
         AccountService::afterDelete($this);
     }
 
+    public function extraFields()
+    {
+        return ['incomeSum'];
+    }
+
+    public function getIncomeSum()
+    {
+        return Setup::toYuan(AccountService::getCalculateIncomeSumCent($this->id));
+    }
+
     /**
      * @return array
      */
