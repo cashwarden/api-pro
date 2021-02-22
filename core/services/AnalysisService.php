@@ -31,15 +31,23 @@ class AnalysisService extends BaseObject
      */
     public function getRecordOverview(array $params = []): array
     {
-        $items = [];
-        foreach (AnalysisDateType::texts() as $key => $item) {
-            $date = AnalysisService::getDateRange($key);
-            $items[$key]['overview'] = $this->getRecordOverviewByDate($date, $params);
-            $items[$key]['key'] = $key;
-            $items[$key]['text'] = $item;
+        $data = [];
+        $items = [
+            AnalysisDateType::TODAY,
+            AnalysisDateType::YESTERDAY,
+            AnalysisDateType::CURRENT_MONTH,
+            AnalysisDateType::LAST_MONTH,
+            AnalysisDateType::GRAND_TOTAL,
+        ];
+        $texts = AnalysisDateType::texts();
+        foreach ($items as $item) {
+            $date = AnalysisService::getDateRange($item);
+            $data[$item]['overview'] = $this->getRecordOverviewByDate($date, $params);
+            $data[$item]['key'] = $item;
+            $data[$item]['text'] = $texts[$item];
         }
 
-        return $items;
+        return $data;
     }
 
     public function getRecordOverviewByDate(array $date, array $params = []): array
