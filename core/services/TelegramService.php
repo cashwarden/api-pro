@@ -362,7 +362,7 @@ class TelegramService extends BaseObject
      */
     public function getReportTextByType(string $type): string
     {
-        $recordOverview = $this->analysisService->recordOverview;
+        $recordOverview = $this->analysisService->getRecordOverview([$type]);
         $date = AnalysisDateType::getDateByType($type);
         $recordByCategory = $this->analysisService->byCategory(['date' => implode('~', $date)]);
         $text = "收支报告\n";

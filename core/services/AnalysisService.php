@@ -25,20 +25,14 @@ use yiier\helpers\Setup;
 class AnalysisService extends BaseObject
 {
     /**
+     * @param array $items
      * @param array $params
      * @return array
      * @throws \Exception
      */
-    public function getRecordOverview(array $params = []): array
+    public function getRecordOverview(array $items, array $params = []): array
     {
         $data = [];
-        $items = [
-            AnalysisDateType::TODAY,
-            AnalysisDateType::YESTERDAY,
-            AnalysisDateType::CURRENT_MONTH,
-            AnalysisDateType::LAST_MONTH,
-            AnalysisDateType::GRAND_TOTAL,
-        ];
         $texts = AnalysisDateType::texts();
         foreach ($items as $item) {
             $date = AnalysisService::getDateRange($item);
