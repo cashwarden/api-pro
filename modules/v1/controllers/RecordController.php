@@ -9,6 +9,7 @@ use app\core\models\Record;
 use app\core\requests\UpdateStatus;
 use app\core\services\LedgerService;
 use app\core\traits\ServiceTrait;
+use app\core\types\AnalysisDateType;
 use app\core\types\RecordSource;
 use app\core\types\ReimbursementStatus;
 use app\core\types\TransactionType;
@@ -86,7 +87,14 @@ class RecordController extends ActiveController
     public function actionOverview(): array
     {
         $params = Yii::$app->request->queryParams;
-        return array_values($this->analysisService->getRecordOverview($params));
+        $items = [
+            AnalysisDateType::TODAY,
+            AnalysisDateType::YESTERDAY,
+            AnalysisDateType::CURRENT_MONTH,
+            AnalysisDateType::LAST_MONTH,
+            AnalysisDateType::GRAND_TOTAL,
+        ];
+        return array_values($this->analysisService->getRecordOverview($items, $params));
     }
 
 

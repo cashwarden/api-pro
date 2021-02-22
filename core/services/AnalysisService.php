@@ -25,21 +25,23 @@ use yiier\helpers\Setup;
 class AnalysisService extends BaseObject
 {
     /**
+     * @param array $items
      * @param array $params
      * @return array
      * @throws \Exception
      */
-    public function getRecordOverview(array $params = []): array
+    public function getRecordOverview(array $items, array $params = []): array
     {
-        $items = [];
-        foreach (AnalysisDateType::texts() as $key => $item) {
-            $date = AnalysisService::getDateRange($key);
-            $items[$key]['overview'] = $this->getRecordOverviewByDate($date, $params);
-            $items[$key]['key'] = $key;
-            $items[$key]['text'] = $item;
+        $data = [];
+        $texts = AnalysisDateType::texts();
+        foreach ($items as $item) {
+            $date = AnalysisService::getDateRange($item);
+            $data[$item]['overview'] = $this->getRecordOverviewByDate($date, $params);
+            $data[$item]['key'] = $item;
+            $data[$item]['text'] = $texts[$item];
         }
 
-        return $items;
+        return $data;
     }
 
     public function getRecordOverviewByDate(array $date, array $params = []): array

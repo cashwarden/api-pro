@@ -151,7 +151,7 @@ class TelegramService extends BaseObject
         /** @var BotApi $bot */
         $data = Json::decode($message->getData());
         switch (data_get($data, 'action')) {
-            case TelegramAction::RECORD_DELETE:
+            case TelegramAction::TRANSACTION_DELETE:
                 /** @var Transaction $model */
                 if ($model = Transaction::find()->where(['id' => data_get($data, 'id')])->one()) {
                     $transaction = Yii::$app->db->beginTransaction();
@@ -159,6 +159,30 @@ class TelegramService extends BaseObject
                         foreach ($model->records as $record) {
                             $record->delete();
                         }
+                        $text = '记录成功被删除';
+                        $transaction->commit();
+                        $bot->editMessageText(
+                            $message->getFrom()->getId(),
+                            $message->getMessage()->getMessageId(),
+                            $text
+                        );
+                    } catch (\Exception $e) {
+                        $transaction->rollBack();
+                        Log::error('删除记录失败', ['model' => $model->attributes, 'e' => (string)$e]);
+                    }
+                } else {
+                    $text = '删除失败，记录已被删除或者不存在';
+                    $replyToMessageId = $message->getMessage()->getMessageId();
+                    $bot->sendMessage($message->getFrom()->getId(), $text, null, false, $replyToMessageId);
+                }
+
+                break;
+            case TelegramAction::NEW_RECORD_DELETE:
+                /** @var Record $model */
+                if ($model = Record::find()->where(['id' => data_get($data, 'id')])->one()) {
+                    $transaction = Yii::$app->db->beginTransaction();
+                    try {
+                        $model->delete();
                         $text = '记录成功被删除';
                         $transaction->commit();
                         $bot->editMessageText(
@@ -223,7 +247,7 @@ class TelegramService extends BaseObject
             [
                 'text' => '🚮删除',
                 'callback_data' => Json::encode([
-                    'action' => TelegramAction::RECORD_DELETE,
+                    'action' => TelegramAction::TRANSACTION_DELETE,
                     'id' => $model->id
                 ]),
             ],
@@ -282,6 +306,7 @@ class TelegramService extends BaseObject
             $bot->sendMessage($telegram['chat']['id'], $messageText, null, false, null, $keyboard);
         } catch (InvalidArgumentException $e) {
         } catch (Exception $e) {
+            Log::error('发送 telegram 消息失败', [$e->getMessage(), $messageText]);
         }
     }
 
@@ -306,6 +331,17 @@ class TelegramService extends BaseObject
         return $text;
     }
 
+    public function getMessageTextByRecord(Record $record, string $title = '余额调整成功'): string
+    {
+        $text = "{$title}\n";
+        $text .= "时间： {$record->date}\n"; // todo add tag
+        $accountBalance = Setup::toYuan($record->account->balance_cent);
+        $text .= "账户： #{$record->account->name} （余额：{$accountBalance}）\n";
+        $direction = $record->direction == DirectionType::INCOME ? '+' : '-';
+        $text .= "金额：{$direction}" . Setup::toYuan($record->amount_cent);
+        return $text;
+    }
+
     /**
      * @param int $userId
      * @param string $type
@@ -326,7 +362,7 @@ class TelegramService extends BaseObject
      */
     public function getReportTextByType(string $type): string
     {
-        $recordOverview = $this->analysisService->recordOverview;
+        $recordOverview = $this->analysisService->getRecordOverview([$type]);
         $date = AnalysisDateType::getDateByType($type);
         $recordByCategory = $this->analysisService->byCategory(['date' => implode('~', $date)]);
         $text = "收支报告\n";
@@ -337,10 +373,10 @@ class TelegramService extends BaseObject
         $surplus = data_get($recordOverview, "{$type}.overview.surplus", 0);
         $text .= "{$title}统计：已支出 {$expense}，已收入 {$income}，结余 {$surplus}\n";
         foreach ($recordByCategory['expense'] as $item) {
-            $text .= "    - {$item['category_name']}：- {$item['currency_amount']}\n";
+            $text .= "    * {$item['category_name']}：- {$item['currency_amount']}\n";
         }
         foreach ($recordByCategory['income'] as $item) {
-            $text .= "    - {$item['category_name']}：+ {$item['currency_amount']}\n";
+            $text .= "    * {$item['category_name']}：+ {$item['currency_amount']}\n";
         }
 
         return $text;
@@ -357,6 +393,33 @@ class TelegramService extends BaseObject
                     'category_id' => $model->category_id,
                     'page' => $page
                 ]),
+            ],
+        ];
+
+        return new InlineKeyboardMarkup([$items]);
+    }
+
+    public function getRecordMarkup(Record $record): InlineKeyboardMarkup
+    {
+        $items = [
+            [
+                'text' => '🚮删除',
+                'callback_data' => Json::encode([
+                    'action' => TelegramAction::NEW_RECORD_DELETE,
+                    'id' => $record->id
+                ]),
+            ],
+            [
+                'text' => '占位',
+                'callback_data' => '占位',
+            ],
+            [
+                'text' => '占位',
+                'callback_data' => '占位',
+            ],
+            [
+                'text' => '占位',
+                'callback_data' => '占位',
             ],
         ];
 

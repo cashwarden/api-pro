@@ -2,9 +2,11 @@
 
 namespace app\core\services;
 
+use app\core\events\CreateRecordSuccessEvent;
 use app\core\exceptions\CannotOperateException;
 use app\core\exceptions\InternalException;
 use app\core\exceptions\InvalidArgumentException;
+use app\core\exceptions\UserNotProException;
 use app\core\helpers\ArrayHelper;
 use app\core\models\Account;
 use app\core\models\Category;
@@ -214,13 +216,19 @@ class TransactionService extends BaseObject
     /**
      * @param string $desc
      * @param null|int $source
-     * @return Transaction
+     * @return Transaction|Account
      * @throws InternalException
      * @throws \Throwable
      */
-    public function createByDesc(string $desc, $source = null): Transaction
+    public function createByDesc(string $desc, $source = null)
     {
         try {
+            if (strpos($desc, '余额') !== false) {
+                if (!UserProService::isPro()) {
+                    throw new UserNotProException();
+                }
+                return $this->updateAccountByDesc($desc);
+            }
             $model = $this->createBaseTransactionByDesc($desc);
             if (!$model->category_id) {
                 throw new CannotOperateException(Yii::t('app', 'Category not found.'));
@@ -229,6 +237,7 @@ class TransactionService extends BaseObject
             if (!$model->save()) {
                 throw new DBException(Setup::errorMessage($model->firstErrors));
             }
+            event(new CreateRecordSuccessEvent(), $model);
             $source ? Record::updateAll(['source' => $source], ['transaction_id' => $model->id]) : null;
             return $model;
         } catch (Exception $e) {
@@ -243,6 +252,25 @@ class TransactionService extends BaseObject
             );
             throw new InternalException($e->getMessage());
         }
+    }
+
+
+    /**
+     * @param string $desc
+     * @return Account
+     * @throws Exception
+     */
+    public function updateAccountByDesc(string $desc): Account
+    {
+        $currencyAmount = $this->getAmountByDesc($desc);
+        $accountId = $this->accountService->getAccountIdByDesc($desc) ?: $this->getAccountIdByDesc();
+        if (!$accountId) {
+            throw new CannotOperateException(Yii::t('app', 'Default account not found.'));
+        }
+        $account = AccountService::findOne($accountId);
+        $account->load(\yii\helpers\ArrayHelper::toArray($account), '');
+        $account->currency_balance = $currencyAmount;
+        return $this->accountService->createUpdate($account);
     }
 
     /**
@@ -408,6 +436,7 @@ class TransactionService extends BaseObject
             );
             throw new DBException(Setup::errorMessage($model->firstErrors));
         }
+        event(new CreateRecordSuccessEvent(), $model);
         return true;
     }
 
@@ -422,6 +451,8 @@ class TransactionService extends BaseObject
     {
         if ($tags = TagService::getTagNames($ledgerId)) {
             $tags = implode('|', $tags);
+            $tags = preg_quote($tags); // 转义特殊字符
+            $tags = str_replace('\|', '|', $tags); // 正则改为或的关系
             preg_match_all("!({$tags})!", $desc, $matches);
             return data_get($matches, '0', []);
         }

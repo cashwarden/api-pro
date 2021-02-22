@@ -78,7 +78,7 @@ class AccountService
         return Account::find()->where(['id' => $id, 'user_id' => $userIds])->one();
     }
 
-    public static function getDefaultAccount(int $userId = 0)
+    public static function getDefaultAccount(int $userId = 0): array
     {
         $userId = $userId ?: Yii::$app->user->id;
         return Account::find()
