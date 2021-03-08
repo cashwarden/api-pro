@@ -186,6 +186,12 @@ class AnalysisService extends BaseObject
                 $endTime = $formatter->asDatetime('now', 'php:01-m-Y');
                 $date = [DateHelper::beginTimestamp($beginTime), DateHelper::endTimestamp($endTime) - 3600 * 24];
                 break;
+            case AnalysisDateType::LAST_WEEK:
+                $date = [
+                    DateHelper::beginTimestamp(strtotime("last week monday")),
+                    DateHelper::endTimestamp(strtotime("last week sunday"))
+                ];
+                break;
             case AnalysisDateType::CURRENT_MONTH:
                 $time = $formatter->asDatetime('now', 'php:01-m-Y');
                 $date = [DateHelper::beginTimestamp($time), DateHelper::endTimestamp()];
