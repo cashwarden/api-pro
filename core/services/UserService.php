@@ -89,7 +89,7 @@ class UserService
             ->issuedBy(params('appURL'))
             ->identifiedBy(Yii::$app->name, true)
             ->issuedAt($time)
-            ->expiresAt($time + 3600 * 72)
+            ->expiresAt($time + 3600 * 24 * 7)
             ->withClaim('username', \user('username'))
             ->withClaim('id', \user('id'))
             ->getToken($signer, $key);
