@@ -23,6 +23,7 @@ use app\core\services\TransactionService;
 use app\core\services\UploadService;
 use app\core\services\UserProService;
 use app\core\services\UserService;
+use app\core\services\WechatService;
 use app\core\services\WishListService;
 use Yii;
 use yii\base\InvalidConfigException;
@@ -45,6 +46,7 @@ use yii\base\InvalidConfigException;
  * @property LedgerService $ledgerService
  * @property PayService $payService
  * @property WishListService $wishListService
+ * @property WechatService $wechatService
  */
 trait ServiceTrait
 {
@@ -219,7 +221,7 @@ trait ServiceTrait
     }
 
     /**
-     * @return PayService()|object
+     * @return PayService|object
      */
     public function getPayService(): PayService
     {
@@ -232,7 +234,7 @@ trait ServiceTrait
 
 
     /**
-     * @return WishListService()|object
+     * @return WishListService|object
      */
     public function getWishListService(): WishListService
     {
@@ -240,6 +242,18 @@ trait ServiceTrait
             return Yii::createObject(WishListService::class);
         } catch (InvalidConfigException $e) {
             return new WishListService();
+        }
+    }
+
+    /**
+     * @return WechatService|object
+     */
+    public function getWechatService(): WechatService
+    {
+        try {
+            return Yii::createObject(WechatService::class);
+        } catch (InvalidConfigException $e) {
+            return new WechatService();
         }
     }
 }
