@@ -2,8 +2,10 @@
 
 namespace app\modules\v1\controllers;
 
+use app\core\requests\WechatLogin;
 use app\core\traits\ServiceTrait;
 use EasyWeChat\Factory;
+use Yii;
 use yiier\graylog\Log;
 
 class WechatController extends ActiveController
@@ -21,12 +23,15 @@ class WechatController extends ActiveController
         return $actions;
     }
 
-    public function actionLogin(string $code)
+    public function actionLogin()
     {
+        $params = Yii::$app->request->bodyParams;
+        /** @var WechatLogin $data */
+        $data = $this->validate(new WechatLogin(), $params);
         $config = $this->wechatService->getConfig();
         $app = Factory::miniProgram($config);
-        $s = $app->auth->session($code);
-        Log::error('test', $s, [$code]);
+        $s = $app->auth->session($data->code);
+        Log::error('test', $s, [$data->code]);
         return $s;
     }
 }
