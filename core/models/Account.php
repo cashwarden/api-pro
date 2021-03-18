@@ -119,6 +119,9 @@ class Account extends \yii\db\ActiveRecord
                 'name',
                 'unique',
                 'targetAttribute' => ['user_id', 'name'],
+                'when' => function ($model, $attribute) {
+                    return $this->id != $model->id;
+                },
                 'message' => Yii::t('app', 'The {attribute} has been used.')
             ],
         ];
@@ -218,6 +221,16 @@ class Account extends \yii\db\ActiveRecord
     {
         parent::afterDelete();
         AccountService::afterDelete($this);
+    }
+
+    public function extraFields()
+    {
+        return ['incomeSum'];
+    }
+
+    public function getIncomeSum()
+    {
+        return Setup::toYuan(AccountService::getCalculateIncomeSumCent($this->id));
     }
 
     /**

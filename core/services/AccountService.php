@@ -12,6 +12,7 @@ use app\core\models\Transaction;
 use app\core\types\AccountStatus;
 use app\core\types\DirectionType;
 use app\core\types\ReimbursementStatus;
+use app\core\types\TransactionType;
 use Exception;
 use Yii;
 use yii\base\InvalidConfigException;
@@ -78,7 +79,7 @@ class AccountService
         return Account::find()->where(['id' => $id, 'user_id' => $userIds])->one();
     }
 
-    public static function getDefaultAccount(int $userId = 0)
+    public static function getDefaultAccount(int $userId = 0): array
     {
         $userId = $userId ?: Yii::$app->user->id;
         return Account::find()
@@ -129,6 +130,47 @@ class AccountService
             'direction' => DirectionType::EXPENSE,
             'reimbursement_status' => [ReimbursementStatus::NONE, ReimbursementStatus::TODO],
         ])->sum('currency_amount_cent');
+
+        return ($in - $out) ?: 0;
+    }
+
+    /**
+     * @param int $accountId
+     * @return int
+     * @throws Exception
+     */
+    public static function getCalculateIncomeSumCent(int $accountId): int
+    {
+        $first = Record::find()
+            ->where([
+                'account_id' => $accountId,
+                'transaction_type' => TransactionType::ADJUST,
+                'reimbursement_status' => [ReimbursementStatus::NONE, ReimbursementStatus::TODO],
+            ])
+            ->orderBy(['date' => SORT_ASC])
+            ->limit(1)
+            ->asArray()
+            ->one();
+
+        $in = Record::find()
+            ->where([
+                'account_id' => $accountId,
+                'transaction_type' => TransactionType::ADJUST,
+                'direction' => DirectionType::INCOME,
+                'reimbursement_status' => [ReimbursementStatus::NONE, ReimbursementStatus::TODO],
+            ])
+            ->andFilterWhere(['!=', 'id', data_get($first, 'id')])
+            ->sum('currency_amount_cent');
+
+        $out = Record::find()
+            ->where([
+                'account_id' => $accountId,
+                'transaction_type' => TransactionType::ADJUST,
+                'direction' => DirectionType::EXPENSE,
+                'reimbursement_status' => [ReimbursementStatus::NONE, ReimbursementStatus::TODO],
+            ])
+            ->andFilterWhere(['!=', 'id', data_get($first, 'id')])
+            ->sum('currency_amount_cent');
 
         return ($in - $out) ?: 0;
     }

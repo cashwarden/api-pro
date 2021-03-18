@@ -4,6 +4,7 @@ namespace app\core\services;
 
 use app\core\exceptions\InternalException;
 use app\core\exceptions\InvalidArgumentException;
+use app\core\exceptions\UserNotProException;
 use app\core\models\Account;
 use app\core\models\AuthClient;
 use app\core\models\Category;
@@ -17,6 +18,7 @@ use app\core\types\AuthClientType;
 use app\core\types\ColorType;
 use app\core\types\LedgerType;
 use app\core\types\TransactionType;
+use app\core\types\UserSettingKeys;
 use app\core\types\UserStatus;
 use Carbon\Carbon;
 use Exception;
@@ -87,7 +89,7 @@ class UserService
             ->issuedBy(params('appURL'))
             ->identifiedBy(Yii::$app->name, true)
             ->issuedAt($time)
-            ->expiresAt($time + 3600 * 72)
+            ->expiresAt($time + 3600 * 24 * 7)
             ->withClaim('username', \user('username'))
             ->withClaim('id', \user('id'))
             ->getToken($signer, $key);
@@ -338,5 +340,46 @@ class UserService
         $user = User::findOne(['status' => UserStatus::ACTIVE, 'email' => $request->email]);
         $this->setPasswordResetToken($user);
         return $this->getMailerService()->sendPasswordResetMessage($user);
+    }
+
+
+    /**
+     * @param array $params
+     * @return bool
+     * @throws UserNotProException
+     */
+    public static function checkAccessBySetting(array $params): bool
+    {
+        if (UserProService::isPro()) {
+            return true;
+        }
+        $proItems = [
+            UserSettingKeys::MONTHLY_REPORT,
+            UserSettingKeys::WEEKLY_REPORT,
+            UserSettingKeys::DAILY_REPORT,
+        ];
+        if (array_intersect($params, $proItems)) {
+            throw new UserNotProException();
+        }
+        return true;
+    }
+
+    /**
+     * @param int $userId
+     * @param array $params
+     * @throws InvalidArgumentException
+     */
+    public static function validateBySetting(int $userId, array $params): void
+    {
+        $items = [
+            UserSettingKeys::MONTHLY_REPORT,
+            UserSettingKeys::WEEKLY_REPORT,
+            UserSettingKeys::DAILY_REPORT,
+        ];
+        if (array_intersect($params, $items)) {
+            if (!AuthClient::find()->where(['type' => AuthClientType::TELEGRAM, 'user_id' => $userId])->exists()) {
+                throw new InvalidArgumentException('请先绑定 Telegram');
+            }
+        }
     }
 }

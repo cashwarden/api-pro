@@ -25,21 +25,23 @@ use yiier\helpers\Setup;
 class AnalysisService extends BaseObject
 {
     /**
+     * @param array $items
      * @param array $params
      * @return array
      * @throws \Exception
      */
-    public function getRecordOverview(array $params = []): array
+    public function getRecordOverview(array $items, array $params = []): array
     {
-        $items = [];
-        foreach (AnalysisDateType::texts() as $key => $item) {
-            $date = AnalysisService::getDateRange($key);
-            $items[$key]['overview'] = $this->getRecordOverviewByDate($date, $params);
-            $items[$key]['key'] = $key;
-            $items[$key]['text'] = $item;
+        $data = [];
+        $texts = AnalysisDateType::texts();
+        foreach ($items as $item) {
+            $date = AnalysisService::getDateRange($item);
+            $data[$item]['overview'] = $this->getRecordOverviewByDate($date, $params);
+            $data[$item]['key'] = $item;
+            $data[$item]['text'] = $texts[$item];
         }
 
-        return $items;
+        return $data;
     }
 
     public function getRecordOverviewByDate(array $date, array $params = []): array
@@ -184,15 +186,21 @@ class AnalysisService extends BaseObject
                 $endTime = $formatter->asDatetime('now', 'php:01-m-Y');
                 $date = [DateHelper::beginTimestamp($beginTime), DateHelper::endTimestamp($endTime) - 3600 * 24];
                 break;
+            case AnalysisDateType::LAST_WEEK:
+                $date = [
+                    DateHelper::beginTimestamp(strtotime("last week monday")),
+                    DateHelper::endTimestamp(strtotime("last week sunday"))
+                ];
+                break;
             case AnalysisDateType::CURRENT_MONTH:
                 $time = $formatter->asDatetime('now', 'php:01-m-Y');
                 $date = [DateHelper::beginTimestamp($time), DateHelper::endTimestamp()];
                 break;
         }
 
-        return array_map(function ($i) use ($formatter) {
+        return $date ? array_map(function ($i) use ($formatter) {
             return $formatter->asDatetime($i);
-        }, $date);
+        }, $date) : [];
     }
 
     /**

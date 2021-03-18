@@ -3,6 +3,7 @@
 namespace app\modules\v1\controllers;
 
 use app\core\exceptions\InvalidArgumentException;
+use app\core\exceptions\UserNotProException;
 use app\core\models\User;
 use app\core\requests\ChangePassword;
 use app\core\requests\JoinConfirm;
@@ -13,7 +14,9 @@ use app\core\requests\PasswordResetRequest;
 use app\core\requests\PasswordResetTokenVerification;
 use app\core\requests\UserUpdate;
 use app\core\services\LedgerService;
+use app\core\services\UserService;
 use app\core\traits\ServiceTrait;
+use app\core\types\UserSettingKeys;
 use app\core\types\UserStatus;
 use Yii;
 use yii\base\Exception;
@@ -246,17 +249,35 @@ class UserController extends ActiveController
         ];
     }
 
-
-    public function actionUpdateSettings()
+    /**
+     * @return array
+     * @throws InvalidArgumentException|UserNotProException
+     */
+    public function actionUpdateSettings(): array
     {
-        $setting = Yii::$app->userSetting;
-
         $params = Yii::$app->request->bodyParams;
         $userId = Yii::$app->user->id;
+        UserService::validateBySetting($userId, array_keys($params));
+        UserService::checkAccessBySetting(array_keys($params));
+        $setting = Yii::$app->userSetting;
+        $userSettingKeys = UserSettingKeys::items();
         foreach ($params as $key => $value) {
-            $setting->set($key, $value, $userId, 'Not allowed Update Post');
+            if (!in_array($key, $userSettingKeys)) {
+                throw new InvalidArgumentException();
+            }
+            $setting->set($key, $value, $userId, '');
         }
-        return $setting->getAllByUserId($userId);
+        $data = $setting->getAllByUserId($userId);
+        return $data ?: [];
+    }
+
+
+    public function actionGetSettings(): array
+    {
+        $setting = Yii::$app->userSetting;
+        $userId = Yii::$app->user->id;
+        $data = $setting->getAllByUserId($userId);
+        return $data ?: [];
     }
 
     public function actionGetUserProRecord(string $out_sn)

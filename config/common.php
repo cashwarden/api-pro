@@ -53,6 +53,9 @@ return [
             'class' => 'hightman\xunsearch\Connection',
             'iniDirectory' => '@app/config',    // 搜索 ini 文件目录，默认：@vendor/hightman/xunsearch/app
         ],
+        'userSetting' => [
+            'class' => 'yiier\userSetting\UserSetting',
+        ],
         'queue' => [
             'class' => \yii\queue\db\Queue::class,
             'db' => 'db', // DB connection component or its config
@@ -65,6 +68,14 @@ return [
                 \yiier\graylog\Log::error('队列执行失败1', $event->job);
                 \yiier\graylog\Log::error('队列执行失败2', $event->error);
             }
+        ],
+        'event' => [
+            'class' => \Guanguans\YiiEvent\Event::class,
+            'listen' => [
+                \app\core\events\CreateRecordSuccessEvent::class => [
+                    \app\core\listeners\SendCreateRecordSuccessTelegram::class,
+                ],
+            ],
         ],
         'i18n' => [
             'translations' => [

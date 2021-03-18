@@ -2,9 +2,11 @@
 
 namespace app\core\services;
 
+use app\core\events\CreateRecordSuccessEvent;
 use app\core\exceptions\CannotOperateException;
 use app\core\exceptions\InternalException;
 use app\core\exceptions\InvalidArgumentException;
+use app\core\exceptions\UserNotProException;
 use app\core\helpers\ArrayHelper;
 use app\core\models\Account;
 use app\core\models\Category;
@@ -74,7 +76,7 @@ class TransactionService extends BaseObject
         return true;
     }
 
-    public function createByCSV($filename): array
+    public function createByCSV(string $filename, int $ledgerId): array
     {
         ini_set("memory_limit", "1024M");
         ini_set("set_time_limit", "0");
@@ -101,6 +103,7 @@ class TransactionService extends BaseObject
                     // 账单日期,类别,收入/支出,金额(CNY),标签（多个英文逗号隔开）,描述,备注,账户1,账户2
                     //2020-08-20,餐饮食品,支出,28.9,,买菜28.9,,
                     $baseConditions = ['user_id' => Yii::$app->user->id];
+                    $_model->ledger_id = $ledgerId;
                     $_model->date = Yii::$app->formatter->asDatetime(strtotime($newData[0]), 'php:Y-m-d H:i');
                     $_model->category_id = Category::find()->where($baseConditions + ['name' => $newData[1]])->scalar();
                     if (!$_model->category_id) {
@@ -213,13 +216,19 @@ class TransactionService extends BaseObject
     /**
      * @param string $desc
      * @param null|int $source
-     * @return Transaction
+     * @return Transaction|Account
      * @throws InternalException
      * @throws \Throwable
      */
-    public function createByDesc(string $desc, $source = null): Transaction
+    public function createByDesc(string $desc, $source = null)
     {
         try {
+            if (strpos($desc, '余额') !== false) {
+                if (!UserProService::isPro()) {
+                    throw new UserNotProException();
+                }
+                return $this->updateAccountByDesc($desc);
+            }
             $model = $this->createBaseTransactionByDesc($desc);
             if (!$model->category_id) {
                 throw new CannotOperateException(Yii::t('app', 'Category not found.'));
@@ -228,6 +237,7 @@ class TransactionService extends BaseObject
             if (!$model->save()) {
                 throw new DBException(Setup::errorMessage($model->firstErrors));
             }
+            event(new CreateRecordSuccessEvent(), $model);
             $source ? Record::updateAll(['source' => $source], ['transaction_id' => $model->id]) : null;
             return $model;
         } catch (Exception $e) {
@@ -242,6 +252,25 @@ class TransactionService extends BaseObject
             );
             throw new InternalException($e->getMessage());
         }
+    }
+
+
+    /**
+     * @param string $desc
+     * @return Account
+     * @throws Exception
+     */
+    public function updateAccountByDesc(string $desc): Account
+    {
+        $currencyAmount = $this->getAmountByDesc($desc);
+        $accountId = $this->accountService->getAccountIdByDesc($desc) ?: $this->getAccountIdByDesc();
+        if (!$accountId) {
+            throw new CannotOperateException(Yii::t('app', 'Default account not found.'));
+        }
+        $account = AccountService::findOne($accountId);
+        $account->load(\yii\helpers\ArrayHelper::toArray($account), '');
+        $account->currency_balance = $currencyAmount;
+        return $this->accountService->createUpdate($account);
     }
 
     /**
@@ -407,6 +436,7 @@ class TransactionService extends BaseObject
             );
             throw new DBException(Setup::errorMessage($model->firstErrors));
         }
+        event(new CreateRecordSuccessEvent(), $model);
         return true;
     }
 
@@ -421,6 +451,8 @@ class TransactionService extends BaseObject
     {
         if ($tags = TagService::getTagNames($ledgerId)) {
             $tags = implode('|', $tags);
+            $tags = preg_quote($tags); // 转义特殊字符
+            $tags = str_replace('\|', '|', $tags); // 正则改为或的关系
             preg_match_all("!({$tags})!", $desc, $matches);
             return data_get($matches, '0', []);
         }
@@ -693,11 +725,18 @@ class TransactionService extends BaseObject
         }
 
         $query = Transaction::find()->andWhere($baseConditions);
-        if ($searchKeywords = trim(request('keyword'))) {
-            $query->andWhere("MATCH(`description`, `tags`, `remark`) AGAINST ('*$searchKeywords*' IN BOOLEAN MODE)");
+        if (($date = explode('~', data_get($params, 'date'))) && count($date) == 2) {
+            $query->andWhere(['between', 'date', $date[0] . ' 00:00:00', $date[1] . ' 23:59:59']);
         }
-
         $query->andFilterWhere(['category_id' => data_get($params, 'category_id')]);
+        if ($searchKeywords = trim(request('keyword'))) {
+            $query->andWhere([
+                'or',
+                ['like', 'remark', $searchKeywords],
+                ['like', 'tags', $searchKeywords],
+                ['like', 'description', $searchKeywords],
+            ]);
+        }
 
         $ids = $query->column();
         return array_map('intval', $ids);
@@ -723,15 +762,15 @@ class TransactionService extends BaseObject
         if (($searchKeywords = trim(data_get($params, 'keyword')))) {
             $query->andWhere($searchKeywords);
         }
-        if (($date = explode('~', data_get($params, 'date'))) && count($date) == 2) {
-            $query->andWhere(['between', 'date', strtotime($date[0]), strtotime($date[1])]);
-        }
+
+//        if (($date = explode('~', data_get($params, 'date'))) && count($date) == 2) {
+//            $query->andWhere(['between', 'date', strtotime($date[0]), strtotime($date[1])]);
+//        }
 
         $query->andFilterWhere(['category_id' => data_get($params, 'category_id')]);
         $search = $query->asArray()
             ->orderBy(['date' => SORT_DESC, 'id' => SORT_DESC])
             ->all();
-        Log::error('xxxxxx', $search);
 
         return \yii\helpers\ArrayHelper::getColumn($search, function ($element) {
             return (int)$element['id'];

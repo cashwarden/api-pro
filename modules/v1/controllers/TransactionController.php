@@ -4,6 +4,7 @@ namespace app\modules\v1\controllers;
 
 use app\core\exceptions\InvalidArgumentException;
 use app\core\helpers\RuleControlHelper;
+use app\core\models\Account;
 use app\core\models\Transaction;
 use app\core\requests\TransactionCreateByDescRequest;
 use app\core\requests\TransactionUploadRequest;
@@ -32,16 +33,15 @@ class TransactionController extends ActiveController
     }
 
     /**
-     * @return Transaction
+     * @return Transaction|Account
      * @throws \Exception|\Throwable
      */
-    public function actionCreateByDescription(): Transaction
+    public function actionCreateByDescription()
     {
         $params = Yii::$app->request->bodyParams;
         $model = new TransactionCreateByDescRequest();
         /** @var TransactionCreateByDescRequest $model */
         $model = $this->validate($model, $params);
-
         return $this->transactionService->createByDesc($model->description);
     }
 
@@ -76,7 +76,7 @@ class TransactionController extends ActiveController
         $this->validate($model, $params);
         $filename = Yii::$app->user->id . 'record.csv';
         $this->uploadService->uploadRecord($uploadedFile, $filename);
-        $data = $this->transactionService->createByCSV($filename);
+        $data = $this->transactionService->createByCSV($filename, request('ledger_id'));
         $this->uploadService->deleteLocalFile($filename);
         return $data;
     }
