@@ -31,5 +31,8 @@ return [
     'userRecurrenceTotal' => env('USER_RECURRENCE_TOTAL', 1),
     'userRuleTotal' => env('USER_RULE_TOTAL', 5),
     'useXunSearch' => env('USE_XUN_SEARCH', 0),
-    'rapidapiKey' => env('RAPIDAPI_KEY')
+    'rapidapiKey' => env('RAPIDAPI_KEY'),
+    'wechatAppId' => env('WECHAT_APP_ID'),
+    'wechatAppSecret' => env('WECHAT_APP_SECRET'),
+    'wechatToken' => env('WECHAT_TOKEN'),
 ];
