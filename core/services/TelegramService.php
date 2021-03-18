@@ -10,7 +10,6 @@ use app\core\models\Transaction;
 use app\core\models\User;
 use app\core\traits\ServiceTrait;
 use app\core\types\AnalysisDateType;
-use app\core\types\AuthClientStatus;
 use app\core\types\AuthClientType;
 use app\core\types\DirectionType;
 use app\core\types\TelegramAction;
@@ -50,29 +49,17 @@ class TelegramService extends BaseObject
 
     /**
      * @param User $user
-     * @param string $token
      * @param Message $message
      * @throws DBException
      */
-    public function bind(User $user, string $token, Message $message): void
+    public function bind(User $user, Message $message): void
     {
-        Yii::error($message, 'telegram_message' . $token);
-
-        $conditions = [
-            'type' => AuthClientType::TELEGRAM,
-            'user_id' => $user->id,
-            'status' => AuthClientStatus::ACTIVE
+        $expand = [
+            'client_username' => (string)($message->getFrom()->getUsername() ?: $message->getFrom()->getFirstName()),
+            'client_id' => (string)$message->getFrom()->getId(),
+            'data' => $message->toJson(),
         ];
-        if (!$model = AuthClient::find()->where($conditions)->one()) {
-            $model = new AuthClient();
-            $model->load($conditions, '');
-        }
-        $model->client_username = (string)($message->getFrom()->getUsername() ?: $message->getFrom()->getFirstName());
-        $model->client_id = (string)$message->getFrom()->getId();
-        $model->data = $message->toJson();
-        if (!$model->save()) {
-            throw new DBException(Setup::errorMessage($model->firstErrors));
-        }
+        UserService::findOrCreateAuthClient($user->id, AuthClientType::TELEGRAM, $expand);
         User::updateAll(['password_reset_token' => null], ['id' => $user->id]);
     }
 

@@ -179,7 +179,7 @@ class TelegramController extends ActiveController
                 $token = StringHelper::after(TelegramKeyword::BIND . '/', $message->getText());
                 try {
                     $user = $this->userService->getUserByResetToken($token);
-                    $this->telegramService->bind($user, $token, $message);
+                    $this->telegramService->bind($user, $message);
                     $text = '成功绑定账号【' . data_get($user, 'username') . '】！';
                 } catch (\Exception $e) {
                     $text = $e->getMessage();

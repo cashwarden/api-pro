@@ -14,6 +14,7 @@ use app\core\requests\JoinRequest;
 use app\core\requests\PasswordResetRequest;
 use app\core\traits\ServiceTrait;
 use app\core\types\AccountType;
+use app\core\types\AuthClientStatus;
 use app\core\types\AuthClientType;
 use app\core\types\ColorType;
 use app\core\types\LedgerType;
@@ -279,7 +280,7 @@ class UserService
         }
     }
 
-    public function getAuthClients()
+    public function getAuthClients(): array
     {
         $data = [];
         if ($items = AuthClient::find()->where(['user_id' => Yii::$app->user->id])->all()) {
@@ -381,5 +382,30 @@ class UserService
                 throw new InvalidArgumentException('请先绑定 Telegram');
             }
         }
+    }
+
+    /**
+     * @param int $userId
+     * @param int $type
+     * @param array $expand
+     * @return AuthClient|array|ActiveRecord
+     * @throws DBException
+     */
+    public static function findOrCreateAuthClient(int $userId, int $type, array $expand = [])
+    {
+        $conditions = [
+            'type' => $type,
+            'user_id' => $userId,
+            'status' => AuthClientStatus::ACTIVE
+        ];
+        if (!$model = AuthClient::find()->where($conditions)->one()) {
+            $model = new AuthClient();
+            $model->load($conditions, '');
+        }
+        $model->load($expand, '');
+        if (!$model->save()) {
+            throw new DBException(Setup::errorMessage($model->firstErrors));
+        }
+        return $model;
     }
 }

@@ -148,7 +148,7 @@ class UserController extends ActiveController
     /**
      * @return array
      */
-    public function actionGetAuthClients()
+    public function actionGetAuthClients(): array
     {
         return $this->userService->getAuthClients();
     }
