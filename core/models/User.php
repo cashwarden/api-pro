@@ -9,7 +9,6 @@ use Yii;
 use yii\behaviors\TimestampBehavior;
 use yii\db\ActiveRecord;
 use yii\web\IdentityInterface;
-use yiier\helpers\DateHelper;
 
 /**
  * This is the model class for table "{{%user}}".
@@ -215,25 +214,23 @@ class User extends ActiveRecord implements IdentityInterface
     public function fields()
     {
         $fields = parent::fields();
-        unset($fields['auth_key'], $fields['password_hash'], $fields['password_reset_token']);
+        unset(
+            $fields['auth_key'],
+            $fields['password_hash'],
+            $fields['password_reset_token'],
+            $fields['id'],
+            $fields['created_at'],
+            $fields['updated_at'],
+        );
 
         $fields['status'] = function (self $model) {
             return UserStatus::getName($model->status);
-        };
-
-        $fields['created_at'] = function (self $model) {
-            return DateHelper::datetimeToIso8601($model->created_at);
         };
 
         $fields['avatar'] = function (self $model) {
             $avatar = md5(strtolower(trim($model->avatar)));
             return "https://www.gravatar.com/avatar/{$avatar}?s=48";
         };
-
-        $fields['updated_at'] = function (self $model) {
-            return DateHelper::datetimeToIso8601($model->updated_at);
-        };
-
         return $fields;
     }
 }
