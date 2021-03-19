@@ -60,7 +60,8 @@ class UserProService
 
         switch ($modelClass) {
             case Account::class:
-                if (Account::find()->where($baseConditions)->count('id') >= params('userAccountTotal')) {
+                $count = Account::find()->where($baseConditions)->count('id');
+                if ($action == 'create' && $count >= params('userAccountTotal')) {
                     throw new UserNotProException();
                 }
                 if (in_array(data_get($model, 'type'), [AccountType::INVESTMENT_ACCOUNT])) {
