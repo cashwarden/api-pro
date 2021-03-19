@@ -68,12 +68,16 @@ class UserController extends ActiveController
      * @return string[]
      * @throws InvalidArgumentException|\Throwable
      */
-    public function actionLogin()
+    public function actionLogin(): array
     {
         $params = Yii::$app->request->bodyParams;
-        $this->validate(new LoginRequest(), $params);
+        /** @var LoginRequest $data */
+        $data = $this->validate(new LoginRequest(), $params);
         $token = $this->userService->getToken();
         $user = Yii::$app->user->identity;
+        if ($data->code) {
+            $this->wechatService->bind(Yii::$app->user->id, $data->code);
+        }
 
         return [
             'user' => $user,

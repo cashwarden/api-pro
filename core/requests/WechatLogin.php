@@ -13,6 +13,7 @@ class WechatLogin extends \yii\base\Model
     {
         return [
             [['code'], 'trim'],
+            [['code'], 'string'],
             [['code'], 'required'],
         ];
     }

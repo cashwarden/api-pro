@@ -2,6 +2,7 @@
 
 namespace app\core\services;
 
+use app\core\exceptions\ErrorCodes;
 use app\core\exceptions\InternalException;
 use app\core\exceptions\InvalidArgumentException;
 use app\core\models\AuthClient;
@@ -57,7 +58,7 @@ class WechatService extends BaseObject
     {
         $authClient = AuthClient::find()->where(['type' => AuthClientType::WECHAT, 'client_id' => $openid])->one();
         if (!$authClient) {
-            throw new InvalidArgumentException('暂未绑定微信，请先用账号密码登录，然后绑定微信');
+            throw new InvalidArgumentException('首次请先用账号密码登录', ErrorCodes::NOT_USER_ERROR);
         }
         return $authClient;
     }

@@ -8,6 +8,7 @@ use Yii;
 class LoginRequest extends \yii\base\Model
 {
     public $username;
+    public $code;
     public $password;
 
     /**
@@ -16,8 +17,9 @@ class LoginRequest extends \yii\base\Model
     public function rules()
     {
         return [
-            [['username'], 'filter', 'filter' => 'trim'],
+            [['username', 'code'], 'filter', 'filter' => 'trim'],
             [['username', 'password'], 'required'],
+            [['code'], 'string'],
 
             ['password', 'validatePassword'],
         ];
