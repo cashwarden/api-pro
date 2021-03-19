@@ -82,7 +82,8 @@ class UserProService
                 }
                 break;
             case Rule::class:
-                if (Rule::find()->where($baseConditions)->count('id') >= params('userRuleTotal')) {
+                $count = Rule::find()->where($baseConditions)->count('id');
+                if ($action == 'create' && $count >= params('userRuleTotal')) {
                     throw new UserNotProException();
                 }
                 break;
