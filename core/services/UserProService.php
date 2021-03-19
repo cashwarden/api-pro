@@ -64,7 +64,7 @@ class UserProService
                 if ($action == 'create' && $count >= params('userAccountTotal')) {
                     throw new UserNotProException();
                 }
-                if (in_array(data_get($model, 'type'), [AccountType::INVESTMENT_ACCOUNT])) {
+                if (data_get($model, 'type') == AccountType::getName(AccountType::INVESTMENT_ACCOUNT)) {
                     throw new UserNotProException();
                 }
                 break;
