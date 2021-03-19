@@ -76,7 +76,8 @@ class UserController extends ActiveController
         $token = $this->userService->getToken();
         $user = Yii::$app->user->identity;
         if ($token && $data->code) {
-            $this->wechatService->bind(Yii::$app->user->id, $data->code);
+            $openid = $this->wechatService->getOpenid($data->code);
+            $this->wechatService->bind(Yii::$app->user->id, $openid);
         }
 
         return [
@@ -86,7 +87,7 @@ class UserController extends ActiveController
         ];
     }
 
-    public function actionRefreshToken()
+    public function actionRefreshToken(): array
     {
         $user = Yii::$app->user->identity;
         $token = $this->userService->getToken();
@@ -101,7 +102,7 @@ class UserController extends ActiveController
      * @return array
      * @throws Exception
      */
-    public function actionResetToken()
+    public function actionResetToken(): array
     {
         /** @var User $user */
         $user = Yii::$app->user->identity;
