@@ -75,7 +75,7 @@ class UserController extends ActiveController
         $data = $this->validate(new LoginRequest(), $params);
         $token = $this->userService->getToken();
         $user = Yii::$app->user->identity;
-        if ($data->code) {
+        if ($token && $data->code) {
             $this->wechatService->bind(Yii::$app->user->id, $data->code);
         }
 
