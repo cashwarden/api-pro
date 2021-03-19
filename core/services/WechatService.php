@@ -10,6 +10,7 @@ use app\core\traits\ServiceTrait;
 use app\core\types\AuthClientType;
 use EasyWeChat\Factory;
 use yii\base\BaseObject;
+use yiier\graylog\Log;
 
 /**
  *
@@ -58,6 +59,7 @@ class WechatService extends BaseObject
     {
         $authClient = AuthClient::find()->where(['type' => AuthClientType::WECHAT, 'client_id' => $openid])->one();
         if (!$authClient) {
+            Log::error('微信登录失败', $openid);
             throw new InvalidArgumentException('首次请先用账号密码登录', ErrorCodes::NOT_USER_ERROR);
         }
         return $authClient;
