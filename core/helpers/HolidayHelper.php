@@ -4,12 +4,13 @@ namespace app\core\helpers;
 
 use app\core\exceptions\ThirdPartyServiceErrorException;
 use app\core\traits\SendRequestTrait;
-use GuzzleHttp\Exception\GuzzleException;
 use yiier\graylog\Log;
 
 class HolidayHelper
 {
     use SendRequestTrait;
+
+    private static $times = 0;
 
     /**
      * @return mixed
@@ -27,12 +28,14 @@ class HolidayHelper
             if ($data->code == 0) {
                 return $data->workday->date;
             }
-        } catch (GuzzleException $e) {
-            Log::error('holiday error', [$response ?? [], (string)$e]);
-            throw new ThirdPartyServiceErrorException();
-        } catch (\Exception $e) {
-            Log::error('holiday error', [$response ?? [], (string)$e]);
-            throw new ThirdPartyServiceErrorException();
+        } catch (\Throwable $e) {
+            self::$times++;
+            Log::error('holiday-error', [$response ?? [], self::$times, (string)$e]);
+            if (self::$times > 3) {
+                throw new ThirdPartyServiceErrorException();
+            }
+            sleep(10);
+            return self::getNextWorkday();
         }
     }
 }

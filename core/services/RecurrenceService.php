@@ -66,7 +66,7 @@ class RecurrenceService extends BaseObject
      * @throws InvalidConfigException
      * @throws \Exception
      */
-    public static function getExecutionDate(Recurrence $recurrence)
+    public static function getExecutionDate(Recurrence $recurrence): ?string
     {
         $formatter = Yii::$app->formatter;
         switch ($recurrence->frequency) {
