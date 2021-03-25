@@ -35,9 +35,9 @@ class CrontabController extends Controller
     {
         /** @var Transaction[] $transactions */
         $transactions = [];
+        $date = Yii::$app->formatter->asDatetime('now', 'php:Y-m-d');
         $items = Recurrence::find()
-            ->where(['status' => RecurrenceStatus::ACTIVE])
-            ->andWhere(['execution_date' => Yii::$app->formatter->asDatetime('now', 'php:Y-m-d')])
+            ->where(['status' => RecurrenceStatus::ACTIVE, 'execution_date' => $date])
             ->asArray()
             ->all();
         $transaction = Yii::$app->db->beginTransaction();
@@ -48,14 +48,14 @@ class CrontabController extends Controller
                 array_push($ids, $item['id']);
                 if ($newTransaction = $this->transactionService->copy($item['transaction_id'], $item['user_id'])) {
                     array_push($transactions, $newTransaction);
-                    $this->stdout("定时记账成功，transaction_id：{$newTransaction->id}\n");
+                    $this->stdout("{$date} 定时记账成功，transaction_id：{$newTransaction->id}\n");
                 }
             }
             RecurrenceService::updateAllExecutionDate($ids);
             $transaction->commit();
         } catch (\Exception $e) {
             $ids = implode(',', $ids);
-            $this->stdout("定时记账失败：依次执行的 Recurrence ID 为 {$ids}，{$e->getMessage()}\n");
+            $this->stdout("{$date} 定时记账失败：依次执行的 Recurrence ID 为 {$ids}，{$e->getMessage()}\n");
             $transaction->rollBack();
             throw $e;
         }
