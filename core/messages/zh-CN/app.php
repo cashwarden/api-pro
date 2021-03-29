@@ -100,5 +100,6 @@ return [
     'You have successfully joined this account, please do not repeat the process.' => '您已经成功加入此账本，请勿重复操作。',
     'You do not have permission to operate.' => '您没有权限操作。',
     'Not found account.' => '账户未找到。',
+    'Cannot delete the default ledger.' => '不能删除默认账本。'
 
 ];

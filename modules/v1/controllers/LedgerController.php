@@ -34,10 +34,7 @@ class LedgerController extends ActiveController
 
     public function actions()
     {
-        $actions = parent::actions();
-        // 注销系统自带的实现方法
-        unset($actions['delete']);
-        return $actions;
+        return parent::actions();
     }
 
     /**

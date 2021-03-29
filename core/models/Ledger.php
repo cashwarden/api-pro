@@ -2,10 +2,12 @@
 
 namespace app\core\models;
 
+use app\core\exceptions\CannotOperateException;
 use app\core\services\LedgerService;
 use app\core\types\LedgerType;
 use Yii;
 use yii\behaviors\TimestampBehavior;
+use yii\web\ForbiddenHttpException;
 use yiier\helpers\DateHelper;
 
 /**
@@ -127,6 +129,27 @@ class Ledger extends \yii\db\ActiveRecord
         if ($insert) {
             LedgerService::createLedgerAfter($this);
         }
+    }
+
+    /**
+     * @return bool
+     * @throws CannotOperateException|ForbiddenHttpException
+     */
+    public function beforeDelete()
+    {
+        if ($this->default) {
+            throw new CannotOperateException(Yii::t('app', 'Cannot delete the default ledger.'));
+        }
+        if ($this->user_id !== Yii::$app->user->id) {
+            throw new ForbiddenHttpException(Yii::t('app', 'You do not have permission to operate.'));
+        }
+        return parent::beforeDelete();
+    }
+
+    public function afterDelete()
+    {
+        parent::afterDelete();
+        LedgerService::afterDelete($this->id);
     }
 
     public function getCategories()

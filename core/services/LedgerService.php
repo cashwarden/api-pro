@@ -6,9 +6,17 @@ use app\core\exceptions\InternalException;
 use app\core\exceptions\InvalidArgumentException;
 use app\core\helpers\RuleControlHelper;
 use app\core\models\Account;
+use app\core\models\Budget;
+use app\core\models\BudgetConfig;
 use app\core\models\Category;
 use app\core\models\Ledger;
 use app\core\models\LedgerMember;
+use app\core\models\Record;
+use app\core\models\Recurrence;
+use app\core\models\Rule;
+use app\core\models\Tag;
+use app\core\models\Transaction;
+use app\core\models\WishList;
 use app\core\requests\LedgerInvitingMember;
 use app\core\types\ColorType;
 use app\core\types\LedgerMemberRule;
@@ -177,6 +185,22 @@ class LedgerService
             throw new InternalException($e->getMessage());
         }
         return true;
+    }
+
+    public static function afterDelete(int $ledgerId)
+    {
+        LedgerMember::deleteAll(['ledger_id' => $ledgerId]);
+        Category::deleteAll(['ledger_id' => $ledgerId]);
+        $budgetConfigIds = BudgetConfig::find()->where(['ledger_id' => $ledgerId])->column();
+        Budget::deleteAll(['budget_config_id' => $budgetConfigIds]);
+        BudgetConfig::deleteAll(['ledger_id' => $ledgerId]);
+        Record::deleteAll(['ledger_id' => $ledgerId]);
+        Rule::deleteAll(['ledger_id' => $ledgerId]);
+        Tag::deleteAll(['ledger_id' => $ledgerId]);
+        WishList::deleteAll(['ledger_id' => $ledgerId]);
+        $transactionIds = Transaction::find()->where(['ledger_id' => $ledgerId])->column();
+        Recurrence::deleteAll(['transaction_id' => $transactionIds]);
+        Transaction::deleteAll(['ledger_id' => $ledgerId]);
     }
 
     /**
