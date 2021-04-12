@@ -11,6 +11,7 @@ use app\core\types\AccountType;
 use app\core\types\DirectionType;
 use app\core\types\TransactionType;
 use Yii;
+use yii\web\UnauthorizedHttpException;
 use yiier\helpers\Setup;
 
 class InvestmentController extends ActiveController
@@ -19,25 +20,14 @@ class InvestmentController extends ActiveController
 
     public $modelClass = '';
 
-    /**
-     * @param \yii\base\Action $action
-     * @return bool
-     * @throws UserNotProException
-     * @throws \yii\web\BadRequestHttpException
-     */
-    public function beforeAction($action)
-    {
-        if (!UserProService::isPro()) {
-            throw new UserNotProException();
-        }
-        return parent::beforeAction($action);
-    }
 
     /**
      * @return array
+     * @throws \Exception
      */
     public function actionOverview(): array
     {
+        $this->checkAccess('');
         $baseConditions = [
             'user_id' => Yii::$app->user->id,
             'type' => AccountType::INVESTMENT_ACCOUNT,
@@ -46,9 +36,19 @@ class InvestmentController extends ActiveController
         $balanceCentSum = Account::find()->where($baseConditions)->sum('balance_cent');
         $items['balance_sum'] = $balanceCentSum ? Setup::toYuan($balanceCentSum) : 0;
 
+        if (($date = explode('~', data_get(Yii::$app->request->queryParams, 'date'))) && count($date) == 2) {
+            $start = $date[0] . ' 00:00:00';
+            $end = $date[1] . ' 23:59:59';
+            $paramsDate = [$start, $end];
+        }
+
         foreach (Account::find()->where($baseConditions)->column() as $id) {
             $conditions = ['account_id' => $id, 'transaction_type' => TransactionType::ADJUST];
+
             $query = Record::find()->where($conditions)->andWhere(['direction' => DirectionType::INCOME]);
+            if (isset($paramsDate)) {
+                $query->andWhere(['between', 'date', $paramsDate[0], $paramsDate[1]]);
+            }
             $sum = $query->sum('amount_cent');
             $first = $query->select('amount_cent')->orderBy(['date' => SORT_ASC])->limit(1)->scalar();
 
@@ -65,5 +65,23 @@ class InvestmentController extends ActiveController
         unset($items['expense'], $items['income']);
 
         return $items;
+    }
+
+
+    /**
+     * @param string $action
+     * @param null $model
+     * @param array $params
+     * @throws UnauthorizedHttpException
+     * @throws UserNotProException
+     */
+    public function checkAccess($action, $model = null, $params = [])
+    {
+        if (!Yii::$app->user->id) {
+            throw new UnauthorizedHttpException('Your request was made with invalid credentials.');
+        }
+        if (!UserProService::isPro()) {
+            throw new UserNotProException();
+        }
     }
 }

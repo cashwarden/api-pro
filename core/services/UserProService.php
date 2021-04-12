@@ -46,7 +46,7 @@ class UserProService
      * @param string $action
      * @param null $model
      * @return bool
-     * @throws UserNotProException
+     * @throws UserNotProException|\app\core\exceptions\InvalidArgumentException
      */
     public static function checkAccess(string $modelClass, string $action, $model = null): bool
     {
