@@ -135,41 +135,26 @@ class AccountService
     }
 
     /**
-     * @param int $accountId
+     * @param int|array $accountId
+     * @param array $conditions
      * @return int
-     * @throws Exception
      */
-    public static function getCalculateIncomeSumCent(int $accountId): int
+    public static function getCalculateIncomeSumCent($accountId, array $conditions): int
     {
-        $first = Record::find()
-            ->where([
-                'account_id' => $accountId,
-                'transaction_type' => TransactionType::ADJUST,
-                'reimbursement_status' => [ReimbursementStatus::NONE, ReimbursementStatus::TODO],
-            ])
-            ->orderBy(['date' => SORT_ASC])
-            ->limit(1)
-            ->asArray()
-            ->one();
-
+        $baseConditions = [
+            'account_id' => $accountId,
+            'transaction_type' => TransactionType::ADJUST,
+            'reimbursement_status' => [ReimbursementStatus::NONE, ReimbursementStatus::TODO],
+            'exclude_from_stats' => false
+        ];
         $in = Record::find()
-            ->where([
-                'account_id' => $accountId,
-                'transaction_type' => TransactionType::ADJUST,
-                'direction' => DirectionType::INCOME,
-                'reimbursement_status' => [ReimbursementStatus::NONE, ReimbursementStatus::TODO],
-            ])
-            ->andFilterWhere(['!=', 'id', data_get($first, 'id')])
+            ->where($baseConditions + ['direction' => DirectionType::INCOME])
+            ->andFilterWhere($conditions)
             ->sum('currency_amount_cent');
 
         $out = Record::find()
-            ->where([
-                'account_id' => $accountId,
-                'transaction_type' => TransactionType::ADJUST,
-                'direction' => DirectionType::EXPENSE,
-                'reimbursement_status' => [ReimbursementStatus::NONE, ReimbursementStatus::TODO],
-            ])
-            ->andFilterWhere(['!=', 'id', data_get($first, 'id')])
+            ->where($baseConditions + ['direction' => DirectionType::EXPENSE])
+            ->andFilterWhere($conditions)
             ->sum('currency_amount_cent');
 
         return ($in - $out) ?: 0;

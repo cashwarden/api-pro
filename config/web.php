@@ -142,6 +142,7 @@ $config = [
                 "PUT <module>/wish-lists/<id:\d+>/status" => '<module>/wish-list/update-status',
 
                 "GET <module>/investments/overview" => '<module>/investment/overview',
+                "GET <module>/investments/statistics" => '<module>/investment/statistics',
 
                 [
                     'class' => 'yii\rest\UrlRule',
