@@ -109,6 +109,22 @@ http://127.0.0.1:8000
   see [Performance tuning for volume mounts](https://docs.docker.com/docker-for-mac/osxfs-caching/))
 - The default configuration uses a host-volume in your home directory `.docker-composer` for composer caches
 
+使用手册
+---------
+
+### 给指定用户升级为 Pro
+
+```shell
+php yii user/upgrade-pro 1
+
+# or
+
+php yii user/upgrade-pro 1 2022-12-23
+```
+
+- 第一个参数是用户 ID
+- 第二个参数是到期时间，默认是1年之后到期，也可以指定到期时间
+
 Check out the packages
 ------------
 
