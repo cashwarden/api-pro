@@ -4,6 +4,7 @@ namespace app\core\models;
 
 use app\core\exceptions\CannotOperateException;
 use app\core\services\LedgerService;
+use app\core\types\CurrencyType;
 use app\core\types\LedgerType;
 use Yii;
 use yii\behaviors\TimestampBehavior;
@@ -17,6 +18,7 @@ use yiier\helpers\DateHelper;
  * @property string $name
  * @property int|string $type 类型
  * @property int $user_id
+ * @property string $base_currency_code
  * @property string|null $cover
  * @property string|null $remark
  * @property int|null $default
@@ -78,6 +80,7 @@ class Ledger extends \yii\db\ActiveRecord
             [['name', 'user_id', 'type'], 'required'],
             [['user_id'], 'integer'],
             ['type', 'in', 'range' => LedgerType::names()],
+            [['base_currency_code'], 'string', 'max' => 3],
             [['name'], 'string', 'max' => 100],
             [['cover', 'remark'], 'string', 'max' => 255],
             ['default', 'boolean', 'trueValue' => true, 'falseValue' => false, 'strict' => true],
@@ -94,6 +97,7 @@ class Ledger extends \yii\db\ActiveRecord
             'name' => Yii::t('app', 'Name'),
             'type' => Yii::t('app', 'Type'),
             'user_id' => Yii::t('app', 'User ID'),
+            'base_currency_code' => Yii::t('app', 'Base Currency Code'),
             'cover' => Yii::t('app', 'Cover'),
             'remark' => Yii::t('app', 'Remark'),
             'default' => Yii::t('app', 'Default'),
@@ -111,6 +115,7 @@ class Ledger extends \yii\db\ActiveRecord
     public function beforeSave($insert)
     {
         if (parent::beforeSave($insert)) {
+            $this->base_currency_code = $this->base_currency_code ?: CurrencyType::CNY_KEY;
             $this->type = LedgerType::toEnumValue($this->type);
             return true;
         } else {

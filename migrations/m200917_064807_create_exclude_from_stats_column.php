@@ -24,19 +24,4 @@ class m200917_064807_create_exclude_from_stats_column extends Migration
         $this->dropColumn('{{%record}}', 'exclude_from_stats');
         return true;
     }
-
-    /*
-    // Use up()/down() to run migration code without a transaction.
-    public function up()
-    {
-
-    }
-
-    public function down()
-    {
-        echo "m200917_064807_create_exclude_from_stats_column cannot be reverted.\n";
-
-        return false;
-    }
-    */
 }

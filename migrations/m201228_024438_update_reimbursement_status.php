@@ -13,7 +13,7 @@ class m201228_024438_update_reimbursement_status extends Migration
     public function safeUp()
     {
         $this->addColumn(
-            '{{record}}',
+            '{{%record}}',
             'reimbursement_status',
             $this->tinyInteger()->defaultValue(0)->after('exclude_from_stats')
         );
@@ -26,7 +26,7 @@ class m201228_024438_update_reimbursement_status extends Migration
     public function safeDown()
     {
         echo "m201228_024438_update_reimbursement_status cannot be reverted.\n";
-        $this->addColumn('{{transaction}}', 'reimbursement_status', $this->tinyInteger()->after('status'));
+        $this->addColumn('{{%transaction}}', 'reimbursement_status', $this->tinyInteger()->after('status'));
         $this->dropColumn('{{%record}}', 'reimbursement_status');
 
         return true;

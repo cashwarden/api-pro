@@ -12,19 +12,19 @@ class m201102_072500_add_ledger_id extends Migration
      */
     public function safeUp()
     {
-        $this->addColumn('{{category}}', 'ledger_id', $this->integer()->after('id'));
+        $this->addColumn('{{%category}}', 'ledger_id', $this->integer()->after('id'));
         $this->createIndex('category_ledger_id', '{{%category}}', ['ledger_id']);
 
-        $this->addColumn('{{transaction}}', 'ledger_id', $this->integer()->after('id'));
+        $this->addColumn('{{%transaction}}', 'ledger_id', $this->integer()->after('id'));
         $this->createIndex('transaction_ledger_id', '{{%transaction}}', ['ledger_id']);
 
-        $this->addColumn('{{record}}', 'ledger_id', $this->integer()->after('id'));
+        $this->addColumn('{{%record}}', 'ledger_id', $this->integer()->after('id'));
         $this->createIndex('record_ledger_id', '{{%record}}', ['ledger_id']);
 
-        $this->addColumn('{{tag}}', 'ledger_id', $this->integer()->after('id'));
+        $this->addColumn('{{%tag}}', 'ledger_id', $this->integer()->after('id'));
         $this->createIndex('tag_ledger_id', '{{%tag}}', ['ledger_id']);
 
-        $this->addColumn('{{rule}}', 'ledger_id', $this->integer()->after('if_keywords'));
+        $this->addColumn('{{%rule}}', 'ledger_id', $this->integer()->after('if_keywords'));
     }
 
     /**

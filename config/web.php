@@ -143,6 +143,8 @@ $config = [
 
                 "GET <module>/investments/overview" => '<module>/investment/overview',
 
+                "GET <module>/currencies/rate/<from:\w+>/<to:\w+>" => '<module>/currency/rate',
+
                 [
                     'class' => 'yii\rest\UrlRule',
                     'controller' => [
@@ -155,6 +157,7 @@ $config = [
                         'v1/recurrence',
                         'v1/budget-config',
                         'v1/ledger',
+                        'v1/currency',
                         'v1/wish-list',
                     ]
                 ],

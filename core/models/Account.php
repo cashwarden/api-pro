@@ -8,7 +8,7 @@ use app\core\services\TransactionService;
 use app\core\types\AccountStatus;
 use app\core\types\AccountType;
 use app\core\types\ColorType;
-use app\core\types\CurrencyCode;
+use app\core\types\CurrencyType;
 use Yii;
 use yii\behaviors\TimestampBehavior;
 use yiier\helpers\DateHelper;
@@ -113,7 +113,7 @@ class Account extends \yii\db\ActiveRecord
             [['balance', 'currency_balance'], MoneyValidator::class, 'allowsNegative' => true], //todo message
             ['exclude_from_stats', 'boolean', 'trueValue' => true, 'falseValue' => false, 'strict' => true],
             ['default', 'boolean', 'trueValue' => true, 'falseValue' => false, 'strict' => true],
-            ['currency_code', 'in', 'range' => CurrencyCode::getKeys()],
+            ['currency_code', 'in', 'range' => CurrencyType::currentUseCodes()],
             [['keywords'], ArrayValidator::class],
             [
                 'name',

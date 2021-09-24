@@ -12,8 +12,8 @@ class m201111_100456_update_rule_table extends Migration
      */
     public function safeUp()
     {
-        $this->addColumn('{{rule}}', 'then_currency_code', $this->string(3)->after('then_to_account_id'));
-        $this->addColumn('{{rule}}', 'then_currency_amount_cent', $this->integer()->after('then_to_account_id'));
+        $this->addColumn('{{%rule}}', 'then_currency_code', $this->string(3)->after('then_to_account_id'));
+        $this->addColumn('{{%rule}}', 'then_currency_amount_cent', $this->integer()->after('then_to_account_id'));
 
         \app\core\models\Rule::updateAll(['then_currency_code' => 'CNY']);
     }

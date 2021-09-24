@@ -50,7 +50,7 @@ class WishListController extends ActiveController
      * @param string $action
      * @param null $model
      * @param array $params
-     * @throws ForbiddenHttpException|UserNotProException
+     * @throws ForbiddenHttpException|UserNotProException|InvalidArgumentException
      */
     public function checkAccess($action, $model = null, $params = [])
     {
