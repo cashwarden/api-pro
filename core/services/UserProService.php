@@ -6,6 +6,7 @@ use app\core\exceptions\PayException;
 use app\core\exceptions\UserNotProException;
 use app\core\models\Account;
 use app\core\models\BudgetConfig;
+use app\core\models\Currency;
 use app\core\models\Ledger;
 use app\core\models\LedgerMember;
 use app\core\models\Recurrence;
@@ -89,6 +90,7 @@ class UserProService
                 break;
             case BudgetConfig::class:
             case LedgerMember::class:
+            case Currency::class:
             case WishList::class:
                 throw new UserNotProException();
         }
