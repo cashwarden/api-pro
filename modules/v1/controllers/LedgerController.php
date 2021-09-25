@@ -31,12 +31,6 @@ class LedgerController extends ActiveController
     public $partialMatchAttributes = ['name'];
     public $stringToIntAttributes = ['type' => LedgerType::class];
 
-
-    public function actions()
-    {
-        return parent::actions();
-    }
-
     /**
      * @return bool
      * @throws InternalException
@@ -133,7 +127,7 @@ class LedgerController extends ActiveController
      * @param null $model
      * @param array $params
      * @throws ForbiddenHttpException
-     * @throws UserNotProException
+     * @throws UserNotProException|InvalidArgumentException
      */
     public function checkAccess($action, $model = null, $params = [])
     {

@@ -3,6 +3,7 @@
 namespace app\core\models;
 
 use app\core\exceptions\CannotOperateException;
+use app\core\exceptions\InvalidArgumentException;
 use app\core\services\LedgerService;
 use app\core\types\CurrencyType;
 use app\core\types\LedgerType;
@@ -117,6 +118,12 @@ class Ledger extends \yii\db\ActiveRecord
         if (parent::beforeSave($insert)) {
             $this->base_currency_code = $this->base_currency_code ?: CurrencyType::CNY_KEY;
             $this->type = LedgerType::toEnumValue($this->type);
+            // 有记录时不支持修改基础货币
+            if (!$insert && Transaction::find()->where(['ledger_id' => $this->id])->count('id')) {
+                if (data_get($this->oldAttributes, 'base_currency_code') != $this->base_currency_code) {
+                    throw new InvalidArgumentException('账本有数据之后不再支持修改基础货币');
+                }
+            }
             return true;
         } else {
             return false;
