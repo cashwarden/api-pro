@@ -222,7 +222,7 @@ class AnalysisService extends BaseObject
             $data = $this->getBaseQuery($params)
                 ->select([
                     'category_id',
-                    'SUM(currency_amount_cent) AS currency_amount_cent'
+                    'SUM(amount_cent) AS amount_cent'
                 ])
                 ->andWhere(['transaction_type' => $type])
                 ->groupBy('category_id')
@@ -231,11 +231,11 @@ class AnalysisService extends BaseObject
             $k = TransactionType::getName($type);
             $items['total'][$k] = 0;
             $items[$k] = [];
-            foreach ($data as $key => $value) {
+            foreach ($data as $value) {
                 $v['category_id'] = $value['category_id'];
                 $v['category_name'] = data_get($categoriesMap, $value['category_id'], 0);
-                $v['currency_amount'] = (float)Setup::toYuan($value['currency_amount_cent']);
-                $items['total'][$k] += $v['currency_amount'];
+                $v['amount'] = (float)Setup::toYuan($value['amount_cent']);
+                $items['total'][$k] += $v['amount'];
                 $items[$k][] = $v;
             }
         }
@@ -262,7 +262,7 @@ class AnalysisService extends BaseObject
             $data = $this->getBaseQuery($params)
                 ->select([
                     "DATE_FORMAT(date, '{$format}') as m_date",
-                    'SUM(currency_amount_cent) AS currency_amount_cent'
+                    'SUM(amount_cent) AS amount_cent'
                 ])
                 ->andWhere(['transaction_type' => $type])
                 ->groupBy('m_date')
@@ -272,10 +272,10 @@ class AnalysisService extends BaseObject
             $k = TransactionType::getName($type);
             $items['total'][$k] = 0;
             $items[$k] = [];
-            foreach ($data as $key => $value) {
+            foreach ($data as $value) {
                 $v['date'] = $value['m_date'];
-                $v['currency_amount'] = (float)Setup::toYuan($value['currency_amount_cent']);
-                $items['total'][$k] += $v['currency_amount'];
+                $v['amount'] = (float)Setup::toYuan($value['amount_cent']);
+                $items['total'][$k] += $v['amount'];
                 $items[$k][] = $v;
             }
         }
