@@ -39,6 +39,13 @@ class m210918_083637_update_currency_rate_table extends Migration
         \app\core\models\Ledger::updateAll(['base_currency_code' => \app\core\types\CurrencyType::CNY_KEY]);
 
         $this->renameTable('{{%currency_rate}}', '{{%currency}}');
+
+        $this->createIndex(
+            'currency_ledger_id_from_to',
+            '{{%currency}}',
+            ['ledger_id', 'currency_code_from', 'currency_code_to'],
+            true
+        );
     }
 
     /**
@@ -47,6 +54,7 @@ class m210918_083637_update_currency_rate_table extends Migration
     public function safeDown()
     {
         echo "m210918_083637_update_currency_rate_table cannot be reverted.\n";
+        $this->renameTable('{{%currency}}', '{{%currency_rate}}');
 
         $this->dropColumn('{{%currency_rate}}', 'ledger_id');
         $this->dropColumn('{{%currency_rate}}', 'currency_code_from');
@@ -63,7 +71,7 @@ class m210918_083637_update_currency_rate_table extends Migration
             'currency_name',
             $this->string(60)->notNull()->after('currency_code')
         );
-        $this->renameTable('{{%currency}}', '{{%currency_rate}}');
+        $this->dropIndex('currency_ledger_id_from_to', '{{%currency_rate}}');
         return true;
     }
 }

@@ -144,6 +144,8 @@ $config = [
                 "GET <module>/investments/overview" => '<module>/investment/overview',
 
                 "GET <module>/currencies/rate/<from:\w+>/<to:\w+>" => '<module>/currency/rate',
+                "GET <module>/currencies/codes" => '<module>/currency/codes',
+                "GET <module>/currencies/can-use-codes" => '<module>/currency/can-use-codes',
 
                 [
                     'class' => 'yii\rest\UrlRule',

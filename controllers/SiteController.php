@@ -170,6 +170,11 @@ class SiteController extends Controller
                             'icon' => 'anticon-funnel-plot',
                         ],
                         [
+                            'text' => '货币',
+                            'link' => '/currency/index',
+                            'icon' => 'anticon-pound',
+                        ],
+                        [
                             'text' => '愿望清单',
                             'link' => '/wish-list/index',
                             'icon' => 'anticon-unordered-list',

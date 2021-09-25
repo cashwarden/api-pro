@@ -6,6 +6,7 @@ use app\core\exceptions\InvalidArgumentException;
 use app\core\types\CurrencyType;
 use Yii;
 use yii\behaviors\TimestampBehavior;
+use yiier\helpers\DateHelper;
 
 /**
  * This is the model class for table "{{%currency}}".
@@ -23,6 +24,8 @@ use yii\behaviors\TimestampBehavior;
  */
 class Currency extends \yii\db\ActiveRecord
 {
+    public const RATE_MULTIPLE = 10000000;
+
     /**
      * {@inheritdoc}
      */
@@ -61,10 +64,13 @@ class Currency extends \yii\db\ActiveRecord
                 'filter' => ['user_id' => Yii::$app->user->id],
                 'targetAttribute' => 'id',
             ],
-            [['created_at', 'updated_at'], 'safe'],
-            [['currency_code_from', 'currency_code_to'], 'string', 'max' => 3],
             [['currency_code_from', 'currency_code_to'], 'in', 'range' => CurrencyType::currentUseCodes()],
             ['currency_code_from', 'compare', 'compareAttribute' => 'currency_code_to', 'operator' => '!='],
+            [
+                ['ledger_id', 'currency_code_from', 'currency_code_to'],
+                'unique',
+                'targetAttribute' => ['ledger_id', 'currency_code_from', 'currency_code_to']
+            ],
         ];
     }
 
@@ -72,6 +78,12 @@ class Currency extends \yii\db\ActiveRecord
     {
         if (parent::beforeValidate()) {
             $this->user_id = Yii::$app->user->id;
+            if (!$this->rate) {
+                $this->addError('rate', '汇率必须大于0');
+            }
+            if ($this->rate && is_numeric($this->rate)) {
+                $this->rate = bcmul($this->rate, self::RATE_MULTIPLE);
+            }
             return true;
         }
         return false;
@@ -85,7 +97,7 @@ class Currency extends \yii\db\ActiveRecord
     public function beforeSave($insert)
     {
         if (parent::beforeSave($insert)) {
-            if ($this->currency_code_from != $this->ledger->base_currency_code) {
+            if ($this->currency_code_to != $this->ledger->base_currency_code) {
                 throw new InvalidArgumentException('currency_code_from 参数错误');
             }
             return true;
@@ -93,6 +105,13 @@ class Currency extends \yii\db\ActiveRecord
             return false;
         }
     }
+
+    public function afterFind()
+    {
+        parent::afterFind();
+        $this->rate = bcdiv($this->rate, self::RATE_MULTIPLE, 7);
+    }
+
 
     public function getLedger()
     {
@@ -108,12 +127,35 @@ class Currency extends \yii\db\ActiveRecord
             'id' => Yii::t('app', 'ID'),
             'user_id' => Yii::t('app', 'User ID'),
             'ledger_id' => Yii::t('app', 'Ledger ID'),
-            'currency_code_from' => Yii::t('app', 'Currency Code From'),
-            'currency_code_to' => Yii::t('app', 'Currency Code To'),
+            'currency_code_from' => Yii::t('app', 'Base Currency Code'),
+            'currency_code_to' => Yii::t('app', 'Currency'),
             'rate' => Yii::t('app', 'Rate'),
             'status' => Yii::t('app', 'Status'),
             'created_at' => Yii::t('app', 'Created At'),
             'updated_at' => Yii::t('app', 'Updated At'),
         ];
+    }
+
+    /**
+     * @return array
+     */
+    public function fields()
+    {
+        $fields = parent::fields();
+        unset($fields['user_id']);
+
+        $fields['currency_code_to_name'] = function (self $model) {
+            return data_get(CurrencyType::names(), $model->currency_code_to);
+        };
+
+        $fields['created_at'] = function (self $model) {
+            return DateHelper::datetimeToIso8601($model->created_at);
+        };
+
+        $fields['updated_at'] = function (self $model) {
+            return DateHelper::datetimeToIso8601($model->updated_at);
+        };
+
+        return $fields;
     }
 }

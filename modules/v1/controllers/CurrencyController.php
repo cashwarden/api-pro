@@ -5,7 +5,10 @@ namespace app\modules\v1\controllers;
 use app\core\exceptions\InvalidArgumentException;
 use app\core\helpers\CurrencyConverter;
 use app\core\models\Currency;
+use app\core\models\Ledger;
+use app\core\services\LedgerService;
 use app\core\types\CurrencyType;
+use Yii;
 use yiier\graylog\Log;
 
 /**
@@ -42,5 +45,41 @@ class CurrencyController extends ActiveController
         }
 
         return ['rate' => data_get($data, "rates.{$to}"), 'date' => data_get($data, 'date')];
+    }
+
+
+    public function actionCodes(): array
+    {
+        $items = [];
+        $names = CurrencyType::names();
+        foreach (CurrencyType::currentUseCodes() as $currentUseCode) {
+            array_push($items, ['code' => $currentUseCode, 'name' => $names[$currentUseCode]]);
+        }
+        return $items;
+    }
+
+    public function actionCanUseCodes(): array
+    {
+        $items = [];
+        $names = CurrencyType::names();
+        $userIds = Yii::$app->user->id;
+        if ($ledgerId = data_get(Yii::$app->request->queryParams, 'ledger_id')) {
+            LedgerService::checkAccess($ledgerId);
+            $userIds = LedgerService::getLedgerMemberUserIds($ledgerId);
+        }
+        $baseCode = Ledger::find()->select('base_currency_code')
+            ->where(['id' => $ledgerId, 'user_id' => $userIds])
+            ->scalar();
+        array_push($items, ['code' => $baseCode, 'name' => $names[$baseCode]]);
+
+        $codes = Currency::find()->select('currency_code_from')
+            ->where(['ledger_id' => $ledgerId, 'user_id' => $userIds])
+            ->asArray()
+            ->column();
+        foreach ($codes as $code) {
+            array_push($items, ['code' => $code, 'name' => $names[$code]]);
+        }
+
+        return $items;
     }
 }

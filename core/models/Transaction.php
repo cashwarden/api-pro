@@ -227,11 +227,11 @@ class Transaction extends \yii\db\ActiveRecord
             $this->type = TransactionType::toEnumValue($this->type);
 
             $this->currency_amount_cent = Setup::toFen($this->currency_amount);
-            if ($this->currency_code == Yii::$app->user->identity['base_currency_code']) {
+            if ($this->currency_code == $this->ledger->base_currency_code) {
                 $this->amount_cent = $this->currency_amount_cent;
             } else {
-                // $this->amount_cent = $this->currency_amount_cent;
-                // todo 计算汇率
+                $rate = TransactionService::getRate($this, $this->ledger->base_currency_code);
+                $this->amount_cent = Setup::toFen($rate * $this->currency_amount);
             }
             $this->tags ? TransactionService::createTags($this->tags, $this->ledger_id) : null;
             if ($this->description) {

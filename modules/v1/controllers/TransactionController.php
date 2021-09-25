@@ -54,7 +54,6 @@ class TransactionController extends ActiveController
         $items = [];
         $texts = TransactionType::texts();
         $names = TransactionType::names();
-        // unset($names[TransactionType::ADJUST]);
         foreach ($names as $key => $name) {
             $items[] = ['type' => $name, 'name' => data_get($texts, $key)];
         }

@@ -51,6 +51,8 @@ return [
     'Work income' => '工作收入',
     'Investment income' => '投资收入',
     'Other income' => '其他收入',
+    'Currency' => '货币',
+    'Rate' => '汇率',
 
     'General Ledger' => '普通账本',
     'Share Ledger' => '共享账本',

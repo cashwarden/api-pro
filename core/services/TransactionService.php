@@ -10,11 +10,13 @@ use app\core\exceptions\UserNotProException;
 use app\core\helpers\ArrayHelper;
 use app\core\models\Account;
 use app\core\models\Category;
+use app\core\models\Currency;
 use app\core\models\Record;
 use app\core\models\Search;
 use app\core\models\Tag;
 use app\core\models\Transaction;
 use app\core\traits\ServiceTrait;
+use app\core\types\CurrencyStatus;
 use app\core\types\DirectionType;
 use app\core\types\RecordSource;
 use app\core\types\TransactionType;
@@ -208,7 +210,7 @@ class TransactionService extends BaseObject
         $transaction->source = RecordSource::CRONTAB;
         $transaction->load($values, '');
         if (!$transaction->save(false)) {
-            throw new Exception(Setup::errorMessage($transaction->firstErrors));
+            throw new \yii\db\Exception(Setup::errorMessage($transaction->firstErrors));
         }
         return $transaction;
     }
@@ -680,7 +682,7 @@ class TransactionService extends BaseObject
             ->orderBy(['date' => SORT_DESC])
             ->asArray()
             ->all();
-        foreach ($items as $k => $item) {
+        foreach ($items as $item) {
             $datum['date'] = $item['date'];
             $datum['category_name'] = data_get($categoriesMap, $item['category_id'], '');
             $datum['type'] = data_get($types, $item['type'], '');
@@ -763,10 +765,6 @@ class TransactionService extends BaseObject
             $query->andWhere($searchKeywords);
         }
 
-//        if (($date = explode('~', data_get($params, 'date'))) && count($date) == 2) {
-//            $query->andWhere(['between', 'date', strtotime($date[0]), strtotime($date[1])]);
-//        }
-
         $query->andFilterWhere(['category_id' => data_get($params, 'category_id')]);
         $search = $query->asArray()
             ->orderBy(['date' => SORT_DESC, 'id' => SORT_DESC])
@@ -801,5 +799,30 @@ class TransactionService extends BaseObject
             return;
         }
         Search::deleteAll(['id' => $ids]);
+    }
+
+
+    /**
+     * @param Transaction $transaction
+     * @param string $baseCurrencyCode
+     * @return float
+     * @throws InvalidArgumentException
+     */
+    public static function getRate(Transaction $transaction, string $baseCurrencyCode): float
+    {
+        $currency = Currency::find()
+            ->select('rate')
+            ->where([
+                'ledger_id' => $transaction->ledger_id,
+                'currency_code_to' => $baseCurrencyCode,
+                'currency_code_from' => $transaction->currency_code,
+                'status' => CurrencyStatus::ACTIVE
+            ])
+            ->limit(1)
+            ->one();
+        if (!$currency) {
+            throw new InvalidArgumentException('汇率不存在');
+        }
+        return $currency->rate;
     }
 }
