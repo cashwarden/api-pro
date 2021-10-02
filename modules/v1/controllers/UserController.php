@@ -158,6 +158,20 @@ class UserController extends ActiveController
         return $this->userService->getAuthClients();
     }
 
+
+    /**
+     * @param string $type
+     * @return array
+     * @throws InvalidArgumentException
+     * @throws \Throwable
+     * @throws \app\core\exceptions\InternalException
+     * @throws \yii\db\StaleObjectException
+     */
+    public function actionDeleteAuthClient(string $type): array
+    {
+        return $this->userService->deleteAuthClient($type);
+    }
+
     /**
      * Process password reset request
      *

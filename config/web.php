@@ -95,6 +95,7 @@ $config = [
                 "POST <module>/reset-token" => '<module>/user/reset-token',
 
                 "GET <module>/users/auth-clients" => '<module>/user/get-auth-clients',
+                "DELETE <module>/users/auth-client/<type:\w+>" => '<module>/user/delete-auth-client',
                 'POST <module>/users/confirm' => '<module>/user/confirm',
                 'POST <module>/users/send-confirmation' => '<module>/user/send-confirmation',
                 'POST <module>/users/me' => '<module>/user/me-update',

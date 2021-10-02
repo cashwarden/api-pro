@@ -285,9 +285,8 @@ class UserService
         $data = [];
         if ($items = AuthClient::find()->where(['user_id' => Yii::$app->user->id])->all()) {
             $items = ArrayHelper::index($items, 'type');
-
             foreach (AuthClientType::names() as $key => $value) {
-                $data[$value] = $items[$key];
+                $data[$value] = data_get($items, $key, '');
             }
         }
 
@@ -407,5 +406,26 @@ class UserService
             throw new DBException(Setup::errorMessage($model->firstErrors));
         }
         return $model;
+    }
+
+    /**
+     * @param string $type
+     * @return array
+     * @throws InternalException
+     * @throws InvalidArgumentException
+     * @throws \Throwable
+     * @throws \yii\db\StaleObjectException
+     */
+    public function deleteAuthClient(string $type): array
+    {
+        if (!in_array($type, AuthClientType::names())) {
+            throw new InvalidArgumentException('参数错误');
+        }
+        $type = AuthClientType::toEnumValue($type);
+        $client = AuthClient::find()->where(['user_id' => Yii::$app->user->id, 'type' => $type])->one();
+        if ($client && $client->delete()) {
+            return $this->getAuthClients();
+        }
+        throw new InternalException('删除失败');
     }
 }
