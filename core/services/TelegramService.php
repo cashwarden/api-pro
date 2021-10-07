@@ -288,12 +288,15 @@ class TelegramService extends BaseObject
             return;
         }
         $bot = TelegramService::newClient();
-        /** @var BotApi $bot */
-        try {
-            $bot->sendMessage($telegram['chat']['id'], $messageText, null, false, null, $keyboard);
-        } catch (InvalidArgumentException $e) {
-        } catch (Exception $e) {
-            Log::error('发送 telegram 消息失败', [$e->getMessage(), $messageText]);
+        // 重试五次
+        for ($i = 0; $i < 5; $i++) {
+            /** @var BotApi $bot */
+            try {
+                $bot->sendMessage($telegram['chat']['id'], $messageText, null, false, null, $keyboard);
+                return;
+            } catch (Exception $e) {
+                Log::error('发送 telegram 消息失败', [$messageText, (string)$e]);
+            }
         }
     }
 
@@ -321,7 +324,7 @@ class TelegramService extends BaseObject
     public function getMessageTextByRecord(Record $record, string $title = '余额调整成功'): string
     {
         $text = "{$title}\n";
-        $text .= "时间： {$record->date}\n"; // todo add tag
+        $text .= "时间： {$record->date}\n";
         $accountBalance = Setup::toYuan($record->account->balance_cent);
         $text .= "账户： #{$record->account->name} （余额：{$accountBalance}）\n";
         $direction = $record->direction == DirectionType::INCOME ? '+' : '-';
@@ -360,10 +363,10 @@ class TelegramService extends BaseObject
         $surplus = data_get($recordOverview, "{$type}.overview.surplus", 0);
         $text .= "{$title}统计：已支出 {$expense}，已收入 {$income}，结余 {$surplus}\n";
         foreach ($recordByCategory['expense'] as $item) {
-            $text .= "    * {$item['category_name']}：- {$item['currency_amount']}\n";
+            $text .= "    * {$item['category_name']}：- {$item['amount_cent']}\n";
         }
         foreach ($recordByCategory['income'] as $item) {
-            $text .= "    * {$item['category_name']}：+ {$item['currency_amount']}\n";
+            $text .= "    * {$item['category_name']}：+ {$item['amount_cent']}\n";
         }
 
         return $text;
