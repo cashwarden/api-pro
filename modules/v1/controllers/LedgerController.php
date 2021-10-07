@@ -28,8 +28,8 @@ class LedgerController extends ActiveController
     use ServiceTrait;
 
     public $modelClass = Ledger::class;
-    public $partialMatchAttributes = ['name'];
-    public $stringToIntAttributes = ['type' => LedgerType::class];
+    public array $partialMatchAttributes = ['name'];
+    public array $stringToIntAttributes = ['type' => LedgerType::class];
 
     /**
      * @return bool

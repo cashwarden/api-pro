@@ -16,7 +16,7 @@
     },
     "minimum-stability": "stable",
     "require": {
-        "php": ">=7.2",
+        "php": ">=7.4",
         "yiisoft/yii2": "~2.0.14",
         "yiisoft/yii2-swiftmailer": "~2.0.0 || ~2.1.0",
         "yiithings/yii2-dotenv": "^1.0",
@@ -36,7 +36,8 @@
         "hightman/xunsearch": "^1.4",
         "overtrue/wechat": "^5.4",
         "yiier/yii2-user-setting": "^0.2.0",
-        "guanguans/yii-event": "^1.0"
+        "guanguans/yii-event": "^1.0",
+        "notamedia/yii2-sentry": "^1.7"
     },
     "require-dev": {
         "yiisoft/yii2-debug": "~2.1.0",

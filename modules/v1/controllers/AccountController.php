@@ -27,10 +27,10 @@ class AccountController extends ActiveController
     use ServiceTrait;
 
     public $modelClass = Account::class;
-    public $noAuthActions = [];
-    public $defaultOrder = ['sort' => SORT_ASC, 'id' => SORT_DESC];
-    public $partialMatchAttributes = ['name'];
-    public $stringToIntAttributes = ['type' => AccountType::class, 'status' => AccountStatus::class];
+    public array $noAuthActions = [];
+    public array $defaultOrder = ['sort' => SORT_ASC, 'id' => SORT_DESC];
+    public array $partialMatchAttributes = ['name'];
+    public array $stringToIntAttributes = ['type' => AccountType::class, 'status' => AccountStatus::class];
 
     public function actions()
     {

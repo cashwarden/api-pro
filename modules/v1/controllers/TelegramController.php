@@ -22,7 +22,7 @@ class TelegramController extends ActiveController
     use ServiceTrait;
 
     public $modelClass = '';
-    public $noAuthActions = ['hook', 'bind'];
+    public array $noAuthActions = ['hook', 'bind'];
 
     public function actions()
     {

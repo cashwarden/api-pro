@@ -121,6 +121,19 @@ return [
                     ],
                 ],
                 [
+                    'class' => 'notamedia\sentry\SentryTarget',
+                    'dsn' => env('SENTRY_DSN'),
+                    'levels' => Logger::LEVEL_ERROR | Logger::LEVEL_WARNING,
+                    'logVars' => ['_GET', '_POST', '_FILES', '_COOKIE', '_SESSION'],
+                    'except' => [
+                        'yii\web\HttpException:404',
+                    ],
+                    // Write the context information (the default is true):
+                    'context' => true,
+                    // Additional options for `Sentry\init`:
+                    'clientOptions' => ['release' => getenv('GRAYLOG_TAG')]
+                ],
+                [
                     'class' => yiier\graylog\Target::class,
                     'levels' => Logger::LEVEL_ERROR | Logger::LEVEL_WARNING | Logger::LEVEL_INFO,
                     'logVars' => ['_GET', '_POST', '_FILES', '_COOKIE', '_SESSION'],

@@ -11,7 +11,7 @@ class AnalysisController extends ActiveController
     use ServiceTrait;
 
     public $modelClass = '';
-    public $noAuthActions = [];
+    public array $noAuthActions = [];
 
     public function actions()
     {
