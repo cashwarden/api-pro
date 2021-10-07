@@ -293,7 +293,7 @@ class TelegramService extends BaseObject
             /** @var BotApi $bot */
             try {
                 $bot->sendMessage($telegram['chat']['id'], $messageText, null, false, null, $keyboard);
-                return;
+                break;
             } catch (Exception $e) {
                 Log::error('发送 telegram 消息失败', [$messageText, (string)$e]);
             }
