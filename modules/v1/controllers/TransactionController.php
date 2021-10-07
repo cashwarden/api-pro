@@ -23,7 +23,7 @@ class TransactionController extends ActiveController
     use ServiceTrait;
 
     public $modelClass = Transaction::class;
-    public $noAuthActions = [];
+    public array $noAuthActions = [];
 
     public function actions()
     {

@@ -12,7 +12,7 @@ class WechatController extends ActiveController
     use ServiceTrait;
 
     public $modelClass = '';
-    public $noAuthActions = ['login'];
+    public array $noAuthActions = ['login'];
 
     public function actions()
     {

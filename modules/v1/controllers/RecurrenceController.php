@@ -22,7 +22,7 @@ class RecurrenceController extends ActiveController
     use ServiceTrait;
 
     public $modelClass = Recurrence::class;
-    public $partialMatchAttributes = ['name'];
+    public array $partialMatchAttributes = ['name'];
 
     /**
      * @param int $id

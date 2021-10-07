@@ -12,8 +12,8 @@ class BudgetConfigController extends ActiveController
     use ServiceTrait;
 
     public $modelClass = BudgetConfig::class;
-    public $defaultOrder = ['id' => SORT_DESC];
-    public $partialMatchAttributes = ['name'];
+    public array $defaultOrder = ['id' => SORT_DESC];
+    public array $partialMatchAttributes = ['name'];
 
     /**
      * @param int $id

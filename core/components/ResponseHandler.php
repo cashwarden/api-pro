@@ -19,7 +19,7 @@ class ResponseHandler
             if (isset($response->data['code']) && isset($response->data['message'])) {
                 $response->data = [
                     'code' => $response->data['code'] ?: $response->statusCode,
-                    'data' => isset($response->data['data']) ? $response->data['data'] : null,
+                    'data' => $response->data['data'] ?? null,
                     'message' => $response->data['message'],
                 ];
             } elseif ($response->format != 'html' && !isset($response->data['message'])) {
@@ -33,7 +33,7 @@ class ResponseHandler
                 unset($response->data['message']);
                 $response->data = [
                     'code' => 0,
-                    'data' => isset($response->data[0]) ? $response->data[0] : $response->data,
+                    'data' => $response->data[0] ?? $response->data,
                     'message' => $message,
                 ];
             }
@@ -62,7 +62,7 @@ class ResponseHandler
                 # code...
                 break;
         }
-
+        \Yii::info("response success", $response->data);
         $response->setStatusCode(200);
     }
 }

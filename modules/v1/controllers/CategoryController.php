@@ -17,9 +17,9 @@ class CategoryController extends ActiveController
     use ServiceTrait;
 
     public $modelClass = Category::class;
-    public $defaultOrder = ['sort' => SORT_ASC, 'id' => SORT_DESC];
-    public $partialMatchAttributes = ['name'];
-    public $stringToIntAttributes = ['transaction_type' => TransactionType::class];
+    public array $defaultOrder = ['sort' => SORT_ASC, 'id' => SORT_DESC];
+    public array $partialMatchAttributes = ['name'];
+    public array $stringToIntAttributes = ['transaction_type' => TransactionType::class];
 
     /**
      * @return array

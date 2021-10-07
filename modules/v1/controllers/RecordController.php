@@ -28,9 +28,9 @@ class RecordController extends ActiveController
     use ServiceTrait;
 
     public $modelClass = Record::class;
-    public $noAuthActions = [];
-    public $defaultOrder = ['date' => SORT_DESC, 'id' => SORT_DESC];
-    public $stringToIntAttributes = [
+    public array $noAuthActions = [];
+    public array $defaultOrder = ['date' => SORT_DESC, 'id' => SORT_DESC];
+    public array $stringToIntAttributes = [
         'transaction_type' => TransactionType::class,
         'reimbursement_status' => ReimbursementStatus::class
     ];

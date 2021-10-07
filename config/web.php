@@ -38,7 +38,7 @@ $config = [
         ],
         'pay' => [
             'class' => 'Guanguans\YiiPay\Pay',
-            'alipayOption' => [
+            'alipayOptions' => [
                 'app_id' => env('ALIPAY_APP_ID'),
                 'notify_url' => env('APP_URL') . '/pay-notify-url',
                 'return_url' => env('APP_URL') . '/pay-return-url',

@@ -29,16 +29,16 @@ class ActiveController extends \yii\rest\ActiveController
 {
     protected const MAX_PAGE_SIZE = 100;
     protected const DEFAULT_PAGE_SIZE = 20;
-    public $defaultOrder = ['id' => SORT_DESC];
-    public $partialMatchAttributes = [];
-    public $stringToIntAttributes = [];
-    public $relations = [];
+    public array $defaultOrder = ['id' => SORT_DESC];
+    public array $partialMatchAttributes = [];
+    public array $stringToIntAttributes = [];
+    public array $relations = [];
 
     /**
      * 不参与校验的 actions
      * @var array
      */
-    public $noAuthActions = [];
+    public array $noAuthActions = [];
 
     // 序列化输出
     public $serializer = [
