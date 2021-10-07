@@ -363,10 +363,10 @@ class TelegramService extends BaseObject
         $surplus = data_get($recordOverview, "{$type}.overview.surplus", 0);
         $text .= "{$title}统计：已支出 {$expense}，已收入 {$income}，结余 {$surplus}\n";
         foreach ($recordByCategory['expense'] as $item) {
-            $text .= "    * {$item['category_name']}：- {$item['amount_cent']}\n";
+            $text .= "    * {$item['category_name']}：- {$item['amount']}\n";
         }
         foreach ($recordByCategory['income'] as $item) {
-            $text .= "    * {$item['category_name']}：+ {$item['amount_cent']}\n";
+            $text .= "    * {$item['category_name']}：+ {$item['amount']}\n";
         }
 
         return $text;
