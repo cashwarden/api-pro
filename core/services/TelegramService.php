@@ -131,12 +131,16 @@ class TelegramService extends BaseObject
      * @param Client $bot
      * @throws Exception
      * @throws InvalidArgumentException
+     * @throws InvalidConfigException
      * @throws \Throwable
      */
     public function callbackQuery(CallbackQuery $message, Client $bot)
     {
         /** @var BotApi $bot */
-        $data = Json::decode($message->getData());
+        if (!$data = json_decode($message->getData(), true)) {
+            Log::warning('telegram callback error', $message->getData());
+            return;
+        }
         switch (data_get($data, 'action')) {
             case TelegramAction::TRANSACTION_DELETE:
                 /** @var Transaction $model */

@@ -39,7 +39,6 @@ class TelegramController extends ActiveController
     {
         try {
             $bot = TelegramService::newClient();
-
             $bot->callbackQuery(function (CallbackQuery $message) use ($bot) {
                 $bot->answerCallbackQuery($message->getId(), "Loading...");
                 $user = $this->userService->getUserByClientId(
