@@ -79,7 +79,7 @@ class SiteController extends Controller
         }
 
         $alipay->success()->send();
-        return true;
+        Yii::$app->end();
     }
 
     /**
