@@ -20,7 +20,6 @@ class InvestmentController extends ActiveController
 
     public $modelClass = '';
 
-
     /**
      * @return array
      * @throws \Exception
@@ -41,7 +40,8 @@ class InvestmentController extends ActiveController
             $end = $date[1] . ' 23:59:59';
             $paramsDate = [$start, $end];
         }
-
+        $items['income'] = [];
+        $items['expense'] = [];
         foreach (Account::find()->where($baseConditions)->column() as $id) {
             $conditions = ['account_id' => $id, 'transaction_type' => TransactionType::ADJUST];
 
