@@ -10,6 +10,7 @@ use app\core\services\RecurrenceService;
 use app\core\types\DirectionType;
 use app\core\types\RecordSource;
 use app\core\types\ReimbursementStatus;
+use app\core\types\ReviewStatus;
 use Yii;
 use yii\behaviors\TimestampBehavior;
 use yii\db\ActiveRecord;
@@ -35,6 +36,7 @@ use yiier\helpers\Setup;
  * @property int $source
  * @property int $exclude_from_stats
  * @property int $reimbursement_status
+ * @property int $review
  * @property string|null $created_at
  * @property string|null $updated_at
  *
@@ -111,6 +113,7 @@ class Record extends ActiveRecord
             ],
             ['direction', 'in', 'range' => [DirectionType::INCOME, DirectionType::EXPENSE]],
             ['source', 'in', 'range' => array_keys(RecordSource::names())],
+            ['review', 'in', 'range' => array_keys(ReviewStatus::names())],
             ['reimbursement_status', 'in', 'range' => array_keys(ReimbursementStatus::names())],
             [['date'], 'datetime', 'format' => 'php:Y-m-d H:i'],
             ['exclude_from_stats', 'boolean', 'trueValue' => true, 'falseValue' => false, 'strict' => true],
@@ -138,6 +141,7 @@ class Record extends ActiveRecord
             'source' => Yii::t('app', 'Source'),
             'exclude_from_stats' => Yii::t('app', 'Exclude From Stats'),
             'reimbursement_status' => Yii::t('app', 'Reimbursement Status'),
+            'review' => Yii::t('app', 'Review'),
             'created_at' => Yii::t('app', 'Created At'),
             'updated_at' => Yii::t('app', 'Updated At'),
         ];
@@ -302,6 +306,10 @@ class Record extends ActiveRecord
 
         $fields['reimbursement_status'] = function (self $model) {
             return ReimbursementStatus::getName($model->reimbursement_status);
+        };
+
+        $fields['review'] = function (self $model) {
+            return ReviewStatus::getName($model->review);
         };
 
         $fields['created_at'] = function (self $model) {

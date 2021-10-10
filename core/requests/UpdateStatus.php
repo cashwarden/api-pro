@@ -22,7 +22,7 @@ class UpdateStatus extends \yii\base\Model
      * @param array $config
      * @throws InternalException
      */
-    public function __construct(array $statusRange, $config = [])
+    public function __construct(array $statusRange, array $config = [])
     {
         if (!count($statusRange)) {
             throw new InternalException(\Yii::t('app', 'Status range cannot be blank.'));
