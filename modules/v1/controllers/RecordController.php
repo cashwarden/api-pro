@@ -13,6 +13,7 @@ use app\core\types\AnalysisDateType;
 use app\core\types\ExcludeFromStats;
 use app\core\types\RecordSource;
 use app\core\types\ReimbursementStatus;
+use app\core\types\ReviewStatus;
 use app\core\types\TransactionType;
 use Exception;
 use Yii;
@@ -167,6 +168,9 @@ class RecordController extends ActiveController
                 break;
             case 'exclude_from_stats':
                 $statusClass = new ExcludeFromStats();
+                break;
+            case 'review':
+                $statusClass = new ReviewStatus();
                 break;
             default:
                 throw new InvalidArgumentException('错误的 key');
