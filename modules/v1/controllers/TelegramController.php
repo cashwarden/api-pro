@@ -10,7 +10,7 @@ use app\core\types\AuthClientType;
 use app\core\types\RecordSource;
 use app\core\types\TelegramKeyword;
 use TelegramBot\Api\BotApi;
-use TelegramBot\Api\Types\CallbackQuery;
+use TelegramBot\Api\Exception;
 use TelegramBot\Api\Types\Message;
 use TelegramBot\Api\Types\ReplyKeyboardMarkup;
 use TelegramBot\Api\Types\Update;
@@ -39,33 +39,26 @@ class TelegramController extends ActiveController
     {
         try {
             $bot = TelegramService::newClient();
-            $bot->callbackQuery(function (CallbackQuery $message) use ($bot) {
-                $bot->answerCallbackQuery($message->getId(), "Loading...");
-                $user = $this->userService->getUserByClientId(
-                    AuthClientType::TELEGRAM,
-                    $message->getFrom()->getId()
-                );
-                if ($user) {
-                    \Yii::$app->user->setIdentity($user);
-                    $this->telegramService->callbackQuery($message, $bot);
-                }
-            });
+
+            // 记账记录按钮操作
+            $this->telegramService->messageCallback($bot);
 
             $bot->command(ltrim(TelegramKeyword::REPORT, '/'), function (Message $message) use ($bot) {
-                $keyboard = new ReplyKeyboardMarkup(
+                $keyboard = [
                     [
-                        [
-                            TelegramKeyword::TODAY,
-                            TelegramKeyword::YESTERDAY,
-                            TelegramKeyword::LAST_MONTH,
-                            TelegramKeyword::CURRENT_MONTH
-                        ]
-                    ],
+                        TelegramKeyword::TODAY,
+                        TelegramKeyword::YESTERDAY,
+                        TelegramKeyword::LAST_MONTH,
+                        TelegramKeyword::CURRENT_MONTH
+                    ]
+                ];
+                $replyMarkup = new ReplyKeyboardMarkup(
+                    $keyboard,
                     true,
                     true
                 );
                 /** @var BotApi $bot */
-                $bot->sendMessage($message->getChat()->getId(), '请选择统计范围', null, false, null, $keyboard);
+                $bot->sendMessage($message->getChat()->getId(), '请选择统计范围', null, false, null, $replyMarkup);
             });
 
             $bot->command(ltrim(TelegramKeyword::PASSWORD_RESET, '/'), function (Message $message) use ($bot) {
@@ -162,17 +155,6 @@ class TelegramController extends ActiveController
                 return false;
             });
 
-//            $bot->on(function (Update $Update) use ($bot) {
-//                $message = $Update->getMessage();
-//                /** @var BotApi $bot */
-//                $bot->sendMessage($message->getChat()->getId(), "hi");
-//            }, function (Update $message) {
-//                if ($message->getMessage() && $message->getMessage()->getText() == '/login') {
-//                    return true;
-//                }
-//                return false;
-//            });
-
             $bot->on(function (Update $Update) use ($bot) {
                 $message = $Update->getMessage();
                 $token = StringHelper::after(TelegramKeyword::BIND . '/', $message->getText());
@@ -230,7 +212,7 @@ class TelegramController extends ActiveController
             });
 
             $bot->run();
-        } catch (\TelegramBot\Api\Exception $e) {
+        } catch (Exception $e) {
             Log::error('webHook error' . $e->getMessage(), (string)$e);
             throw $e;
         }

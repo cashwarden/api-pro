@@ -27,6 +27,7 @@ use Yii;
 use yii\base\BaseObject;
 use yii\base\InvalidConfigException;
 use yii\db\Exception as DBException;
+use yii\helpers\ArrayHelper;
 use yii\helpers\Json;
 use yiier\graylog\Log;
 use yiier\helpers\Setup;
@@ -418,5 +419,22 @@ class TelegramService extends BaseObject
         ];
 
         return new InlineKeyboardMarkup([$items]);
+    }
+
+    public function messageCallback(Client $bot)
+    {
+        // 记账
+        $bot->callbackQuery(function (CallbackQuery $message) use ($bot) {
+            Log::warning('messageCallback', ArrayHelper::toArray($bot));
+            $bot->answerCallbackQuery($message->getId(), "Loading...");
+            $user = $this->userService->getUserByClientId(
+                AuthClientType::TELEGRAM,
+                $message->getFrom()->getId()
+            );
+            if ($user) {
+                \Yii::$app->user->setIdentity($user);
+                $this->callbackQuery($message, $bot);
+            }
+        });
     }
 }
