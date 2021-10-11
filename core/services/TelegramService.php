@@ -13,6 +13,7 @@ use app\core\types\AnalysisDateType;
 use app\core\types\AuthClientType;
 use app\core\types\DirectionType;
 use app\core\types\TelegramAction;
+use app\core\types\TelegramKeyword;
 use app\core\types\TransactionRating;
 use app\core\types\TransactionType;
 use Carbon\Carbon;
@@ -22,14 +23,16 @@ use TelegramBot\Api\Exception;
 use TelegramBot\Api\Types\CallbackQuery;
 use TelegramBot\Api\Types\Inline\InlineKeyboardMarkup;
 use TelegramBot\Api\Types\Message;
+use TelegramBot\Api\Types\ReplyKeyboardMarkup;
+use TelegramBot\Api\Types\Update;
 use Throwable;
 use Yii;
 use yii\base\BaseObject;
 use yii\base\InvalidConfigException;
-use yii\db\Exception as DBException;
 use yii\helpers\Json;
 use yiier\graylog\Log;
 use yiier\helpers\Setup;
+use yiier\helpers\StringHelper;
 
 class TelegramService extends BaseObject
 {
@@ -47,20 +50,38 @@ class TelegramService extends BaseObject
         }
     }
 
+
     /**
-     * @param User $user
-     * @param Message $message
-     * @throws DBException
+     * @param Client $bot
      */
-    public function bind(User $user, Message $message): void
+    public function bind(Client $bot): void
     {
-        $expand = [
-            'client_username' => (string)($message->getFrom()->getUsername() ?: $message->getFrom()->getFirstName()),
-            'client_id' => (string)$message->getFrom()->getId(),
-            'data' => $message->toJson(),
-        ];
-        UserService::findOrCreateAuthClient($user->id, AuthClientType::TELEGRAM, $expand);
-        User::updateAll(['password_reset_token' => null], ['id' => $user->id]);
+        $bot->on(function (Update $Update) use ($bot) {
+            $message = $Update->getMessage();
+            $token = StringHelper::after(TelegramKeyword::BIND . '/', $message->getText());
+            try {
+                $user = $this->userService->getUserByResetToken($token);
+                $expand = [
+                    'client_username' => $message->getFrom()->getUsername() ?: $message->getFrom()->getFirstName(),
+                    'client_id' => (string)$message->getFrom()->getId(),
+                    'data' => $message->toJson(),
+                ];
+                UserService::findOrCreateAuthClient($user->id, AuthClientType::TELEGRAM, $expand);
+                User::updateAll(['password_reset_token' => null], ['id' => $user->id]);
+
+                $text = '成功绑定账号【' . data_get($user, 'username') . '】！';
+            } catch (\Exception $e) {
+                $text = $e->getMessage();
+            }
+            /** @var BotApi $bot */
+            $bot->sendMessage($message->getChat()->getId(), $text);
+        }, function (Update $message) {
+            $msg = $message->getMessage();
+            if ($msg && strpos($msg->getText(), TelegramKeyword::BIND) === 0) {
+                return true;
+            }
+            return false;
+        });
     }
 
 
@@ -440,5 +461,123 @@ class TelegramService extends BaseObject
             $replyToMessageId = $message->getMessage()->getMessageId();
             $bot->sendMessage($message->getFrom()->getId(), $text, null, false, $replyToMessageId);
         }
+    }
+
+    public function reportMessage(Client $bot)
+    {
+        $bot->on(function (Update $Update) use ($bot) {
+            $message = $Update->getMessage();
+            $user = $this->userService->getUserByClientId(
+                AuthClientType::TELEGRAM,
+                $message->getFrom()->getId()
+            );
+            if ($user) {
+                \Yii::$app->user->setIdentity($user);
+                $type = ltrim($message->getText(), '/');
+                $text = $this->telegramService->getReportTextByType($type);
+            } else {
+                $text = '请先绑定您的账号';
+            }
+            /** @var BotApi $bot */
+            $bot->sendMessage($message->getChat()->getId(), $text);
+        }, function (Update $message) {
+            $msg = $message->getMessage();
+            $report = [
+                TelegramKeyword::TODAY,
+                TelegramKeyword::YESTERDAY,
+                TelegramKeyword::LAST_MONTH,
+                TelegramKeyword::CURRENT_MONTH
+            ];
+            if ($msg && in_array($msg->getText(), $report)) {
+                return true;
+            }
+            return false;
+        });
+    }
+
+    public function reportMenus(Client $bot)
+    {
+        $bot->command(ltrim(TelegramKeyword::REPORT, '/'), function (Message $message) use ($bot) {
+            $keyboard = [
+                [
+                    TelegramKeyword::TODAY,
+                    TelegramKeyword::YESTERDAY,
+                    TelegramKeyword::LAST_MONTH,
+                    TelegramKeyword::CURRENT_MONTH
+                ]
+            ];
+            $replyMarkup = new ReplyKeyboardMarkup(
+                $keyboard,
+                true,
+                true
+            );
+            /** @var BotApi $bot */
+            $bot->sendMessage($message->getChat()->getId(), '请选择统计范围', null, false, null, $replyMarkup);
+        });
+    }
+
+    public function passwordReset(Client $bot)
+    {
+        $bot->command(ltrim(TelegramKeyword::PASSWORD_RESET, '/'), function (Message $message) use ($bot) {
+            $text = "您还未绑定账号，请先访问「个人设置」中的「账号绑定」进行绑定账号，然后才能使用此功能。";
+            $user = $this->userService->getUserByClientId(
+                AuthClientType::TELEGRAM,
+                $message->getFrom()->getId()
+            );
+            if ($user) {
+                (new UserService())->setPasswordResetToken($user);
+                $resetURL = params('frontendURL') .
+                    '#/passport/password-reset?token=' .
+                    $user->password_reset_token;
+                $text = "请在 24 小时内使使用此链接设置新密码\n {$resetURL}";
+            }
+            /** @var BotApi $bot */
+            $bot->sendMessage($message->getChat()->getId(), $text);
+        });
+    }
+
+    public function cmd(Client $bot)
+    {
+        $bot->command(ltrim(TelegramKeyword::CMD, '/'), function (Message $message) use ($bot) {
+            $keyboard = new ReplyKeyboardMarkup(
+                [[TelegramKeyword::REPORT]],
+                true,
+                true
+            );
+            /** @var BotApi $bot */
+            $bot->sendMessage($message->getChat()->getId(), '请选择指令', null, false, null, $keyboard);
+        });
+
+        $bot->command(ltrim(TelegramKeyword::HELP, '/'), function (Message $message) use ($bot) {
+            $text = "我能做什么？
+/help - 查看帮助
+/cmd - 列出所有指令
+/today - 今日消费报告
+/yesterday - 昨日消费报告
+/current_month - 本月消费报告
+/last_month - 上个月消费报告
+/start - 开始使用
+/password_reset - 重置密码
+
+绑定账号成功之后发送文字直接记账";
+            /** @var BotApi $bot */
+            $bot->sendMessage($message->getChat()->getId(), $text);
+        });
+    }
+
+    public function start(Client $bot)
+    {
+        $bot->command(ltrim(TelegramKeyword::START, '/'), function (Message $message) use ($bot) {
+            $text = "您还未绑定账号，请先访问「个人设置」中的「账号绑定」进行绑定账号，然后才能快速记账。";
+            $user = $this->userService->getUserByClientId(
+                AuthClientType::TELEGRAM,
+                $message->getFrom()->getId()
+            );
+            if ($user) {
+                $text = '欢迎回来👏';
+            }
+            /** @var BotApi $bot */
+            $bot->sendMessage($message->getChat()->getId(), $text);
+        });
     }
 }
