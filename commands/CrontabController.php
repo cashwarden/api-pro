@@ -65,7 +65,7 @@ class CrontabController extends Controller
                 \Yii::$app->user->switchIdentity(User::findOne($transaction->user_id));
                 $keyboard = $this->telegramService->getTransactionMarkup($transaction);
                 $text = $this->telegramService->getMessageTextByTransaction($transaction, '定时记账成功');
-                $this->telegramService->sendMessage($text, $keyboard);
+                $this->telegramService->sendMessage($text, null, $keyboard);
             }
         }
     }

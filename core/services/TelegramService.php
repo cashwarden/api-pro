@@ -13,23 +13,26 @@ use app\core\types\AnalysisDateType;
 use app\core\types\AuthClientType;
 use app\core\types\DirectionType;
 use app\core\types\TelegramAction;
+use app\core\types\TelegramKeyword;
 use app\core\types\TransactionRating;
 use app\core\types\TransactionType;
 use Carbon\Carbon;
 use TelegramBot\Api\BotApi;
 use TelegramBot\Api\Client;
 use TelegramBot\Api\Exception;
-use TelegramBot\Api\InvalidArgumentException;
 use TelegramBot\Api\Types\CallbackQuery;
 use TelegramBot\Api\Types\Inline\InlineKeyboardMarkup;
 use TelegramBot\Api\Types\Message;
+use TelegramBot\Api\Types\ReplyKeyboardMarkup;
+use TelegramBot\Api\Types\Update;
+use Throwable;
 use Yii;
 use yii\base\BaseObject;
 use yii\base\InvalidConfigException;
-use yii\db\Exception as DBException;
 use yii\helpers\Json;
 use yiier\graylog\Log;
 use yiier\helpers\Setup;
+use yiier\helpers\StringHelper;
 
 class TelegramService extends BaseObject
 {
@@ -47,20 +50,38 @@ class TelegramService extends BaseObject
         }
     }
 
+
     /**
-     * @param User $user
-     * @param Message $message
-     * @throws DBException
+     * @param Client $bot
      */
-    public function bind(User $user, Message $message): void
+    public function bind(Client $bot): void
     {
-        $expand = [
-            'client_username' => (string)($message->getFrom()->getUsername() ?: $message->getFrom()->getFirstName()),
-            'client_id' => (string)$message->getFrom()->getId(),
-            'data' => $message->toJson(),
-        ];
-        UserService::findOrCreateAuthClient($user->id, AuthClientType::TELEGRAM, $expand);
-        User::updateAll(['password_reset_token' => null], ['id' => $user->id]);
+        $bot->on(function (Update $Update) use ($bot) {
+            $message = $Update->getMessage();
+            $token = StringHelper::after(TelegramKeyword::BIND . '/', $message->getText());
+            try {
+                $user = $this->userService->getUserByResetToken($token);
+                $expand = [
+                    'client_username' => $message->getFrom()->getUsername() ?: $message->getFrom()->getFirstName(),
+                    'client_id' => (string)$message->getFrom()->getId(),
+                    'data' => $message->toJson(),
+                ];
+                UserService::findOrCreateAuthClient($user->id, AuthClientType::TELEGRAM, $expand);
+                User::updateAll(['password_reset_token' => null], ['id' => $user->id]);
+
+                $text = '成功绑定账号【' . data_get($user, 'username') . '】！';
+            } catch (\Exception $e) {
+                $text = $e->getMessage();
+            }
+            /** @var BotApi $bot */
+            $bot->sendMessage($message->getChat()->getId(), $text);
+        }, function (Update $message) {
+            $msg = $message->getMessage();
+            if ($msg && strpos($msg->getText(), TelegramKeyword::BIND) === 0) {
+                return true;
+            }
+            return false;
+        });
     }
 
 
@@ -70,7 +91,7 @@ class TelegramService extends BaseObject
      * @return string
      * @throws InvalidConfigException
      */
-    public function getRecordsTextByTransaction(Transaction $transaction, $page = 0): string
+    public function getRecordsTextByTransaction(Transaction $transaction, int $page = 0): string
     {
         $limit = 10;
         if (strpos($transaction->description, '今天') !== false) {
@@ -126,104 +147,6 @@ class TelegramService extends BaseObject
         return $text;
     }
 
-    /**
-     * @param CallbackQuery $message
-     * @param Client $bot
-     * @throws Exception
-     * @throws InvalidArgumentException
-     * @throws InvalidConfigException
-     * @throws \Throwable
-     */
-    public function callbackQuery(CallbackQuery $message, Client $bot)
-    {
-        /** @var BotApi $bot */
-        if (!$data = json_decode($message->getData(), true)) {
-            Log::warning('telegram callback error', $message->getData());
-            return;
-        }
-        switch (data_get($data, 'action')) {
-            case TelegramAction::TRANSACTION_DELETE:
-                /** @var Transaction $model */
-                if ($model = Transaction::find()->where(['id' => data_get($data, 'id')])->one()) {
-                    $transaction = Yii::$app->db->beginTransaction();
-                    try {
-                        foreach ($model->records as $record) {
-                            $record->delete();
-                        }
-                        $text = '记录成功被删除';
-                        $transaction->commit();
-                        $bot->editMessageText(
-                            $message->getFrom()->getId(),
-                            $message->getMessage()->getMessageId(),
-                            $text
-                        );
-                    } catch (\Exception $e) {
-                        $transaction->rollBack();
-                        Log::error('删除记录失败', ['model' => $model->attributes, 'e' => (string)$e]);
-                    }
-                } else {
-                    $text = '删除失败，记录已被删除或者不存在';
-                    $replyToMessageId = $message->getMessage()->getMessageId();
-                    $bot->sendMessage($message->getFrom()->getId(), $text, null, false, $replyToMessageId);
-                }
-
-                break;
-            case TelegramAction::NEW_RECORD_DELETE:
-                /** @var Record $model */
-                if ($model = Record::find()->where(['id' => data_get($data, 'id')])->one()) {
-                    $transaction = Yii::$app->db->beginTransaction();
-                    try {
-                        $model->delete();
-                        $text = '记录成功被删除';
-                        $transaction->commit();
-                        $bot->editMessageText(
-                            $message->getFrom()->getId(),
-                            $message->getMessage()->getMessageId(),
-                            $text
-                        );
-                    } catch (\Exception $e) {
-                        $transaction->rollBack();
-                        Log::error('删除记录失败', ['model' => $model->attributes, 'e' => (string)$e]);
-                    }
-                } else {
-                    $text = '删除失败，记录已被删除或者不存在';
-                    $replyToMessageId = $message->getMessage()->getMessageId();
-                    $bot->sendMessage($message->getFrom()->getId(), $text, null, false, $replyToMessageId);
-                }
-
-                break;
-            case TelegramAction::FIND_CATEGORY_RECORDS:
-                $transaction = new Transaction();
-                $transaction->load($data, '');
-                $page = data_get($data, 'page', 0) + 1;
-                $text = $this->getRecordsTextByTransaction($transaction, $page);
-                $keyboard = $this->getRecordsMarkup($transaction, $page);
-                $replyToMessageId = $message->getMessage()->getMessageId();
-                $bot->sendMessage($message->getFrom()->getId(), $text, null, false, $replyToMessageId, $keyboard);
-
-                break;
-            case TelegramAction::TRANSACTION_RATING:
-                $id = data_get($data, 'id');
-                if ($this->transactionService->updateRating($id, data_get($data, 'value'))) {
-                    $replyMarkup = $this->getTransactionMarkup(Transaction::findOne($id));
-                    $bot->editMessageReplyMarkup(
-                        $message->getFrom()->getId(),
-                        $message->getMessage()->getMessageId(),
-                        $replyMarkup
-                    );
-                } else {
-                    $text = '评分失败，记录已被删除或者不存在';
-                    $replyToMessageId = $message->getMessage()->getMessageId();
-                    $bot->sendMessage($message->getFrom()->getId(), $text, null, false, $replyToMessageId);
-                }
-
-                break;
-            default:
-                # code...
-                break;
-        }
-    }
-
     public function getTransactionMarkup(Transaction $model): InlineKeyboardMarkup
     {
         $tests = TransactionRating::texts();
@@ -273,30 +196,35 @@ class TelegramService extends BaseObject
 
     /**
      * @param string $messageText
+     * @param int|null $chatId
      * @param null $keyboard
      * @param int $userId
      * @return void
      */
-    public function sendMessage(string $messageText, $keyboard = null, int $userId = 0): void
+    public function sendMessage(string $messageText, int $chatId = null, $keyboard = null, int $userId = 0): void
     {
         $userId = $userId ?: Yii::$app->user->id;
-        $telegram = AuthClient::find()->select('data')->where([
-            'user_id' => $userId,
-            'type' => AuthClientType::TELEGRAM
-        ])->scalar();
-        if (!$telegram) {
-            return;
+        if (!$chatId) {
+            $telegram = AuthClient::find()->select('data')->where([
+                'user_id' => $userId,
+                'type' => AuthClientType::TELEGRAM
+            ])->scalar();
+            if (!$telegram) {
+                return;
+            }
+            $telegram = Json::decode($telegram);
+            $chatId = $telegram['chat']['id'];
+            if (!$chatId) {
+                return;
+            }
         }
-        $telegram = Json::decode($telegram);
-        if (empty($telegram['chat']['id'])) {
-            return;
-        }
+
         $bot = TelegramService::newClient();
         // 重试五次
         for ($i = 0; $i < 5; $i++) {
             /** @var BotApi $bot */
             try {
-                $bot->sendMessage($telegram['chat']['id'], $messageText, null, false, null, $keyboard);
+                $bot->sendMessage($chatId, $messageText, null, false, null, $keyboard);
                 break;
             } catch (Exception $e) {
                 Log::error('发送 telegram 消息失败', [$messageText, (string)$e]);
@@ -399,7 +327,7 @@ class TelegramService extends BaseObject
             [
                 'text' => '🚮删除',
                 'callback_data' => Json::encode([
-                    'action' => TelegramAction::NEW_RECORD_DELETE,
+                    'action' => TelegramAction::RECORD_DELETE,
                     'id' => $record->id
                 ]),
             ],
@@ -418,5 +346,238 @@ class TelegramService extends BaseObject
         ];
 
         return new InlineKeyboardMarkup([$items]);
+    }
+
+    public function messageCallback(Client $bot)
+    {
+        $bot->callbackQuery(function (CallbackQuery $message) use ($bot) {
+            $user = $this->userService->getUserByClientId(
+                AuthClientType::TELEGRAM,
+                $message->getFrom()->getId()
+            );
+            if ($user) {
+                \Yii::$app->user->setIdentity($user);
+                /** @var BotApi $bot */
+                if (!$data = json_decode($message->getData(), true)) {
+                    Log::warning('telegram callback error', $message->getData());
+                    return;
+                }
+                $bot->answerCallbackQuery($message->getId(), "Loading...");
+                switch (data_get($data, 'action')) {
+                    case TelegramAction::TRANSACTION_DELETE:
+                        $this->transactionDelete($message, $bot, $data);
+                        break;
+                    case TelegramAction::RECORD_DELETE:
+                        $this->recordDelete($message, $bot, $data);
+                        break;
+                    case TelegramAction::FIND_CATEGORY_RECORDS:
+                        $this->findCategoryRecords($message, $bot, $data);
+                        break;
+                    case TelegramAction::TRANSACTION_RATING:
+                        $this->transactionRating($message, $bot, $data);
+                        break;
+                    default:
+                        # code...
+                        break;
+                }
+            }
+        });
+    }
+
+    private function recordDelete(CallbackQuery $message, Client $bot, array $data)
+    {
+        $chatId = $message->getMessage()->getChat()->getId();
+        /** @var BotApi $bot */
+        /** @var Record $model */
+        if ($model = Record::find()->where(['id' => data_get($data, 'id')])->one()) {
+            $transaction = Yii::$app->db->beginTransaction();
+            try {
+                $model->delete();
+                $text = '记录成功被删除';
+                $transaction->commit();
+                $bot->editMessageText($chatId, $message->getMessage()->getMessageId(), $text);
+            } catch (Throwable $e) {
+                $transaction->rollBack();
+                Log::error('删除记录失败', ['model' => $model->attributes, 'e' => (string)$e]);
+            }
+        } else {
+            $text = '删除失败，记录已被删除或者不存在';
+            $replyToMessageId = $message->getMessage()->getMessageId();
+            $bot->sendMessage($chatId, $text, null, false, $replyToMessageId);
+        }
+    }
+
+    private function transactionDelete(CallbackQuery $message, Client $bot, array $data)
+    {
+        $chatId = $message->getMessage()->getChat()->getId();
+        /** @var BotApi $bot */
+        /** @var Transaction $model */
+        if ($model = Transaction::find()->where(['id' => data_get($data, 'id')])->one()) {
+            $transaction = Yii::$app->db->beginTransaction();
+            try {
+                foreach ($model->records as $record) {
+                    $record->delete();
+                }
+                $text = '记录成功被删除';
+                $transaction->commit();
+                $bot->editMessageText($chatId, $message->getMessage()->getMessageId(), $text);
+            } catch (Throwable $e) {
+                $transaction->rollBack();
+                Log::error(
+                    '删除记录失败',
+                    ['message' => $message->toJson(), 'model' => $model->attributes, 'e' => (string)$e]
+                );
+            }
+        } else {
+            $text = '删除失败，记录已被删除或者不存在';
+            $replyToMessageId = $message->getMessage()->getMessageId();
+            $bot->sendMessage($chatId, $text, null, false, $replyToMessageId);
+        }
+    }
+
+    private function findCategoryRecords(CallbackQuery $message, Client $bot, array $data)
+    {
+        /** @var BotApi $bot */
+        $transaction = new Transaction();
+        $transaction->load($data, '');
+        $page = data_get($data, 'page', 0) + 1;
+        $text = $this->getRecordsTextByTransaction($transaction, $page);
+        $keyboard = $this->getRecordsMarkup($transaction, $page);
+        $replyToMessageId = $message->getMessage()->getMessageId();
+        $chatId = $message->getMessage()->getChat()->getId();
+        $bot->sendMessage($chatId, $text, null, false, $replyToMessageId, $keyboard);
+    }
+
+    private function transactionRating(CallbackQuery $message, Client $bot, array $data)
+    {
+        $chatId = $message->getMessage()->getChat()->getId();
+        /** @var BotApi $bot */
+        $id = data_get($data, 'id');
+        if ($this->transactionService->updateRating($id, data_get($data, 'value'))) {
+            $replyMarkup = $this->getTransactionMarkup(Transaction::findOne($id));
+            $bot->editMessageReplyMarkup($chatId, $message->getMessage()->getMessageId(), $replyMarkup);
+        } else {
+            $text = '评分失败，记录已被删除或者不存在';
+            $replyToMessageId = $message->getMessage()->getMessageId();
+            $bot->sendMessage($chatId, $text, null, false, $replyToMessageId);
+        }
+    }
+
+    public function reportMessage(Client $bot)
+    {
+        $bot->on(function (Update $Update) use ($bot) {
+            $message = $Update->getMessage();
+            $user = $this->userService->getUserByClientId(
+                AuthClientType::TELEGRAM,
+                $message->getFrom()->getId()
+            );
+            if ($user) {
+                \Yii::$app->user->setIdentity($user);
+                $type = ltrim($message->getText(), '/');
+                $text = $this->telegramService->getReportTextByType($type);
+            } else {
+                $text = '请先绑定您的账号';
+            }
+            /** @var BotApi $bot */
+            $bot->sendMessage($message->getChat()->getId(), $text);
+        }, function (Update $message) {
+            $msg = $message->getMessage();
+            $report = [
+                TelegramKeyword::TODAY,
+                TelegramKeyword::YESTERDAY,
+                TelegramKeyword::LAST_MONTH,
+                TelegramKeyword::CURRENT_MONTH
+            ];
+            if ($msg && in_array($msg->getText(), $report)) {
+                return true;
+            }
+            return false;
+        });
+    }
+
+    public function reportMenus(Client $bot)
+    {
+        $bot->command(ltrim(TelegramKeyword::REPORT, '/'), function (Message $message) use ($bot) {
+            $keyboard = [
+                [
+                    TelegramKeyword::TODAY,
+                    TelegramKeyword::YESTERDAY,
+                    TelegramKeyword::LAST_MONTH,
+                    TelegramKeyword::CURRENT_MONTH
+                ]
+            ];
+            $replyMarkup = new ReplyKeyboardMarkup(
+                $keyboard,
+                true,
+                true
+            );
+            /** @var BotApi $bot */
+            $bot->sendMessage($message->getChat()->getId(), '请选择统计范围', null, false, null, $replyMarkup);
+        });
+    }
+
+    public function passwordReset(Client $bot)
+    {
+        $bot->command(ltrim(TelegramKeyword::PASSWORD_RESET, '/'), function (Message $message) use ($bot) {
+            $text = "您还未绑定账号，请先访问「个人设置」中的「账号绑定」进行绑定账号，然后才能使用此功能。";
+            $user = $this->userService->getUserByClientId(
+                AuthClientType::TELEGRAM,
+                $message->getFrom()->getId()
+            );
+            if ($user) {
+                (new UserService())->setPasswordResetToken($user);
+                $resetURL = params('frontendURL') .
+                    '#/passport/password-reset?token=' .
+                    $user->password_reset_token;
+                $text = "请在 24 小时内使使用此链接设置新密码\n {$resetURL}";
+            }
+            /** @var BotApi $bot */
+            $bot->sendMessage($message->getChat()->getId(), $text);
+        });
+    }
+
+    public function cmd(Client $bot)
+    {
+        $bot->command(ltrim(TelegramKeyword::CMD, '/'), function (Message $message) use ($bot) {
+            $keyboard = new ReplyKeyboardMarkup(
+                [[TelegramKeyword::REPORT]],
+                true,
+                true
+            );
+            /** @var BotApi $bot */
+            $bot->sendMessage($message->getChat()->getId(), '请选择指令', null, false, null, $keyboard);
+        });
+
+        $bot->command(ltrim(TelegramKeyword::HELP, '/'), function (Message $message) use ($bot) {
+            $text = "我能做什么？
+/help - 查看帮助
+/cmd - 列出所有指令
+/today - 今日消费报告
+/yesterday - 昨日消费报告
+/current_month - 本月消费报告
+/last_month - 上个月消费报告
+/start - 开始使用
+/password_reset - 重置密码
+
+绑定账号成功之后发送文字直接记账";
+            /** @var BotApi $bot */
+            $bot->sendMessage($message->getChat()->getId(), $text);
+        });
+    }
+
+    public function start(Client $bot)
+    {
+        $bot->command(ltrim(TelegramKeyword::START, '/'), function (Message $message) use ($bot) {
+            $text = "您还未绑定账号，请先访问「个人设置」中的「账号绑定」进行绑定账号，然后才能快速记账。";
+            $user = $this->userService->getUserByClientId(
+                AuthClientType::TELEGRAM,
+                $message->getFrom()->getId()
+            );
+            if ($user) {
+                $text = '欢迎回来👏';
+            }
+            /** @var BotApi $bot */
+            $bot->sendMessage($message->getChat()->getId(), $text);
+        });
     }
 }
