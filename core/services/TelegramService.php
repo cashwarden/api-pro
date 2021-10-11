@@ -19,7 +19,6 @@ use Carbon\Carbon;
 use TelegramBot\Api\BotApi;
 use TelegramBot\Api\Client;
 use TelegramBot\Api\Exception;
-use TelegramBot\Api\InvalidArgumentException;
 use TelegramBot\Api\Types\CallbackQuery;
 use TelegramBot\Api\Types\Inline\InlineKeyboardMarkup;
 use TelegramBot\Api\Types\Message;
@@ -71,7 +70,7 @@ class TelegramService extends BaseObject
      * @return string
      * @throws InvalidConfigException
      */
-    public function getRecordsTextByTransaction(Transaction $transaction, $page = 0): string
+    public function getRecordsTextByTransaction(Transaction $transaction, int $page = 0): string
     {
         $limit = 10;
         if (strpos($transaction->description, '今天') !== false) {
@@ -125,112 +124,6 @@ class TelegramService extends BaseObject
         }
 
         return $text;
-    }
-
-    /**
-     * @param CallbackQuery $message
-     * @param Client $bot
-     * @throws Exception
-     * @throws InvalidArgumentException
-     * @throws InvalidConfigException
-     * @throws \Throwable
-     */
-    public function callbackQuery(CallbackQuery $message, Client $bot)
-    {
-        /** @var BotApi $bot */
-        if (!$data = json_decode($message->getData(), true)) {
-            Log::warning('telegram callback error', $message->getData());
-            return;
-        }
-        $bot->answerCallbackQuery($message->getId(), "Loading...");
-        switch (data_get($data, 'action')) {
-            case TelegramAction::TRANSACTION_DELETE:
-                $this->transactionDelete($message, $bot, $data);
-                break;
-            case TelegramAction::NEW_RECORD_DELETE:
-                /** @var Record $model */
-                if ($model = Record::find()->where(['id' => data_get($data, 'id')])->one()) {
-                    $transaction = Yii::$app->db->beginTransaction();
-                    try {
-                        $model->delete();
-                        $text = '记录成功被删除';
-                        $transaction->commit();
-                        $bot->editMessageText(
-                            $message->getFrom()->getId(),
-                            $message->getMessage()->getMessageId(),
-                            $text
-                        );
-                    } catch (\Exception $e) {
-                        $transaction->rollBack();
-                        Log::error('删除记录失败', ['model' => $model->attributes, 'e' => (string)$e]);
-                    }
-                } else {
-                    $text = '删除失败，记录已被删除或者不存在';
-                    $replyToMessageId = $message->getMessage()->getMessageId();
-                    $bot->sendMessage($message->getFrom()->getId(), $text, null, false, $replyToMessageId);
-                }
-
-                break;
-            case TelegramAction::FIND_CATEGORY_RECORDS:
-                $transaction = new Transaction();
-                $transaction->load($data, '');
-                $page = data_get($data, 'page', 0) + 1;
-                $text = $this->getRecordsTextByTransaction($transaction, $page);
-                $keyboard = $this->getRecordsMarkup($transaction, $page);
-                $replyToMessageId = $message->getMessage()->getMessageId();
-                $bot->sendMessage($message->getFrom()->getId(), $text, null, false, $replyToMessageId, $keyboard);
-
-                break;
-            case TelegramAction::TRANSACTION_RATING:
-                $id = data_get($data, 'id');
-                if ($this->transactionService->updateRating($id, data_get($data, 'value'))) {
-                    $replyMarkup = $this->getTransactionMarkup(Transaction::findOne($id));
-                    $bot->editMessageReplyMarkup(
-                        $message->getFrom()->getId(),
-                        $message->getMessage()->getMessageId(),
-                        $replyMarkup
-                    );
-                } else {
-                    $text = '评分失败，记录已被删除或者不存在';
-                    $replyToMessageId = $message->getMessage()->getMessageId();
-                    $bot->sendMessage($message->getFrom()->getId(), $text, null, false, $replyToMessageId);
-                }
-
-                break;
-            default:
-                # code...
-                break;
-        }
-    }
-
-    public function transactionDelete(CallbackQuery $message, $bot, array $data)
-    {
-        Yii::warning('transactionDelete:' . get_class($bot));
-        /** @var Transaction $model */
-        if ($model = Transaction::find()->where(['id' => data_get($data, 'id')])->one()) {
-            $transaction = Yii::$app->db->beginTransaction();
-            try {
-                foreach ($model->records as $record) {
-                    $record->delete();
-                }
-                $text = '记录成功被删除';
-                $transaction->commit();
-                $bot->editMessageText(
-                    $message->getFrom()->getId(),
-                    $message->getMessage()->getMessageId(),
-                    $text
-                );
-                $transaction->rollBack();
-                Log::error('删除记录失败', ['model' => $model->attributes, 'e' => (string)$e]);
-            } catch (Throwable $e) {
-                $transaction->rollBack();
-                Log::error('删除记录失败', ['model' => $model->attributes, 'e' => (string)$e]);
-            }
-        } else {
-            $text = '删除失败，记录已被删除或者不存在';
-            $replyToMessageId = $message->getMessage()->getMessageId();
-            $bot->sendMessage($message->getFrom()->getId(), $text, null, false, $replyToMessageId);
-        }
     }
 
     public function getTransactionMarkup(Transaction $model): InlineKeyboardMarkup
@@ -408,7 +301,7 @@ class TelegramService extends BaseObject
             [
                 'text' => '🚮删除',
                 'callback_data' => Json::encode([
-                    'action' => TelegramAction::NEW_RECORD_DELETE,
+                    'action' => TelegramAction::RECORD_DELETE,
                     'id' => $record->id
                 ]),
             ],
@@ -438,8 +331,114 @@ class TelegramService extends BaseObject
             );
             if ($user) {
                 \Yii::$app->user->setIdentity($user);
-                $this->callbackQuery($message, $bot);
+                /** @var BotApi $bot */
+                if (!$data = json_decode($message->getData(), true)) {
+                    Log::warning('telegram callback error', $message->getData());
+                    return;
+                }
+                $bot->answerCallbackQuery($message->getId(), "Loading...");
+                switch (data_get($data, 'action')) {
+                    case TelegramAction::TRANSACTION_DELETE:
+                        $this->transactionDelete($message, $bot, $data);
+                        break;
+                    case TelegramAction::RECORD_DELETE:
+                        $this->recordDelete($message, $bot, $data);
+                        break;
+                    case TelegramAction::FIND_CATEGORY_RECORDS:
+                        $this->findCategoryRecords($message, $bot, $data);
+                        break;
+                    case TelegramAction::TRANSACTION_RATING:
+                        $this->transactionRating($message, $bot, $data);
+                        break;
+                    default:
+                        # code...
+                        break;
+                }
             }
         });
+    }
+
+    private function recordDelete(CallbackQuery $message, Client $bot, array $data)
+    {
+        /** @var BotApi $bot */
+        /** @var Record $model */
+        if ($model = Record::find()->where(['id' => data_get($data, 'id')])->one()) {
+            $transaction = Yii::$app->db->beginTransaction();
+            try {
+                $model->delete();
+                $text = '记录成功被删除';
+                $transaction->commit();
+                $bot->editMessageText(
+                    $message->getFrom()->getId(),
+                    $message->getMessage()->getMessageId(),
+                    $text
+                );
+            } catch (Throwable $e) {
+                $transaction->rollBack();
+                Log::error('删除记录失败', ['model' => $model->attributes, 'e' => (string)$e]);
+            }
+        } else {
+            $text = '删除失败，记录已被删除或者不存在';
+            $replyToMessageId = $message->getMessage()->getMessageId();
+            $bot->sendMessage($message->getFrom()->getId(), $text, null, false, $replyToMessageId);
+        }
+    }
+
+    private function transactionDelete(CallbackQuery $message, Client $bot, array $data)
+    {
+        /** @var BotApi $bot */
+        /** @var Transaction $model */
+        if ($model = Transaction::find()->where(['id' => data_get($data, 'id')])->one()) {
+            $transaction = Yii::$app->db->beginTransaction();
+            try {
+                foreach ($model->records as $record) {
+                    $record->delete();
+                }
+                $text = '记录成功被删除';
+                $transaction->commit();
+                $bot->editMessageText(
+                    $message->getFrom()->getId(),
+                    $message->getMessage()->getMessageId(),
+                    $text
+                );
+            } catch (Throwable $e) {
+                $transaction->rollBack();
+                Log::error('删除记录失败', ['model' => $model->attributes, 'e' => (string)$e]);
+            }
+        } else {
+            $text = '删除失败，记录已被删除或者不存在';
+            $replyToMessageId = $message->getMessage()->getMessageId();
+            $bot->sendMessage($message->getFrom()->getId(), $text, null, false, $replyToMessageId);
+        }
+    }
+
+    private function findCategoryRecords(CallbackQuery $message, Client $bot, array $data)
+    {
+        /** @var BotApi $bot */
+        $transaction = new Transaction();
+        $transaction->load($data, '');
+        $page = data_get($data, 'page', 0) + 1;
+        $text = $this->getRecordsTextByTransaction($transaction, $page);
+        $keyboard = $this->getRecordsMarkup($transaction, $page);
+        $replyToMessageId = $message->getMessage()->getMessageId();
+        $bot->sendMessage($message->getFrom()->getId(), $text, null, false, $replyToMessageId, $keyboard);
+    }
+
+    private function transactionRating(CallbackQuery $message, Client $bot, array $data)
+    {
+        /** @var BotApi $bot */
+        $id = data_get($data, 'id');
+        if ($this->transactionService->updateRating($id, data_get($data, 'value'))) {
+            $replyMarkup = $this->getTransactionMarkup(Transaction::findOne($id));
+            $bot->editMessageReplyMarkup(
+                $message->getFrom()->getId(),
+                $message->getMessage()->getMessageId(),
+                $replyMarkup
+            );
+        } else {
+            $text = '评分失败，记录已被删除或者不存在';
+            $replyToMessageId = $message->getMessage()->getMessageId();
+            $bot->sendMessage($message->getFrom()->getId(), $text, null, false, $replyToMessageId);
+        }
     }
 }
