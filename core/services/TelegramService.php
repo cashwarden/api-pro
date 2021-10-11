@@ -425,7 +425,7 @@ class TelegramService extends BaseObject
     {
         // 记账
         $bot->callbackQuery(function (CallbackQuery $message) use ($bot) {
-            Log::warning('messageCallback', ArrayHelper::toArray($bot));
+            Yii::warning(ArrayHelper::toArray($bot));
             $bot->answerCallbackQuery($message->getId(), "Loading...");
             $user = $this->userService->getUserByClientId(
                 AuthClientType::TELEGRAM,
