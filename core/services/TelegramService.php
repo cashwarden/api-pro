@@ -386,6 +386,7 @@ class TelegramService extends BaseObject
 
     private function recordDelete(CallbackQuery $message, Client $bot, array $data)
     {
+        $chatId = $message->getMessage()->getChat()->getId();
         /** @var BotApi $bot */
         /** @var Record $model */
         if ($model = Record::find()->where(['id' => data_get($data, 'id')])->one()) {
@@ -394,11 +395,7 @@ class TelegramService extends BaseObject
                 $model->delete();
                 $text = '记录成功被删除';
                 $transaction->commit();
-                $bot->editMessageText(
-                    $message->getFrom()->getId(),
-                    $message->getMessage()->getMessageId(),
-                    $text
-                );
+                $bot->editMessageText($chatId, $message->getMessage()->getMessageId(), $text);
             } catch (Throwable $e) {
                 $transaction->rollBack();
                 Log::error('删除记录失败', ['model' => $model->attributes, 'e' => (string)$e]);
@@ -406,12 +403,13 @@ class TelegramService extends BaseObject
         } else {
             $text = '删除失败，记录已被删除或者不存在';
             $replyToMessageId = $message->getMessage()->getMessageId();
-            $bot->sendMessage($message->getFrom()->getId(), $text, null, false, $replyToMessageId);
+            $bot->sendMessage($chatId, $text, null, false, $replyToMessageId);
         }
     }
 
     private function transactionDelete(CallbackQuery $message, Client $bot, array $data)
     {
+        $chatId = $message->getMessage()->getChat()->getId();
         /** @var BotApi $bot */
         /** @var Transaction $model */
         if ($model = Transaction::find()->where(['id' => data_get($data, 'id')])->one()) {
@@ -422,11 +420,7 @@ class TelegramService extends BaseObject
                 }
                 $text = '记录成功被删除';
                 $transaction->commit();
-                $bot->editMessageText(
-                    $message->getFrom()->getId(),
-                    $message->getMessage()->getMessageId(),
-                    $text
-                );
+                $bot->editMessageText($chatId, $message->getMessage()->getMessageId(), $text);
             } catch (Throwable $e) {
                 $transaction->rollBack();
                 Log::error(
@@ -437,7 +431,7 @@ class TelegramService extends BaseObject
         } else {
             $text = '删除失败，记录已被删除或者不存在';
             $replyToMessageId = $message->getMessage()->getMessageId();
-            $bot->sendMessage($message->getFrom()->getId(), $text, null, false, $replyToMessageId);
+            $bot->sendMessage($chatId, $text, null, false, $replyToMessageId);
         }
     }
 
@@ -450,24 +444,22 @@ class TelegramService extends BaseObject
         $text = $this->getRecordsTextByTransaction($transaction, $page);
         $keyboard = $this->getRecordsMarkup($transaction, $page);
         $replyToMessageId = $message->getMessage()->getMessageId();
-        $bot->sendMessage($message->getFrom()->getId(), $text, null, false, $replyToMessageId, $keyboard);
+        $chatId = $message->getMessage()->getChat()->getId();
+        $bot->sendMessage($chatId, $text, null, false, $replyToMessageId, $keyboard);
     }
 
     private function transactionRating(CallbackQuery $message, Client $bot, array $data)
     {
+        $chatId = $message->getMessage()->getChat()->getId();
         /** @var BotApi $bot */
         $id = data_get($data, 'id');
         if ($this->transactionService->updateRating($id, data_get($data, 'value'))) {
             $replyMarkup = $this->getTransactionMarkup(Transaction::findOne($id));
-            $bot->editMessageReplyMarkup(
-                $message->getFrom()->getId(),
-                $message->getMessage()->getMessageId(),
-                $replyMarkup
-            );
+            $bot->editMessageReplyMarkup($chatId, $message->getMessage()->getMessageId(), $replyMarkup);
         } else {
             $text = '评分失败，记录已被删除或者不存在';
             $replyToMessageId = $message->getMessage()->getMessageId();
-            $bot->sendMessage($message->getFrom()->getId(), $text, null, false, $replyToMessageId);
+            $bot->sendMessage($chatId, $text, null, false, $replyToMessageId);
         }
     }
 
