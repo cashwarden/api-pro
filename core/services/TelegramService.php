@@ -431,7 +431,7 @@ class TelegramService extends BaseObject
                 $transaction->rollBack();
                 Log::error(
                     '删除记录失败',
-                    ['message' => $message->getData(), 'model' => $model->attributes, 'e' => (string)$e]
+                    ['message' => $message->toJson(), 'model' => $model->attributes, 'e' => (string)$e]
                 );
             }
         } else {
