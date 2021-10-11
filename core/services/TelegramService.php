@@ -429,7 +429,10 @@ class TelegramService extends BaseObject
                 );
             } catch (Throwable $e) {
                 $transaction->rollBack();
-                Log::error('删除记录失败', ['model' => $model->attributes, 'e' => (string)$e]);
+                Log::error(
+                    '删除记录失败',
+                    ['message' => $message->getData(), 'model' => $model->attributes, 'e' => (string)$e]
+                );
             }
         } else {
             $text = '删除失败，记录已被删除或者不存在';
