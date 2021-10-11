@@ -27,7 +27,6 @@ use Yii;
 use yii\base\BaseObject;
 use yii\base\InvalidConfigException;
 use yii\db\Exception as DBException;
-use yii\helpers\ArrayHelper;
 use yii\helpers\Json;
 use yiier\graylog\Log;
 use yiier\helpers\Setup;
@@ -425,7 +424,7 @@ class TelegramService extends BaseObject
     {
         // 记账
         $bot->callbackQuery(function (CallbackQuery $message) use ($bot) {
-            Yii::warning(ArrayHelper::toArray($bot));
+            Yii::warning('messageCallback:' . get_class($bot));
             $bot->answerCallbackQuery($message->getId(), "Loading...");
             $user = $this->userService->getUserByClientId(
                 AuthClientType::TELEGRAM,
