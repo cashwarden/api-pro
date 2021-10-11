@@ -23,6 +23,7 @@ use TelegramBot\Api\InvalidArgumentException;
 use TelegramBot\Api\Types\CallbackQuery;
 use TelegramBot\Api\Types\Inline\InlineKeyboardMarkup;
 use TelegramBot\Api\Types\Message;
+use Throwable;
 use Yii;
 use yii\base\BaseObject;
 use yii\base\InvalidConfigException;
@@ -141,32 +142,10 @@ class TelegramService extends BaseObject
             Log::warning('telegram callback error', $message->getData());
             return;
         }
+        $bot->answerCallbackQuery($message->getId(), "Loading...");
         switch (data_get($data, 'action')) {
             case TelegramAction::TRANSACTION_DELETE:
-                /** @var Transaction $model */
-                if ($model = Transaction::find()->where(['id' => data_get($data, 'id')])->one()) {
-                    $transaction = Yii::$app->db->beginTransaction();
-                    try {
-                        foreach ($model->records as $record) {
-                            $record->delete();
-                        }
-                        $text = '记录成功被删除';
-                        $transaction->commit();
-                        $bot->editMessageText(
-                            $message->getFrom()->getId(),
-                            $message->getMessage()->getMessageId(),
-                            $text
-                        );
-                    } catch (\Exception $e) {
-                        $transaction->rollBack();
-                        Log::error('删除记录失败', ['model' => $model->attributes, 'e' => (string)$e]);
-                    }
-                } else {
-                    $text = '删除失败，记录已被删除或者不存在';
-                    $replyToMessageId = $message->getMessage()->getMessageId();
-                    $bot->sendMessage($message->getFrom()->getId(), $text, null, false, $replyToMessageId);
-                }
-
+                $this->transactionDelete($message, $bot, $data);
                 break;
             case TelegramAction::NEW_RECORD_DELETE:
                 /** @var Record $model */
@@ -221,6 +200,36 @@ class TelegramService extends BaseObject
             default:
                 # code...
                 break;
+        }
+    }
+
+    public function transactionDelete(CallbackQuery $message, $bot, array $data)
+    {
+        Yii::warning('transactionDelete:' . get_class($bot));
+        /** @var Transaction $model */
+        if ($model = Transaction::find()->where(['id' => data_get($data, 'id')])->one()) {
+            $transaction = Yii::$app->db->beginTransaction();
+            try {
+                foreach ($model->records as $record) {
+                    $record->delete();
+                }
+                $text = '记录成功被删除';
+                $transaction->commit();
+                $bot->editMessageText(
+                    $message->getFrom()->getId(),
+                    $message->getMessage()->getMessageId(),
+                    $text
+                );
+                $transaction->rollBack();
+                Log::error('删除记录失败', ['model' => $model->attributes, 'e' => (string)$e]);
+            } catch (Throwable $e) {
+                $transaction->rollBack();
+                Log::error('删除记录失败', ['model' => $model->attributes, 'e' => (string)$e]);
+            }
+        } else {
+            $text = '删除失败，记录已被删除或者不存在';
+            $replyToMessageId = $message->getMessage()->getMessageId();
+            $bot->sendMessage($message->getFrom()->getId(), $text, null, false, $replyToMessageId);
         }
     }
 
@@ -422,10 +431,7 @@ class TelegramService extends BaseObject
 
     public function messageCallback(Client $bot)
     {
-        // 记账
         $bot->callbackQuery(function (CallbackQuery $message) use ($bot) {
-            Yii::warning('messageCallback:' . get_class($bot));
-            $bot->answerCallbackQuery($message->getId(), "Loading...");
             $user = $this->userService->getUserByClientId(
                 AuthClientType::TELEGRAM,
                 $message->getFrom()->getId()
