@@ -12,18 +12,23 @@ class SendCreateRecordSuccessTelegram implements ListenerInterface
 {
     use ServiceTrait;
 
-    public function handle(Event $event)
+    /**
+     * @param Event $event
+     * @throws \Exception
+     */
+    public function handle(Event $event): void
     {
         $text = '内部错误';
         $keyboard = null;
-        $data = $event->data;
-        if ($data instanceof Transaction) {
-            $keyboard = $this->getTelegramService()->getTransactionMarkup($data);
-            $text = $this->getTelegramService()->getMessageTextByTransaction($data);
-        } elseif ($data instanceof Record) {
-            $keyboard = $this->getTelegramService()->getRecordMarkup($data);
-            $text = $this->getTelegramService()->getMessageTextByRecord($data);
+        $model = data_get($event->data, 'model');
+        $chatId = data_get($event->data, 'chat_id');
+        if ($model instanceof Transaction) {
+            $keyboard = $this->getTelegramService()->getTransactionMarkup($model);
+            $text = $this->getTelegramService()->getMessageTextByTransaction($model);
+        } elseif ($model instanceof Record) {
+            $keyboard = $this->getTelegramService()->getRecordMarkup($model);
+            $text = $this->getTelegramService()->getMessageTextByRecord($model);
         }
-        $this->getTelegramService()->sendMessage($text, $keyboard, $data->user_id);
+        $this->getTelegramService()->sendMessage($text, $chatId, $keyboard, $model->user_id);
     }
 }

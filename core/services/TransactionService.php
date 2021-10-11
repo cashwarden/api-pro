@@ -217,12 +217,12 @@ class TransactionService extends BaseObject
 
     /**
      * @param string $desc
-     * @param null|int $source
+     * @param int|null $source
      * @return Transaction|Account
      * @throws InternalException
      * @throws \Throwable
      */
-    public function createByDesc(string $desc, $source = null)
+    public function createByDesc(string $desc, int $chatId = null)
     {
         try {
             if (strpos($desc, '余额') !== false) {
@@ -239,8 +239,10 @@ class TransactionService extends BaseObject
             if (!$model->save()) {
                 throw new DBException(Setup::errorMessage($model->firstErrors));
             }
-            event(new CreateRecordSuccessEvent(), $model);
-            $source ? Record::updateAll(['source' => $source], ['transaction_id' => $model->id]) : null;
+            event(new CreateRecordSuccessEvent(), ['model' => $model, 'chat_id' => $chatId]);
+            if ($chatId) {
+                Record::updateAll(['source' => RecordSource::TELEGRAM], ['transaction_id' => $model->id]);
+            }
             return $model;
         } catch (Exception $e) {
             Yii::error(
@@ -438,7 +440,7 @@ class TransactionService extends BaseObject
             );
             throw new DBException(Setup::errorMessage($model->firstErrors));
         }
-        event(new CreateRecordSuccessEvent(), $model);
+        event(new CreateRecordSuccessEvent(), ['model' => $model]);
         return true;
     }
 

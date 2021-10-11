@@ -6,7 +6,6 @@ use app\core\helpers\ArrayHelper;
 use app\core\services\TelegramService;
 use app\core\traits\ServiceTrait;
 use app\core\types\AuthClientType;
-use app\core\types\RecordSource;
 use app\core\types\TelegramKeyword;
 use TelegramBot\Api\BotApi;
 use TelegramBot\Api\Exception;
@@ -62,6 +61,7 @@ class TelegramController extends ActiveController
                 $message = $Update->getMessage();
                 $keyboard = null;
                 $text = '';
+                $chatId = $message->getChat()->getId();
                 try {
                     $user = $this->userService->getUserByClientId(
                         AuthClientType::TELEGRAM,
@@ -74,14 +74,14 @@ class TelegramController extends ActiveController
                         $keyboard = $this->telegramService->getRecordsMarkup($model);
                         $text = $this->telegramService->getRecordsTextByTransaction($model);
                     } else {
-                        $this->transactionService->createByDesc($t, RecordSource::TELEGRAM);
+                        $this->transactionService->createByDesc($t, $chatId);
                     }
                 } catch (\Exception $e) {
                     $text = $e->getMessage();
                 }
                 if ($text) {
                     /** @var BotApi $bot */
-                    $bot->sendMessage($message->getChat()->getId(), $text, null, false, null, $keyboard);
+                    $bot->sendMessage($chatId, $text, null, false, null, $keyboard);
                 }
             }, function (Update $message) {
                 if ($message->getMessage()) {

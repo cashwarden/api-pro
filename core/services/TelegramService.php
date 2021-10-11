@@ -196,30 +196,35 @@ class TelegramService extends BaseObject
 
     /**
      * @param string $messageText
+     * @param int|null $chatId
      * @param null $keyboard
      * @param int $userId
      * @return void
      */
-    public function sendMessage(string $messageText, $keyboard = null, int $userId = 0): void
+    public function sendMessage(string $messageText, int $chatId = null, $keyboard = null, int $userId = 0): void
     {
         $userId = $userId ?: Yii::$app->user->id;
-        $telegram = AuthClient::find()->select('data')->where([
-            'user_id' => $userId,
-            'type' => AuthClientType::TELEGRAM
-        ])->scalar();
-        if (!$telegram) {
-            return;
+        if (!$chatId) {
+            $telegram = AuthClient::find()->select('data')->where([
+                'user_id' => $userId,
+                'type' => AuthClientType::TELEGRAM
+            ])->scalar();
+            if (!$telegram) {
+                return;
+            }
+            $telegram = Json::decode($telegram);
+            $chatId = $telegram['chat']['id'];
+            if (!$chatId) {
+                return;
+            }
         }
-        $telegram = Json::decode($telegram);
-        if (empty($telegram['chat']['id'])) {
-            return;
-        }
+
         $bot = TelegramService::newClient();
         // 重试五次
         for ($i = 0; $i < 5; $i++) {
             /** @var BotApi $bot */
             try {
-                $bot->sendMessage($telegram['chat']['id'], $messageText, null, false, null, $keyboard);
+                $bot->sendMessage($chatId, $messageText, null, false, null, $keyboard);
                 break;
             } catch (Exception $e) {
                 Log::error('发送 telegram 消息失败', [$messageText, (string)$e]);
