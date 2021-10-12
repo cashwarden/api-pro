@@ -39,9 +39,7 @@ class TelegramController extends ActiveController
 
             // 记账记录按钮操作
             $this->telegramService->messageCallback($bot);
-            $this->telegramService->reportMenus($bot);
             $this->telegramService->passwordReset($bot);
-            $this->telegramService->cmd($bot);
             $this->telegramService->start($bot);
 
             $bot->command('ping', function (Message $message) use ($bot) {
