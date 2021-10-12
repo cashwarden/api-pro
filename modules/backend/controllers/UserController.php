@@ -31,7 +31,7 @@ class UserController extends Controller
                 'email' => request('email'),
             ]),
             'pagination' => [
-                'pageSize' => 2,
+                'pageSize' => 20,
             ],
             'sort' => ['defaultOrder' => ['id' => SORT_DESC]]
         ]);
