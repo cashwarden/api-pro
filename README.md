@@ -40,8 +40,9 @@ You can then install this project template using the following command:
 composer create-project --prefer-dist cashwarden/api <rest-api>
 cd <rest-api>
 cp .env.example .env
-chmod 777 -R runtime/
-chmod 777 -R web/uploads/
+chmod 777 -R runtime
+chmod 777 -R web/uploads
+chmod 777 -R web/assets
 php yii migrate
 php yii queue-migrate
 php yii migrate --migrationPath=@yiier/userSetting/migrations/
@@ -63,8 +64,9 @@ Accessing [Use this template](https://github.com/cashwarden/api/generate) Create
 git clone xxxx
 cd <rest-api>
 cp .env.example .env
-chmod 777 -R runtime/
-chmod 777 -R web/uploads/
+chmod 777 -R runtime
+chmod 777 -R web/uploads
+chmod 777 -R web/assets
 php yii migrate
 php yii queue-migrate
 php yii migrate --migrationPath=@yiier/userSetting/migrations/
