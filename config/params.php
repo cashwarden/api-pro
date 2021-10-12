@@ -36,5 +36,4 @@ return [
     'wechatAppSecret' => env('WECHAT_APP_SECRET'),
     'wechatToken' => env('WECHAT_TOKEN'),
     'superAdminUserId' => env('SUPER_ADMIN_USER_ID'),
-    'bsVersion' => '5.x',
 ];
