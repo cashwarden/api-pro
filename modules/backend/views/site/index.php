@@ -1,4 +1,4 @@
-<div class="backend-default-index">
+<div class="backend-site-index">
     <h1><?= $this->context->action->uniqueId ?></h1>
     <p>
         This is the view content for action "<?= $this->context->action->id ?>".

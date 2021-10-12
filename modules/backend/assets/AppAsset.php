@@ -3,6 +3,7 @@
 namespace app\modules\backend\assets;
 
 use yii\bootstrap5\BootstrapAsset;
+use yii\bootstrap5\BootstrapPluginAsset;
 use yii\web\AssetBundle;
 use yii\web\YiiAsset;
 
@@ -20,11 +21,11 @@ class AppAsset extends AssetBundle
         'css/site.css',
     ];
     public $js = [
-        'javascript/main.js',
-        // 'javascript/lazysizes.min.js',
     ];
+
     public $depends = [
         YiiAsset::class,
         BootstrapAsset::class,
+        BootstrapPluginAsset::class,
     ];
 }
