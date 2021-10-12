@@ -4,9 +4,9 @@ namespace app\modules\backend\controllers;
 
 use app\core\models\User;
 use app\modules\backend\models\LoginForm;
+use Carbon\Carbon;
 use Yii;
 use yii\web\Response;
-use yiier\helpers\DateHelper;
 
 class SiteController extends \yii\web\Controller
 {
@@ -21,8 +21,8 @@ class SiteController extends \yii\web\Controller
         if (Yii::$app->user->isGuest) {
             return $this->redirect('login');
         }
-        $start = DateHelper::beginTimestamp();
-        $end = DateHelper::endTimestamp();
+        $start = Carbon::now()->startOfDay()->toDateTimeString();
+        $end = Carbon::now()->endOfDay()->toDateTimeString();
         $todayUserTotal = User::find()->where(['between', 'created_at', $start, $end])->count();
         return $this->render('index', [
             'todayUserTotal' => $todayUserTotal,
