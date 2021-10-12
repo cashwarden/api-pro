@@ -23,7 +23,6 @@ use TelegramBot\Api\Exception;
 use TelegramBot\Api\Types\CallbackQuery;
 use TelegramBot\Api\Types\Inline\InlineKeyboardMarkup;
 use TelegramBot\Api\Types\Message;
-use TelegramBot\Api\Types\ReplyKeyboardMarkup;
 use TelegramBot\Api\Types\Update;
 use Throwable;
 use Yii;
@@ -69,7 +68,7 @@ class TelegramService extends BaseObject
                 UserService::findOrCreateAuthClient($user->id, AuthClientType::TELEGRAM, $expand);
                 User::updateAll(['password_reset_token' => null], ['id' => $user->id]);
 
-                $text = '成功绑定账号【' . data_get($user, 'username') . '】！';
+                $text = '成功绑定账号【' . data_get($user, 'username') . '】！，发送文字直接记账，示例：「买菜2」';
             } catch (\Exception $e) {
                 $text = $e->getMessage();
             }
@@ -495,27 +494,6 @@ class TelegramService extends BaseObject
         });
     }
 
-    public function reportMenus(Client $bot)
-    {
-        $bot->command(ltrim(TelegramKeyword::REPORT, '/'), function (Message $message) use ($bot) {
-            $keyboard = [
-                [
-                    TelegramKeyword::TODAY,
-                    TelegramKeyword::YESTERDAY,
-                    TelegramKeyword::LAST_MONTH,
-                    TelegramKeyword::CURRENT_MONTH
-                ]
-            ];
-            $replyMarkup = new ReplyKeyboardMarkup(
-                $keyboard,
-                true,
-                true
-            );
-            /** @var BotApi $bot */
-            $bot->sendMessage($message->getChat()->getId(), '请选择统计范围', null, false, null, $replyMarkup);
-        });
-    }
-
     public function passwordReset(Client $bot)
     {
         $bot->command(ltrim(TelegramKeyword::PASSWORD_RESET, '/'), function (Message $message) use ($bot) {
@@ -536,35 +514,6 @@ class TelegramService extends BaseObject
         });
     }
 
-    public function cmd(Client $bot)
-    {
-        $bot->command(ltrim(TelegramKeyword::CMD, '/'), function (Message $message) use ($bot) {
-            $keyboard = new ReplyKeyboardMarkup(
-                [[TelegramKeyword::REPORT]],
-                true,
-                true
-            );
-            /** @var BotApi $bot */
-            $bot->sendMessage($message->getChat()->getId(), '请选择指令', null, false, null, $keyboard);
-        });
-
-        $bot->command(ltrim(TelegramKeyword::HELP, '/'), function (Message $message) use ($bot) {
-            $text = "我能做什么？
-/help - 查看帮助
-/cmd - 列出所有指令
-/today - 今日消费报告
-/yesterday - 昨日消费报告
-/current_month - 本月消费报告
-/last_month - 上个月消费报告
-/start - 开始使用
-/password_reset - 重置密码
-
-绑定账号成功之后发送文字直接记账";
-            /** @var BotApi $bot */
-            $bot->sendMessage($message->getChat()->getId(), $text);
-        });
-    }
-
     public function start(Client $bot)
     {
         $bot->command(ltrim(TelegramKeyword::START, '/'), function (Message $message) use ($bot) {
@@ -574,10 +523,17 @@ class TelegramService extends BaseObject
                 $message->getFrom()->getId()
             );
             if ($user) {
-                $text = '欢迎回来👏';
+                $text = '欢迎回来👏，发送文字直接记账';
             }
             /** @var BotApi $bot */
             $bot->sendMessage($message->getChat()->getId(), $text);
         });
+    }
+
+    public static function setMyCommands()
+    {
+        /** @var BotApi $bot */
+        $bot = TelegramService::newClient();
+        $bot->setMyCommands(TelegramKeyword::commands());
     }
 }

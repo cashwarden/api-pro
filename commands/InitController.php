@@ -7,7 +7,6 @@ use app\core\models\Transaction;
 use app\core\models\User;
 use app\core\services\TelegramService;
 use app\core\services\UserProService;
-use app\core\services\UserService;
 use app\core\traits\FixDataTrait;
 use app\core\traits\ServiceTrait;
 use Carbon\Carbon;
@@ -25,10 +24,11 @@ class InitController extends Controller
      */
     private $count;
 
-    public function actionTelegram()
+    public function actionTelegram(): int
     {
         $url = Url::to('/v1/telegram/hook', true);
         TelegramService::newClient()->setWebHook($url);
+        TelegramService::setMyCommands();
         $this->stdout("Telegram set Webhook url success!: {$url}\n");
         return ExitCode::OK;
     }
