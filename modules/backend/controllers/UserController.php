@@ -30,6 +30,9 @@ class UserController extends Controller
                 'username' => request('username'),
                 'email' => request('email'),
             ]),
+            'pagination' => [
+                'pageSize' => 2,
+            ],
             'sort' => ['defaultOrder' => ['id' => SORT_DESC]]
         ]);
 

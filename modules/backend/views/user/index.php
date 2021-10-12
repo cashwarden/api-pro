@@ -14,9 +14,9 @@ use yii\widgets\Pjax;
 $this->title = '用户管理';
 $this->params['breadcrumbs'][] = $this->title;
 ?>
-    <div class="user-index">
+    <div class="user-index my-4">
 
-        <h1><?= Html::encode($this->title) ?></h1>
+        <h1 class="pb-1"><?= Html::encode($this->title) ?></h1>
 
         <?php $form = ActiveForm::begin([
             'method' => 'get',
@@ -65,7 +65,7 @@ $this->params['breadcrumbs'][] = $this->title;
 
         <?= GridView::widget([
             'dataProvider' => $dataProvider,
-            'layout' => "{items}\n{summary}\n{pager}",
+            'layout' => "{items}\n{summary}\n<div class='pt-2'>{pager}</div>",
             'columns' => [
                 'id',
                 'username',

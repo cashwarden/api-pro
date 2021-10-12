@@ -20,7 +20,7 @@ AppAsset::register($this);
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <?php $this->registerCsrfMetaTags() ?>
     <?php $this->head() ?>
-    <link rel="shortcut icon" href="/favicon.png" type="image/x-png"/>
+    <link rel="shortcut icon" href="/favicon.ico" type="image/x-png"/>
     <title><?= Yii::$app->name ?> - 后台管理系统</title>
 </head>
 <body>
