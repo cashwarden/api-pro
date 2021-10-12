@@ -530,10 +530,19 @@ class TelegramService extends BaseObject
         });
     }
 
+    /**
+     * @throws Exception
+     * @throws \TelegramBot\Api\HttpException
+     * @throws \TelegramBot\Api\InvalidJsonException
+     */
     public static function setMyCommands()
     {
         /** @var BotApi $bot */
         $bot = TelegramService::newClient();
-        $bot->setMyCommands(TelegramKeyword::commands());
+        $commands = [];
+        foreach (TelegramKeyword::commands() as $key => $value) {
+            array_push($commands, ['command' => $key, 'description' => $value]);
+        }
+        $bot->setMyCommands($commands);
     }
 }
