@@ -2,9 +2,11 @@
 
 namespace app\modules\backend\controllers;
 
+use app\core\models\User;
 use app\modules\backend\models\LoginForm;
 use Yii;
 use yii\web\Response;
+use yiier\helpers\DateHelper;
 
 class SiteController extends \yii\web\Controller
 {
@@ -12,13 +14,19 @@ class SiteController extends \yii\web\Controller
     /**
      * Renders the index view for the module
      * @return Response|string
+     * @throws \Exception
      */
     public function actionIndex()
     {
         if (Yii::$app->user->isGuest) {
             return $this->redirect('login');
         }
-        return $this->render('index');
+        $start = DateHelper::beginTimestamp();
+        $end = DateHelper::endTimestamp();
+        $todayUserTotal = User::find()->where(['between', 'created_at', $start, $end])->count();
+        return $this->render('index', [
+            'todayUserTotal' => $todayUserTotal,
+        ]);
     }
 
     /**

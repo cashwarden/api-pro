@@ -1,12 +1,16 @@
-<div class="backend-site-index">
-    <h1><?= $this->context->action->uniqueId ?></h1>
-    <p>
-        This is the view content for action "<?= $this->context->action->id ?>".
-        The action belongs to the controller "<?= get_class($this->context) ?>"
-        in the "<?= $this->context->module->id ?>" module.
-    </p>
-    <p>
-        You may customize this page by editing the following file:<br>
-        <code><?= __FILE__ ?></code>
-    </p>
+<?php
+
+/* @var $this \yii\web\View */
+/** @var int $todayUserTotal */
+
+$this->title = '后台管理系统';
+
+?>
+
+<div class="backend-site-index my-4">
+    <div class="backend-default-index">
+        <p> 欢迎访问后台管理系统</p>
+        <p>今天有 <span><?= $todayUserTotal ?></span> 用户注册。</p>
+    </div>
+
 </div>
