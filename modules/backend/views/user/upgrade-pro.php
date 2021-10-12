@@ -15,9 +15,8 @@ use yii\helpers\Html;
 /* @var $model \app\modules\backend\models\UpgradeProForm */
 /** @var User $user */
 
-$this->title = '发放积分';
+$this->title = '升级用户';
 ?>
-
     <div class="alert alert-success d-none" id="modal_form-alert" role="alert">
         操作成功
     </div>
