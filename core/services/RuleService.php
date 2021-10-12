@@ -37,7 +37,7 @@ class RuleService
      * @throws Exception
      * @throws NotFoundHttpException
      */
-    public function updateStatus(int $id, string $status)
+    public function updateStatus(int $id, string $status): Rule
     {
         $model = $this->findCurrentOne($id);
         $model->load($model->toArray(), '');
@@ -53,7 +53,7 @@ class RuleService
      * @param string $desc
      * @return Rule[]
      */
-    public function getRulesByDesc(string $desc)
+    public function getRulesByDesc(string $desc): array
     {
         $models = Rule::find()
             ->where(['user_id' => \Yii::$app->user->id, 'status' => RuleStatus::ACTIVE])
@@ -62,9 +62,8 @@ class RuleService
         $rules = [];
         /** @var Rule $model */
         foreach ($models as $model) {
-            if ($model->if_keywords === '*') {
-                array_push($rules, $model);
-            } elseif (ArrayHelper::strPosArr($desc, explode(',', $model->if_keywords)) !== false) {
+            $ifKeywords = ArrayHelper::strPosArr($desc, explode(',', $model->if_keywords)) !== false;
+            if ($model->if_keywords === '*' || $ifKeywords) {
                 array_push($rules, $model);
             }
         }

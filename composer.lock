@@ -4,8 +4,23 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "eba6d355b78b5713d7090b8fd7c1659e",
+    "content-hash": "fa64c6d370b2f2c245cddaa95e064897",
     "packages": [
+        {
+            "name": "bower-asset/bootstrap",
+            "version": "v5.1.1",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/twbs/bootstrap.git",
+                "reference": "0d81d3cbc14dfcdca8a868e3f25189a4f1ab273c"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/twbs/bootstrap/zipball/0d81d3cbc14dfcdca8a868e3f25189a4f1ab273c",
+                "reference": "0d81d3cbc14dfcdca8a868e3f25189a4f1ab273c"
+            },
+            "type": "bower-asset"
+        },
         {
             "name": "bower-asset/inputmask",
             "version": "3.3.11",
@@ -5549,6 +5564,82 @@
                 }
             ],
             "time": "2021-08-09T17:38:43+00:00"
+        },
+        {
+            "name": "yiisoft/yii2-bootstrap5",
+            "version": "2.0.1",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/yiisoft/yii2-bootstrap5.git",
+                "reference": "a1d51a8fc6f666d71d60c88b8713b72cad20b00c"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/yiisoft/yii2-bootstrap5/zipball/a1d51a8fc6f666d71d60c88b8713b72cad20b00c",
+                "reference": "a1d51a8fc6f666d71d60c88b8713b72cad20b00c",
+                "shasum": ""
+            },
+            "require": {
+                "bower-asset/bootstrap": "^5.1.0",
+                "ext-json": "*",
+                "php": ">=7.0",
+                "yiisoft/yii2": "^2.0.42"
+            },
+            "require-dev": {
+                "phpunit/phpunit": "^6.5.14",
+                "yiisoft/yii2-coding-standards": "~2.0"
+            },
+            "type": "yii2-extension",
+            "extra": {
+                "branch-alias": {
+                    "dev-master": "1.0.x-dev"
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "yii\\bootstrap5\\": "src"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "BSD-3-Clause"
+            ],
+            "authors": [
+                {
+                    "name": "Sergey Zhukovskiy",
+                    "email": "mylistryx@gmail.com",
+                    "homepage": "https://net23.ru/"
+                },
+                {
+                    "name": "Simon Karlen",
+                    "email": "simi.albi@outlook.com"
+                }
+            ],
+            "description": "The Twitter Bootstrap v5 extension for the Yii framework",
+            "keywords": [
+                "bootstrap",
+                "bootstrap5",
+                "yii2"
+            ],
+            "support": {
+                "issues": "https://github.com/yiisoft/yii2-bootstrap5/issues",
+                "source": "https://github.com/yiisoft/yii2-bootstrap5"
+            },
+            "funding": [
+                {
+                    "url": "https://github.com/yiisoft",
+                    "type": "github"
+                },
+                {
+                    "url": "https://opencollective.com/yiisoft",
+                    "type": "open_collective"
+                },
+                {
+                    "url": "https://tidelift.com/funding/github/packagist/yiisoft/yii2-bootstrap5",
+                    "type": "tidelift"
+                }
+            ],
+            "time": "2021-08-11T17:42:33+00:00"
         },
         {
             "name": "yiisoft/yii2-composer",

@@ -39,6 +39,11 @@ class User extends ActiveRecord implements IdentityInterface
         return '{{%user}}';
     }
 
+    public static function currUserIsSuperAdmin(): bool
+    {
+        return Yii::$app->user->id == params('superAdminUserId');
+    }
+
     /**
      * @inheritdoc
      * @throws \yii\base\InvalidConfigException
