@@ -337,7 +337,7 @@ class UserService
     public function sendPasswordResetEmail(PasswordResetRequest $request): bool
     {
         /* @var $user User */
-        $user = User::findOne(['status' => UserStatus::ACTIVE, 'email' => $request->email]);
+        $user = User::findOne(['status' => [UserStatus::ACTIVE, UserStatus::UNACTIVATED], 'email' => $request->email]);
         $this->setPasswordResetToken($user);
         return $this->getMailerService()->sendPasswordResetMessage($user);
     }
