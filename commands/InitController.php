@@ -24,9 +24,14 @@ class InitController extends Controller
      */
     private $count;
 
-    public function actionTelegram(): int
+    /**
+     * @throws \TelegramBot\Api\InvalidJsonException
+     * @throws \TelegramBot\Api\Exception
+     * @throws \TelegramBot\Api\HttpException
+     */
+    public function actionTelegram(string $url = '/v1/telegram/hook'): int
     {
-        $url = Url::to('/v1/telegram/hook', true);
+        $url = Url::to($url, true);
         TelegramService::newClient()->setWebHook($url);
         TelegramService::setMyCommands();
         $this->stdout("Telegram set Webhook url success!: {$url}\n");
@@ -34,7 +39,7 @@ class InitController extends Controller
     }
 
     /**
-     * @param int $userId
+     * @param  int  $userId
      * @throws \app\core\exceptions\InvalidArgumentException
      * @throws \yii\db\Exception
      */
