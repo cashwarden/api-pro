@@ -1,4 +1,12 @@
 <?php
+/**
+ *
+ * @author forecho <caizhenghai@gmail.com>
+ * @link https://github.com/cashwarden
+ * @copyright Copyright (c) 2019 - 2022 forecho
+ * @license https://github.com/cashwarden/api-pro/blob/master/LICENSE.md
+ * @version 1.0.0
+ */
 
 namespace app\modules\v1\controllers;
 
@@ -30,7 +38,7 @@ class InvestmentController extends ActiveController
         $baseConditions = [
             'user_id' => Yii::$app->user->id,
             'type' => AccountType::INVESTMENT_ACCOUNT,
-            'exclude_from_stats' => false
+            'exclude_from_stats' => false,
         ];
         $balanceCentSum = Account::find()->where($baseConditions)->sum('balance_cent');
         $items['balance_sum'] = $balanceCentSum ? Setup::toYuan($balanceCentSum) : 0;
@@ -52,11 +60,11 @@ class InvestmentController extends ActiveController
             $sum = $query->sum('amount_cent');
             $first = $query->select('amount_cent')->orderBy(['date' => SORT_ASC])->limit(1)->scalar();
 
-            $items['income'][$id] = $sum ? (float)Setup::toYuan($sum - $first) : 0;
+            $items['income'][$id] = $sum ? (float) Setup::toYuan($sum - $first) : 0;
 
             $query = Record::find()->where($conditions)->andWhere(['direction' => DirectionType::EXPENSE]);
             $sum = $query->sum('amount_cent');
-            $items['expense'][$id] = $sum ? (float)Setup::toYuan($sum) : 0;
+            $items['expense'][$id] = $sum ? (float) Setup::toYuan($sum) : 0;
         }
         bcscale(2);
         $items['count'] = count($items['expense']);

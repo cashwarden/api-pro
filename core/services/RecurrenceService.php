@@ -1,4 +1,12 @@
 <?php
+/**
+ *
+ * @author forecho <caizhenghai@gmail.com>
+ * @link https://github.com/cashwarden
+ * @copyright Copyright (c) 2019 - 2022 forecho
+ * @license https://github.com/cashwarden/api-pro/blob/master/LICENSE.md
+ * @version 1.0.0
+ */
 
 namespace app\core\services;
 
@@ -71,7 +79,7 @@ class RecurrenceService extends BaseObject
         $formatter = Yii::$app->formatter;
         switch ($recurrence->frequency) {
             case RecurrenceFrequency::DAY:
-                $date = strtotime("+1 day", strtotime($recurrence->started_at));
+                $date = strtotime('+1 day', strtotime($recurrence->started_at));
                 break;
             case RecurrenceFrequency::WEEK:
                 $currentWeekDay = $formatter->asDatetime('now', 'php:N') - 1;
@@ -79,12 +87,11 @@ class RecurrenceService extends BaseObject
                 $addDay = $currentWeekDay > $weekDay ? 7 - $currentWeekDay + $weekDay : $weekDay - $currentWeekDay;
                 $date = strtotime("+{$addDay} day", strtotime($recurrence->started_at));
                 break;
-
             case RecurrenceFrequency::MONTH:
                 $currDay = $formatter->asDatetime('now', 'php:d');
                 $d = $recurrence->schedule;
                 $date = Yii::$app->formatter->asDatetime($currDay > $d ? strtotime('+1 month') : time(), 'php:Y-m');
-                $d = sprintf("%02d", $d);
+                $d = sprintf('%02d', $d);
                 return "{$date}-{$d}";
             case RecurrenceFrequency::YEAR:
                 $m = current(explode('-', $recurrence->schedule));
@@ -95,7 +102,7 @@ class RecurrenceService extends BaseObject
                 if (($currentWeekDay = $formatter->asDatetime('now', 'php:N') - 1) > 5) {
                     return null;
                 }
-                $date = strtotime("+1 day", strtotime($recurrence->started_at));
+                $date = strtotime('+1 day', strtotime($recurrence->started_at));
                 break;
             case RecurrenceFrequency::LEGAL_WORKING_DAY:
                 return HolidayHelper::getNextWorkday();

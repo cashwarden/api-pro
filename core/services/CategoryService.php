@@ -1,4 +1,12 @@
 <?php
+/**
+ *
+ * @author forecho <caizhenghai@gmail.com>
+ * @link https://github.com/cashwarden
+ * @copyright Copyright (c) 2019 - 2022 forecho
+ * @license https://github.com/cashwarden/api-pro/blob/master/LICENSE.md
+ * @version 1.0.0
+ */
 
 namespace app\core\services;
 
@@ -16,7 +24,7 @@ class CategoryService
     {
         $userId = $userId ?: Yii::$app->user->id;
         return Category::find()
-            ->where(['user_id' => $userId, 'transaction_type' => $transactionType,])
+            ->where(['user_id' => $userId, 'transaction_type' => $transactionType])
             ->orderBy(['default' => SORT_DESC, 'id' => SORT_ASC])
             ->asArray()
             ->one();
@@ -77,7 +85,7 @@ class CategoryService
             ->where([
                 'user_id' => \Yii::$app->user->id,
                 'ledger_id' => $ledgerId,
-                'transaction_type' => $transactionType
+                'transaction_type' => $transactionType,
             ])
             ->andWhere(['<>', 'keywords', ''])
             ->orderBy(['sort' => SORT_ASC, 'id' => SORT_DESC])

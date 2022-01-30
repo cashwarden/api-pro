@@ -1,4 +1,12 @@
 <?php
+/**
+ *
+ * @author forecho <caizhenghai@gmail.com>
+ * @link https://github.com/cashwarden
+ * @copyright Copyright (c) 2019 - 2022 forecho
+ * @license https://github.com/cashwarden/api-pro/blob/master/LICENSE.md
+ * @version 1.0.0
+ */
 
 namespace app\core\helpers;
 
@@ -47,14 +55,14 @@ class RuleControlHelper
     }
 
     /**
-     * 判断是否有权限
+     * 判断是否有权限.
      * @param int $totalPermission 权限集合
      * @param int $permission 单个权限
      * @return bool
      */
     public static function can(int $totalPermission, int $permission): bool
     {
-        return (($totalPermission & $permission) === $permission);
+        return ($totalPermission & $permission) === $permission;
     }
 
     /**
@@ -95,7 +103,7 @@ class RuleControlHelper
     }
 
     /**
-     * 根据权限值获取对应的角色
+     * 根据权限值获取对应的角色.
      * @param int $permission
      * @return string
      * @throws InvalidArgumentException

@@ -1,4 +1,12 @@
 <?php
+/**
+ *
+ * @author forecho <caizhenghai@gmail.com>
+ * @link https://github.com/cashwarden
+ * @copyright Copyright (c) 2019 - 2022 forecho
+ * @license https://github.com/cashwarden/api-pro/blob/master/LICENSE.md
+ * @version 1.0.0
+ */
 
 namespace app\core\models;
 
@@ -34,7 +42,7 @@ class UserProRecord extends \yii\db\ActiveRecord
     public static function makeOrderNo(): string
     {
         $m = microtime(true);
-        $no = sprintf("%8x%05x", floor($m), ($m - floor($m)) * 1000000);
+        $no = sprintf('%8x%05x', floor($m), ($m - floor($m)) * 1000000);
         return strtoupper($no);
     }
 
@@ -47,7 +55,7 @@ class UserProRecord extends \yii\db\ActiveRecord
         return [
             [
                 'class' => TimestampBehavior::class,
-                'value' => Yii::$app->formatter->asDatetime('now')
+                'value' => Yii::$app->formatter->asDatetime('now'),
             ],
         ];
     }
@@ -94,9 +102,8 @@ class UserProRecord extends \yii\db\ActiveRecord
     {
         if (parent::beforeSave($insert)) {
             return true;
-        } else {
-            return false;
         }
+        return false;
     }
 
 

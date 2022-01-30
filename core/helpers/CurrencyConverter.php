@@ -1,9 +1,11 @@
 <?php
-
 /**
- * author     : forecho <caizhenghai@gmail.comm>
- * createTime : 2019/6/2 8:29 PM
- * description:
+ *
+ * @author forecho <caizhenghai@gmail.com>
+ * @link https://github.com/cashwarden
+ * @copyright Copyright (c) 2019 - 2022 forecho
+ * @license https://github.com/cashwarden/api-pro/blob/master/LICENSE.md
+ * @version 1.0.0
  */
 
 namespace app\core\helpers;
@@ -15,7 +17,7 @@ class CurrencyConverter
     public const ENDPOINT = 'https://api.exchangerate.host/latest';
 
     /**
-     * 获取汇率
+     * 获取汇率.
      * @param string $base
      * @param string $symbols
      * @return array
@@ -41,7 +43,7 @@ class CurrencyConverter
             'query' => [
                 'base' => $base,
                 'symbols' => $symbols,
-            ]
+            ],
         ]);
         return json_decode($response->getBody(), true);
     }

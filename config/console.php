@@ -1,6 +1,14 @@
 <?php
+/**
+ *
+ * @author forecho <caizhenghai@gmail.com>
+ * @link https://github.com/cashwarden
+ * @copyright Copyright (c) 2019 - 2022 forecho
+ * @license https://github.com/cashwarden/api-pro/blob/master/LICENSE.md
+ * @version 1.0.0
+ */
 
-$common = require(__DIR__ . '/common.php');
+$common = require __DIR__ . '/common.php';
 $params = require __DIR__ . '/params.php';
 
 $config = [
@@ -21,7 +29,7 @@ $config = [
         ],
         'urlManager' => [
             'baseUrl' => env('APP_URL'),
-            'hostInfo' => env('APP_URL')
+            'hostInfo' => env('APP_URL'),
         ],
     ],
     'params' => $params,

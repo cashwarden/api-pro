@@ -1,5 +1,16 @@
 <?php
+/**
+ *
+ * @author forecho <caizhenghai@gmail.com>
+ * @link https://github.com/cashwarden
+ * @copyright Copyright (c) 2019 - 2022 forecho
+ * @license https://github.com/cashwarden/api-pro/blob/master/LICENSE.md
+ * @version 1.0.0
+ */
 
+use leinonen\Yii2Monolog\MonologTarget;
+use leinonen\Yii2Monolog\Yii2Monolog;
+use Monolog\Handler\SyslogUdpHandler;
 use yii\log\Logger;
 use yii\mutex\MysqlMutex;
 use yii\queue\ExecEvent;
@@ -8,7 +19,7 @@ return [
     'timeZone' => env('APP_TIME_ZONE'),
     'language' => env('APP_LANGUAGE'),
     'name' => env('APP_NAME'),
-    'bootstrap' => ['log', 'ideHelper', \app\core\EventBootstrap::class, 'queue'],
+    'bootstrap' => ['monolog', 'log', 'ideHelper', \app\core\EventBootstrap::class, 'queue'],
     'components' => [
         'ideHelper' => [
             'class' => 'Mis\IdeHelper\IdeHelper',
@@ -39,9 +50,7 @@ return [
         ],
         'db' => [
             'class' => 'yii\db\Connection',
-            'dsn' => 'mysql:host=' . env('MYSQL_HOST')
-                . ';port=' . env('MYSQL_PORT')
-                . ';dbname=' . env('MYSQL_DATABASE'),
+            'dsn' => 'mysql:host=' . env('MYSQL_HOST') . ';port=' . env('MYSQL_PORT') . ';dbname=' . env('MYSQL_DATABASE'),
             'username' => env('MYSQL_USERNAME'),
             'password' => env('MYSQL_PASSWORD'),
             'charset' => 'utf8mb4',
@@ -65,9 +74,31 @@ return [
             'channel' => 'default', // Queue channel key
             'mutex' => MysqlMutex::class, // Mutex used to sync queries
             'on afterError' => function (ExecEvent $event) {
-                \yiier\graylog\Log::error('队列执行失败1', $event->job);
-                \yiier\graylog\Log::error('队列执行失败2', $event->error);
-            }
+                Yii::error('队列执行失败1', $event->job);
+                Yii::error('队列执行失败2', $event->error);
+            },
+        ],
+        'monolog' => [
+            'class' => Yii2Monolog::class,
+            'channels' => [
+                'myFirstChannel' => [
+                    'handlers' => [
+                        SyslogUdpHandler::class => [
+                            'host' => env('SEMATEXT_HOST'),
+                            'ident' => env('SEMATEXT_IDENT'),
+                            'level' => \Monolog\Logger::INFO,
+                        ],
+                    ],
+                    'processors' => [
+                        function ($record) {
+                            $record['extra']['app'] = env('APP_NAME') . '_' . env('YII_ENV');
+                            $record['extra']['request_id'] = Yii::$app->requestId->id;
+
+                            return $record;
+                        },
+                    ],
+                ],
+            ],
         ],
         'event' => [
             'class' => \Guanguans\YiiEvent\Event::class,
@@ -93,33 +124,41 @@ return [
             'traceLevel' => YII_DEBUG ? 3 : 0,
             'targets' => [
                 [
-                    'class' => yiier\graylog\Target::class,
-                    // 日志等级
-                    'levels' => Logger::LEVEL_ERROR | Logger::LEVEL_WARNING,
-                    'logVars' => ['_GET', '_POST', '_FILES', '_COOKIE', '_SESSION'],
-                    'categories' => [
-                        'yii\db\*',
-                        'yii\web\HttpException:*',
-                        'application',
-                    ],
+                    'class' => MonologTarget::class,
+                    'channel' => 'myFirstChannel',
+                    'levels' => ['error', 'warning', 'info'],
                     'except' => [
                         'yii\web\HttpException:404',
                     ],
-                    'transport' => [
-                        'class' => yiier\graylog\transport\UdpTransport::class,
-                        'host' => getenv('GRAYLOG_HOST'),
-                        'chunkSize' => 4321,
-                    ],
-                    'additionalFields' => [
-                        'request_id' => function ($yii) {
-                            return Yii::$app->requestId->id;
-                        },
-                        'user_ip' => function ($yii) {
-                            return ($yii instanceof \yii\console\Application) ? '' : $yii->request->userIP;
-                        },
-                        'tag' => getenv('GRAYLOG_TAG')
-                    ],
                 ],
+//                [
+//                    'class' => yiier\graylog\Target::class,
+//                    // 日志等级
+//                    'levels' => Logger::LEVEL_ERROR | Logger::LEVEL_WARNING,
+//                    'logVars' => ['_GET', '_POST', '_FILES', '_COOKIE', '_SESSION'],
+//                    'categories' => [
+//                        'yii\db\*',
+//                        'yii\web\HttpException:*',
+//                        'application',
+//                    ],
+//                    'except' => [
+//                        'yii\web\HttpException:404',
+//                    ],
+//                    'transport' => [
+//                        'class' => yiier\graylog\transport\UdpTransport::class,
+//                        'host' => getenv('GRAYLOG_HOST'),
+//                        'chunkSize' => 4321,
+//                    ],
+//                    'additionalFields' => [
+//                        'request_id' => function ($yii) {
+//                            return Yii::$app->requestId->id;
+//                        },
+//                        'user_ip' => function ($yii) {
+//                            return ($yii instanceof \yii\console\Application) ? '' : $yii->request->userIP;
+//                        },
+//                        'tag' => getenv('GRAYLOG_TAG')
+//                    ],
+//                ],
                 [
                     'class' => 'notamedia\sentry\SentryTarget',
                     'dsn' => env('SENTRY_DSN'),
@@ -131,36 +170,36 @@ return [
                     // Write the context information (the default is true):
                     'context' => true,
                     // Additional options for `Sentry\init`:
-                    'clientOptions' => ['release' => getenv('GRAYLOG_TAG')]
+                    'clientOptions' => ['release' => getenv('GRAYLOG_TAG')],
                 ],
-                [
-                    'class' => yiier\graylog\Target::class,
-                    'levels' => Logger::LEVEL_ERROR | Logger::LEVEL_WARNING | Logger::LEVEL_INFO,
-                    'logVars' => ['_GET', '_POST', '_FILES', '_COOKIE', '_SESSION'],
-                    'categories' => [
-                        'graylog'
-                    ],
-                    'except' => [
-                        'yii\web\HttpException:404',
-                    ],
-                    'transport' => [
-                        'class' => yiier\graylog\transport\UdpTransport::class,
-                        'host' => getenv('GRAYLOG_HOST'),
-                        'chunkSize' => 4321,
-                    ],
-                    'additionalFields' => [
-                        'request_id' => function ($yii) {
-                            return Yii::$app->requestId->id;
-                        },
-                        'user_ip' => function ($yii) {
-                            return ($yii instanceof \yii\console\Application) ? '' : $yii->request->userIP;
-                        },
-                        'tag' => getenv('GRAYLOG_TAG')
-                    ],
-                ],
+//                [
+//                    'class' => yiier\graylog\Target::class,
+//                    'levels' => Logger::LEVEL_ERROR | Logger::LEVEL_WARNING | Logger::LEVEL_INFO,
+//                    'logVars' => ['_GET', '_POST', '_FILES', '_COOKIE', '_SESSION'],
+//                    'categories' => [
+//                        'graylog'
+//                    ],
+//                    'except' => [
+//                        'yii\web\HttpException:404',
+//                    ],
+//                    'transport' => [
+//                        'class' => yiier\graylog\transport\UdpTransport::class,
+//                        'host' => getenv('GRAYLOG_HOST'),
+//                        'chunkSize' => 4321,
+//                    ],
+//                    'additionalFields' => [
+//                        'request_id' => function ($yii) {
+//                            return Yii::$app->requestId->id;
+//                        },
+//                        'user_ip' => function ($yii) {
+//                            return ($yii instanceof \yii\console\Application) ? '' : $yii->request->userIP;
+//                        },
+//                        'tag' => getenv('GRAYLOG_TAG')
+//                    ],
+//                ],
                 /**
                  * 错误级别日志：当某些需要立马解决的致命问题发生的时候，调用此方法记录相关信息。
-                 * 使用方法：Yii::error()
+                 * 使用方法：Yii::error().
                  */
                 [
                     'class' => 'yiier\helpers\FileTarget',
@@ -178,7 +217,7 @@ return [
                 ],
                 /**
                  * 警告级别日志：当某些期望之外的事情发生的时候，使用该方法。
-                 * 使用方法：Yii::warning()
+                 * 使用方法：Yii::warning().
                  */
                 [
                     'class' => 'yiier\helpers\FileTarget',
@@ -198,7 +237,7 @@ return [
                     'logVars' => [],
                     'maxFileSize' => 1024,
                     'logFile' => '@app/runtime/logs/request/app.log',
-                    'enableDatePrefix' => true
+                    'enableDatePrefix' => true,
                 ],
                 [
                     'class' => 'yiier\helpers\FileTarget',
@@ -207,7 +246,7 @@ return [
                     'logVars' => [],
                     'maxFileSize' => 1024,
                     'logFile' => '@app/runtime/logs/debug/app.log',
-                    'enableDatePrefix' => true
+                    'enableDatePrefix' => true,
                 ],
             ],
         ],

@@ -1,4 +1,12 @@
 <?php
+/**
+ *
+ * @author forecho <caizhenghai@gmail.com>
+ * @link https://github.com/cashwarden
+ * @copyright Copyright (c) 2019 - 2022 forecho
+ * @license https://github.com/cashwarden/api-pro/blob/master/LICENSE.md
+ * @version 1.0.0
+ */
 
 namespace app\modules\backend\models;
 
@@ -11,7 +19,6 @@ use yii\base\Model;
  * LoginForm is the model behind the login form.
  *
  * @property User|null $user This property is read-only.
- *
  */
 class LoginForm extends Model
 {
@@ -81,7 +88,7 @@ class LoginForm extends Model
     }
 
     /**
-     * Finds user by [[username]]
+     * Finds user by [[username]].
      *
      * @return User|\yii\db\ActiveRecord|null
      */

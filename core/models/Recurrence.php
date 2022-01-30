@@ -1,4 +1,12 @@
 <?php
+/**
+ *
+ * @author forecho <caizhenghai@gmail.com>
+ * @link https://github.com/cashwarden
+ * @copyright Copyright (c) 2019 - 2022 forecho
+ * @license https://github.com/cashwarden/api-pro/blob/master/LICENSE.md
+ * @version 1.0.0
+ */
 
 namespace app\core\models;
 
@@ -50,7 +58,7 @@ class Recurrence extends \yii\db\ActiveRecord
         return [
             [
                 'class' => TimestampBehavior::class,
-                'value' => Yii::$app->formatter->asDatetime('now')
+                'value' => Yii::$app->formatter->asDatetime('now'),
             ],
         ];
     }
@@ -93,7 +101,7 @@ class Recurrence extends \yii\db\ActiveRecord
                         );
                         return null;
                     }
-                }
+                },
             ],
             [
                 'schedule',
@@ -103,7 +111,7 @@ class Recurrence extends \yii\db\ActiveRecord
                         RecurrenceFrequency::toEnumValue($model->frequency),
                         [RecurrenceFrequency::WEEK, RecurrenceFrequency::MONTH, RecurrenceFrequency::YEAR]
                     );
-                }
+                },
             ],
             [
                 'schedule',
@@ -112,7 +120,7 @@ class Recurrence extends \yii\db\ActiveRecord
                 'max' => 7,
                 'when' => function (self $model) {
                     return RecurrenceFrequency::toEnumValue($model->frequency) === RecurrenceFrequency::WEEK;
-                }
+                },
             ],
             [
                 'schedule',
@@ -120,7 +128,7 @@ class Recurrence extends \yii\db\ActiveRecord
                 'format' => 'd',
                 'when' => function (self $model) {
                     return RecurrenceFrequency::toEnumValue($model->frequency) === RecurrenceFrequency::MONTH;
-                }
+                },
             ],
             [
                 'schedule',
@@ -128,7 +136,7 @@ class Recurrence extends \yii\db\ActiveRecord
                 'format' => 'M-d',
                 'when' => function (self $model) {
                     return RecurrenceFrequency::toEnumValue($model->frequency) === RecurrenceFrequency::YEAR;
-                }
+                },
             ],
         ];
     }
@@ -167,13 +175,12 @@ class Recurrence extends \yii\db\ActiveRecord
             }
             $this->started_at = Yii::$app->formatter->asDatetime($this->started_at ?: 'now', 'php:Y-m-d');
             $this->frequency = RecurrenceFrequency::toEnumValue($this->frequency);
-            $this->status = is_null($this->status) ?
+            $this->status = $this->status === null ?
                 RecurrenceStatus::ACTIVE : RecurrenceStatus::toEnumValue($this->status);
             $this->execution_date = RecurrenceService::getExecutionDate($this);
             return true;
-        } else {
-            return false;
         }
+        return false;
     }
 
     public function getTransaction()

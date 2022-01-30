@@ -1,4 +1,12 @@
 <?php
+/**
+ *
+ * @author forecho <caizhenghai@gmail.com>
+ * @link https://github.com/cashwarden
+ * @copyright Copyright (c) 2019 - 2022 forecho
+ * @license https://github.com/cashwarden/api-pro/blob/master/LICENSE.md
+ * @version 1.0.0
+ */
 
 namespace app\core\components;
 
@@ -10,7 +18,7 @@ class ResponseHandler
     public $successMessage;
 
     /**
-     * 返回数据统一处理
+     * 返回数据统一处理.
      */
     public function formatResponse()
     {
@@ -59,10 +67,9 @@ class ResponseHandler
                 $response->data['message'] = current($response->data['data'])['message'];
                 break;
             default:
-                # code...
+                // code...
                 break;
         }
-        \Yii::info("response success", $response->data);
-        $response->setStatusCode(200);
+        \Yii::info('response success', $response->data);
     }
 }

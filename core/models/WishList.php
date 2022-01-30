@@ -1,4 +1,12 @@
 <?php
+/**
+ *
+ * @author forecho <caizhenghai@gmail.com>
+ * @link https://github.com/cashwarden
+ * @copyright Copyright (c) 2019 - 2022 forecho
+ * @license https://github.com/cashwarden/api-pro/blob/master/LICENSE.md
+ * @version 1.0.0
+ */
 
 namespace app\core\models;
 
@@ -53,7 +61,7 @@ class WishList extends \yii\db\ActiveRecord
         return [
             [
                 'class' => TimestampBehavior::class,
-                'value' => Yii::$app->formatter->asDatetime('now')
+                'value' => Yii::$app->formatter->asDatetime('now'),
             ],
         ];
     }
@@ -93,20 +101,19 @@ class WishList extends \yii\db\ActiveRecord
             if ($insert) {
                 $this->user_id = Yii::$app->user->id;
             }
-            $this->status = is_null($this->status) ?
+            $this->status = $this->status === null ?
                 WishListStatus::TODO : WishListStatus::toEnumValue($this->status);
 
             $this->currency_amount_cent = Setup::toFen($this->currency_amount);
             if ($this->currency_code == Yii::$app->user->identity['base_currency_code']) {
                 $this->amount_cent = $this->currency_amount_cent;
-            } else {
-                // $this->amount_cent = $this->currency_amount_cent;
-                // todo 计算汇率
             }
+            // $this->amount_cent = $this->currency_amount_cent;
+            // todo 计算汇率
+
             return true;
-        } else {
-            return false;
         }
+        return false;
     }
 
     /**

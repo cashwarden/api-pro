@@ -1,4 +1,12 @@
 <?php
+/**
+ *
+ * @author forecho <caizhenghai@gmail.com>
+ * @link https://github.com/cashwarden
+ * @copyright Copyright (c) 2019 - 2022 forecho
+ * @license https://github.com/cashwarden/api-pro/blob/master/LICENSE.md
+ * @version 1.0.0
+ */
 
 namespace app\core\services;
 
@@ -10,7 +18,6 @@ use GuzzleHttp\Exception\GuzzleException;
 use yii\base\BaseObject;
 use yii\db\Exception;
 use yii\helpers\Json;
-use yiier\graylog\Log;
 use yiier\helpers\ModelHelper;
 use yiier\helpers\Setup;
 
@@ -30,8 +37,8 @@ class StockService extends BaseObject
      * 纳斯达克综合指数
      * https://sg.finance.yahoo.com/quote/%5EIXIC/history?p=^IXIC&.tsrc=fin-srch
      * 标普 500 指数
-     * https://sg.finance.yahoo.com/quote/%5EGSPC/history?p=%5EGSPC
-     * @param string $code
+     * https://sg.finance.yahoo.com/quote/%5EGSPC/history?p=%5EGSPC.
+     * @param  string  $code
      * @throws ThirdPartyServiceErrorException
      */
     public static function getHistoricalData(string $code): void
@@ -39,13 +46,13 @@ class StockService extends BaseObject
         $baseUrl = 'https://apidojo-yahoo-finance-v1.p.rapidapi.com/stock/v3/get-historical-data';
         $params = [
             'symbol' => $code,
-            'region' => 'HK'
+            'region' => 'HK',
         ];
         try {
             $self = \Yii::createObject(self::class);
             $headers = [
                 'x-rapidapi-host' => 'apidojo-yahoo-finance-v1.p.rapidapi.com',
-                'x-rapidapi-key' => params('rapidapiKey')
+                'x-rapidapi-key' => params('rapidapiKey'),
             ];
             $rows = [];
             $response = $self->sendRequest('GET', $baseUrl, ['query' => $params, 'headers' => $headers]);
@@ -72,7 +79,7 @@ class StockService extends BaseObject
                 throw new Exception("stock_historical $code 基金历史数据更新失败");
             }
         } catch (GuzzleException | \Exception $e) {
-            Log::error('stock_historical', [$response ?? [], (string)$e]);
+            \Yii::error('stock_historical', [$response ?? [], (string) $e]);
             throw new ThirdPartyServiceErrorException();
         }
     }

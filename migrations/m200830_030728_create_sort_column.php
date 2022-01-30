@@ -1,9 +1,17 @@
 <?php
+/**
+ *
+ * @author forecho <caizhenghai@gmail.com>
+ * @link https://github.com/cashwarden
+ * @copyright Copyright (c) 2019 - 2022 forecho
+ * @license https://github.com/cashwarden/api-pro/blob/master/LICENSE.md
+ * @version 1.0.0
+ */
 
 use yii\db\Migration;
 
 /**
- * Class m200830_030728_create_sort_column
+ * Class m200830_030728_create_sort_column.
  */
 class m200830_030728_create_sort_column extends Migration
 {

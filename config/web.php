@@ -1,9 +1,17 @@
 <?php
+/**
+ *
+ * @author forecho <caizhenghai@gmail.com>
+ * @link https://github.com/cashwarden
+ * @copyright Copyright (c) 2019 - 2022 forecho
+ * @license https://github.com/cashwarden/api-pro/blob/master/LICENSE.md
+ * @version 1.0.0
+ */
 
 use app\core\components\ResponseHandler;
 use app\core\models\User;
 
-$common = require(__DIR__ . '/common.php');
+$common = require __DIR__ . '/common.php';
 $params = require __DIR__ . '/params.php';
 $router = require __DIR__ . '/router.php';
 
@@ -29,7 +37,7 @@ $config = [
                 'application/json' => 'yii\web\JsonParser',
             ],
             // !!! insert a secret key in the following (if it is empty) - this is required by cookie validation
-            'cookieValidationKey' => env('COOKIE_VALIDATION_KEY')
+            'cookieValidationKey' => env('COOKIE_VALIDATION_KEY'),
         ],
         'response' => [
             'class' => 'yii\web\Response',

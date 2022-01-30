@@ -1,4 +1,12 @@
 <?php
+/**
+ *
+ * @author forecho <caizhenghai@gmail.com>
+ * @link https://github.com/cashwarden
+ * @copyright Copyright (c) 2019 - 2022 forecho
+ * @license https://github.com/cashwarden/api-pro/blob/master/LICENSE.md
+ * @version 1.0.0
+ */
 
 namespace app\core\behaviors;
 
@@ -15,7 +23,7 @@ class LoggerBehavior extends Behavior
     {
         return [
             Response::EVENT_BEFORE_SEND => 'beforeSend',
-            Controller::EVENT_BEFORE_ACTION => 'beforeAction'
+            Controller::EVENT_BEFORE_ACTION => 'beforeAction',
         ];
     }
 
@@ -46,7 +54,7 @@ class LoggerBehavior extends Behavior
                 'header' => Json::encode($requestHeaderParams),
                 'params' => Json::encode($requestParams),
                 'url' => $request->absoluteUrl,
-                'response' => Json::encode($response->data)
+                'response' => Json::encode($response->data),
             ];
             if (is_array($response->data)) {
                 $response->data = ['request_id' => $requestId] + $response->data;

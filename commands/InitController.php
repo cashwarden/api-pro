@@ -1,4 +1,12 @@
 <?php
+/**
+ *
+ * @author forecho <caizhenghai@gmail.com>
+ * @link https://github.com/cashwarden
+ * @copyright Copyright (c) 2019 - 2022 forecho
+ * @license https://github.com/cashwarden/api-pro/blob/master/LICENSE.md
+ * @version 1.0.0
+ */
 
 namespace app\commands;
 
@@ -77,7 +85,7 @@ class InitController extends Controller
                 return false;
             },
             function (User $item) {
-                $endedAt = Carbon::parse("2020-12-31")->endOfDay();
+                $endedAt = Carbon::parse('2020-12-31')->endOfDay();
                 if (UserProService::upgradeToProBySystem($item->id, $endedAt)) {
                     $this->count++;
                 }

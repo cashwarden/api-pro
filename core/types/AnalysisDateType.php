@@ -1,4 +1,12 @@
 <?php
+/**
+ *
+ * @author forecho <caizhenghai@gmail.com>
+ * @link https://github.com/cashwarden
+ * @copyright Copyright (c) 2019 - 2022 forecho
+ * @license https://github.com/cashwarden/api-pro/blob/master/LICENSE.md
+ * @version 1.0.0
+ */
 
 namespace app\core\types;
 
@@ -39,7 +47,7 @@ class AnalysisDateType
             self::LAST_WEEK => Yii::t('app', 'Last week'),
             self::CURRENT_MONTH => Yii::t('app', 'Current month'),
             self::LAST_MONTH => Yii::t('app', 'Last month'),
-            self::GRAND_TOTAL => Yii::t('app', 'Grand total')
+            self::GRAND_TOTAL => Yii::t('app', 'Grand total'),
         ];
     }
 
@@ -80,9 +88,9 @@ class AnalysisDateType
     {
         $formatter = Yii::$app->formatter;
         $items = [];
-        [$y, $m, $lastDay] = explode('-', date("Y-m-t", strtotime($dateStr)));
+        [$y, $m, $lastDay] = explode('-', date('Y-m-t', strtotime($dateStr)));
         for ($i = 1; $i <= $lastDay; $i++) {
-            $time = date("{$y}-{$m}-" . sprintf("%02d", $i));
+            $time = date("{$y}-{$m}-" . sprintf('%02d', $i));
             $date = [DateHelper::beginTimestamp($time), DateHelper::endTimestamp($time)];
             $items[] = array_map(function ($i) use ($formatter) {
                 return $formatter->asDatetime($i);

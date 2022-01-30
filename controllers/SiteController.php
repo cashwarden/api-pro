@@ -1,6 +1,14 @@
 <?php
 
 declare(strict_types=1);
+/**
+ *
+ * @author forecho <caizhenghai@gmail.com>
+ * @link https://github.com/cashwarden
+ * @copyright Copyright (c) 2019 - 2022 forecho
+ * @license https://github.com/cashwarden/api-pro/blob/master/LICENSE.md
+ * @version 1.0.0
+ */
 
 namespace app\controllers;
 
@@ -9,7 +17,6 @@ use app\core\traits\ServiceTrait;
 use Yii;
 use yii\helpers\ArrayHelper;
 use yii\rest\Controller;
-use yiier\graylog\Log;
 
 class SiteController extends Controller
 {
@@ -43,7 +50,7 @@ class SiteController extends Controller
                 'exception' => $exception->getMessage(),
                 'line' => $exception->getLine(),
                 'file' => $exception->getFile(),
-                'method' => Yii::$app->request->method
+                'method' => Yii::$app->request->method,
             ], 'response_data_error');
 
             return ['code' => $exception->getCode(), 'message' => $exception->getMessage()];
@@ -74,8 +81,8 @@ class SiteController extends Controller
                 }
             }
         } catch (\Exception $e) {
-            Log::error('pay_notify_data', $data ?? $alipay);
-            Log::error('pay_notify_data_error', $e);
+            Yii::error('pay_notify_data', $data ?? $alipay);
+            Yii::error('pay_notify_data_error', $e);
         }
 
         $alipay->success()->send();
@@ -93,7 +100,7 @@ class SiteController extends Controller
             $pay = Yii::$app->pay->getAlipay()->verify();
             return 'ok';
         } catch (\Exception $e) {
-            Log::error('交易失败', $pay ?? []);
+            Yii::error('交易失败', $pay ?? []);
             throw new PayException('交易失败: ' . $e->getMessage());
         }
     }
@@ -127,7 +134,7 @@ class SiteController extends Controller
                 'description' => params('seoDescription'),
                 'keywords' => params('seoKeywords'),
                 'google_analytics' => params('googleAnalyticsAU'),
-                'telegram_bot_name' => params('telegramBotName')
+                'telegram_bot_name' => params('telegramBotName'),
             ],
             'menu' => [
                 [
@@ -211,9 +218,9 @@ class SiteController extends Controller
                             'link' => '/rule/index',
                             'icon' => 'anticon-group',
                         ],
-                    ]
-                ]
-            ]
+                    ],
+                ],
+            ],
         ];
     }
 }

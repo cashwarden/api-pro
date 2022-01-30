@@ -1,4 +1,12 @@
 <?php
+/**
+ *
+ * @author forecho <caizhenghai@gmail.com>
+ * @link https://github.com/cashwarden
+ * @copyright Copyright (c) 2019 - 2022 forecho
+ * @license https://github.com/cashwarden/api-pro/blob/master/LICENSE.md
+ * @version 1.0.0
+ */
 
 namespace app\core\services;
 
@@ -31,7 +39,7 @@ class AccountService
             ->where([
                 'and',
                 $baseConditions,
-                ['or', ['from_account_id' => $account->id], ['to_account_id' => $account->id]]
+                ['or', ['from_account_id' => $account->id], ['to_account_id' => $account->id]],
             ])
             ->column();
         Transaction::deleteAll($baseConditions + ['id' => $transactionIds]);
@@ -41,7 +49,7 @@ class AccountService
         Rule::deleteAll([
             'and',
             $baseConditions,
-            ['or', ['then_from_account_id' => $account->id], ['then_to_account_id' => $account->id]]
+            ['or', ['then_from_account_id' => $account->id], ['then_to_account_id' => $account->id]],
         ]);
     }
 
@@ -59,7 +67,7 @@ class AccountService
             }
         } catch (Exception $e) {
             Yii::error(
-                ['request_id' => Yii::$app->requestId->id, $account->attributes, $account->errors, (string)$e],
+                ['request_id' => Yii::$app->requestId->id, $account->attributes, $account->errors, (string) $e],
                 __FUNCTION__
             );
             throw new InternalException($e->getMessage());
@@ -195,7 +203,7 @@ class AccountService
     {
         $currentBalanceCent = $model->balance_cent;
         $data = Record::find()
-            ->where(['account_id' => $model->id, 'exclude_from_stats' => (int)false])
+            ->where(['account_id' => $model->id, 'exclude_from_stats' => (int) false])
             ->andWhere(['>=', 'date', $endDate])
             ->orderBy(['date' => SORT_DESC, 'id' => SORT_DESC])
             ->asArray()
@@ -215,7 +223,7 @@ class AccountService
         foreach ($dares as $date) {
             $afterBalanceCent = $afterBalanceCent ?? $currentBalanceCent;
             if (!isset($items[$date])) {
-                $items[$date] = ['date' => $date, 'after_balance' => (float)Setup::toYuan($afterBalanceCent)];
+                $items[$date] = ['date' => $date, 'after_balance' => (float) Setup::toYuan($afterBalanceCent)];
             }
             $afterBalanceCent = $afterBalanceCent + data_get($rows, "{$date}.amount_cent", 0);
         }

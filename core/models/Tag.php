@@ -1,4 +1,12 @@
 <?php
+/**
+ *
+ * @author forecho <caizhenghai@gmail.com>
+ * @link https://github.com/cashwarden
+ * @copyright Copyright (c) 2019 - 2022 forecho
+ * @license https://github.com/cashwarden/api-pro/blob/master/LICENSE.md
+ * @version 1.0.0
+ */
 
 namespace app\core\models;
 
@@ -41,7 +49,7 @@ class Tag extends \yii\db\ActiveRecord
         return [
             [
                 'class' => TimestampBehavior::class,
-                'value' => Yii::$app->formatter->asDatetime('now')
+                'value' => Yii::$app->formatter->asDatetime('now'),
             ],
         ];
     }
@@ -67,7 +75,7 @@ class Tag extends \yii\db\ActiveRecord
                 'name',
                 'unique',
                 'targetAttribute' => ['user_id', 'ledger_id', 'name'],
-                'message' => Yii::t('app', 'The {attribute} has been used.')
+                'message' => Yii::t('app', 'The {attribute} has been used.'),
             ],
         ];
     }
@@ -110,9 +118,8 @@ class Tag extends \yii\db\ActiveRecord
                 $this->color = $this->color ?: $rand[mt_rand(0, count($rand) - 1)];
             }
             return true;
-        } else {
-            return false;
         }
+        return false;
     }
 
     /**

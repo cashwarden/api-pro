@@ -1,4 +1,12 @@
 <?php
+/**
+ *
+ * @author forecho <caizhenghai@gmail.com>
+ * @link https://github.com/cashwarden
+ * @copyright Copyright (c) 2019 - 2022 forecho
+ * @license https://github.com/cashwarden/api-pro/blob/master/LICENSE.md
+ * @version 1.0.0
+ */
 
 namespace app\core\models;
 
@@ -53,7 +61,7 @@ class User extends ActiveRecord implements IdentityInterface
         return [
             [
                 'class' => TimestampBehavior::class,
-                'value' => Yii::$app->formatter->asDatetime('now')
+                'value' => Yii::$app->formatter->asDatetime('now'),
             ],
         ];
     }
@@ -89,7 +97,7 @@ class User extends ActiveRecord implements IdentityInterface
      */
     public static function findIdentityByAccessToken($token, $type = null)
     {
-        $userId = (string)$token->getClaim('id');
+        $userId = (string) $token->getClaim('id');
         return self::findIdentity($userId);
     }
 
@@ -118,7 +126,7 @@ class User extends ActiveRecord implements IdentityInterface
     }
 
     /**
-     * Validates password
+     * Validates password.
      *
      * @param string $password password to validate
      * @return bool if password provided is valid for current user
@@ -129,7 +137,7 @@ class User extends ActiveRecord implements IdentityInterface
     }
 
     /**
-     * Generates password hash from password and sets it to the model
+     * Generates password hash from password and sets it to the model.
      *
      * @param string $password
      * @throws \yii\base\Exception
@@ -140,7 +148,7 @@ class User extends ActiveRecord implements IdentityInterface
     }
 
     /**
-     * Generates "remember me" authentication key
+     * Generates "remember me" authentication key.
      * @throws \yii\base\Exception
      */
     public function generateAuthKey()
@@ -149,7 +157,7 @@ class User extends ActiveRecord implements IdentityInterface
     }
 
     /**
-     * Generates new password reset token
+     * Generates new password reset token.
      * @throws \yii\base\Exception
      */
     public function generatePasswordResetToken()
@@ -158,7 +166,7 @@ class User extends ActiveRecord implements IdentityInterface
     }
 
     /**
-     * Removes password reset token
+     * Removes password reset token.
      */
     public function removePasswordResetToken()
     {
@@ -166,7 +174,7 @@ class User extends ActiveRecord implements IdentityInterface
     }
 
     /**
-     * Finds user by password reset token
+     * Finds user by password reset token.
      *
      * @param string $token password reset token
      * @return User|array|ActiveRecord|null
@@ -183,10 +191,10 @@ class User extends ActiveRecord implements IdentityInterface
     }
 
     /**
-     * Finds out if password reset token is valid
+     * Finds out if password reset token is valid.
      *
      * @param string|null $token password reset token
-     * @return boolean
+     * @return bool
      */
     public static function isPasswordResetTokenValid(?string $token)
     {
@@ -194,7 +202,7 @@ class User extends ActiveRecord implements IdentityInterface
             return false;
         }
 
-        $timestamp = (int)substr($token, strrpos($token, '_') + 1);
+        $timestamp = (int) substr($token, strrpos($token, '_') + 1);
         $expire = Yii::$app->params['userPasswordResetTokenExpire'];
         return $timestamp + $expire >= time();
     }

@@ -1,4 +1,12 @@
 <?php
+/**
+ *
+ * @author forecho <caizhenghai@gmail.com>
+ * @link https://github.com/cashwarden
+ * @copyright Copyright (c) 2019 - 2022 forecho
+ * @license https://github.com/cashwarden/api-pro/blob/master/LICENSE.md
+ * @version 1.0.0
+ */
 
 namespace app\core\models;
 
@@ -43,7 +51,7 @@ class Currency extends \yii\db\ActiveRecord
         return [
             [
                 'class' => TimestampBehavior::class,
-                'value' => Yii::$app->formatter->asDatetime('now')
+                'value' => Yii::$app->formatter->asDatetime('now'),
             ],
         ];
     }
@@ -69,7 +77,7 @@ class Currency extends \yii\db\ActiveRecord
             [
                 ['ledger_id', 'currency_code_from', 'currency_code_to'],
                 'unique',
-                'targetAttribute' => ['ledger_id', 'currency_code_from', 'currency_code_to']
+                'targetAttribute' => ['ledger_id', 'currency_code_from', 'currency_code_to'],
             ],
         ];
     }
@@ -101,9 +109,8 @@ class Currency extends \yii\db\ActiveRecord
                 throw new InvalidArgumentException('currency_code_from 参数错误');
             }
             return true;
-        } else {
-            return false;
         }
+        return false;
     }
 
     public function afterFind()

@@ -1,4 +1,12 @@
 <?php
+/**
+ *
+ * @author forecho <caizhenghai@gmail.com>
+ * @link https://github.com/cashwarden
+ * @copyright Copyright (c) 2019 - 2022 forecho
+ * @license https://github.com/cashwarden/api-pro/blob/master/LICENSE.md
+ * @version 1.0.0
+ */
 
 namespace app\core\traits;
 
@@ -7,7 +15,7 @@ use yii\db\ActiveQuery;
 trait FixDataTrait
 {
     /**
-     * @var integer 每次数量
+     * @var int 每次数量
      */
     protected $onceCount = 1000;
 
@@ -17,7 +25,7 @@ trait FixDataTrait
     protected $sleepSecond = 1;
 
     /**
-     * 迁移数据库
+     * 迁移数据库.
      * @param ActiveQuery $query 查询 query
      * @param \Closure $existCallback 检查是否存在的回调函数
      * @param \Closure $callback 添加、迁移数据
@@ -30,7 +38,7 @@ trait FixDataTrait
         $transaction = $userTransaction ? \Yii::$app->db->beginTransaction() : null;
         $count = $query->count();
         try {
-            for ($i = 0; $i <= (int)ceil($count / $this->onceCount); $i++) {
+            for ($i = 0; $i <= (int) ceil($count / $this->onceCount); $i++) {
                 $items = $query
                     ->orderBy(['id' => SORT_ASC])
                     ->limit($this->onceCount)
@@ -49,7 +57,7 @@ trait FixDataTrait
             return $ids ?? [];
         } catch (\Exception $e) {
             $userTransaction ? $transaction->rollBack() : null;
-            \Yii::error('修复数据失败', ['query' => $query, (string)$e]);
+            \Yii::error('修复数据失败', ['query' => $query, (string) $e]);
             throw $e;
         }
     }

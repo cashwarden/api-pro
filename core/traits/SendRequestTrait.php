@@ -1,4 +1,12 @@
 <?php
+/**
+ *
+ * @author forecho <caizhenghai@gmail.com>
+ * @link https://github.com/cashwarden
+ * @copyright Copyright (c) 2019 - 2022 forecho
+ * @license https://github.com/cashwarden/api-pro/blob/master/LICENSE.md
+ * @version 1.0.0
+ */
 
 namespace app\core\traits;
 
@@ -29,9 +37,9 @@ trait SendRequestTrait
             ];
             $client = new \GuzzleHttp\Client(['verify' => false]);
             $response = $client->request($type, $apiUrl, array_merge($baseOptions, $options));
-            Log::info('Curl 请求服务开始', ['url' => $apiUrl, $data, (array)$response]);
+            Log::info('Curl 请求服务开始', ['url' => $apiUrl, $data, (array) $response]);
         } catch (\Exception $e) {
-            Log::error('Curl 请求服务异常', ['url' => $apiUrl, 'exception' => (string)$e, $data]);
+            Log::error('Curl 请求服务异常', ['url' => $apiUrl, 'exception' => (string) $e, $data]);
             throw new ErrorException('Curl 请求异常:' . $e->getMessage(), 500001);
         }
         if ($response->getStatusCode() == 200) {
@@ -39,13 +47,12 @@ trait SendRequestTrait
             $endMillisecond = round(microtime(true) * 1000);
             $context = [
                 'curlUrl' => $apiUrl,
-                'CurlSpendingMillisecond' => $endMillisecond - $beginMillisecond
+                'CurlSpendingMillisecond' => $endMillisecond - $beginMillisecond,
             ];
-            Log::info('curl time consuming', [$context, $data,]);
-            return (string)$response->getBody();
-        } else {
-            Log::error('Curl 请求服务成功，但是操作失败', ['url' => $apiUrl, 'data' => $data]);
-            throw new ErrorException('Curl 请求服务成功，但是操作失败：');
+            Log::info('curl time consuming', [$context, $data]);
+            return (string) $response->getBody();
         }
+        Log::error('Curl 请求服务成功，但是操作失败', ['url' => $apiUrl, 'data' => $data]);
+        throw new ErrorException('Curl 请求服务成功，但是操作失败：');
     }
 }

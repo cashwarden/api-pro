@@ -1,4 +1,12 @@
 <?php
+/**
+ *
+ * @author forecho <caizhenghai@gmail.com>
+ * @link https://github.com/cashwarden
+ * @copyright Copyright (c) 2019 - 2022 forecho
+ * @license https://github.com/cashwarden/api-pro/blob/master/LICENSE.md
+ * @version 1.0.0
+ */
 
 namespace app\core\services;
 
@@ -9,7 +17,6 @@ use yii\base\Exception;
 
 class PayService extends BaseObject
 {
-
     /**
      * @param UserProRecord $record
      * @param $price
@@ -21,7 +28,7 @@ class PayService extends BaseObject
         $order = [
             'out_trade_no' => $record->out_sn . '_' . $record->user_id,
             'total_amount' => $price,
-            'subject' => "1年 Pro 会员 - " . \Yii::$app->name
+            'subject' => '1年 Pro 会员 - ' . \Yii::$app->name,
         ];
 
         $alipay = Yii::$app->pay->getAlipay()->scan($order); // 扫码支付

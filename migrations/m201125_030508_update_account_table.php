@@ -1,9 +1,17 @@
 <?php
+/**
+ *
+ * @author forecho <caizhenghai@gmail.com>
+ * @link https://github.com/cashwarden
+ * @copyright Copyright (c) 2019 - 2022 forecho
+ * @license https://github.com/cashwarden/api-pro/blob/master/LICENSE.md
+ * @version 1.0.0
+ */
 
 use yii\db\Migration;
 
 /**
- * Class m201125_030508_update_account_table
+ * Class m201125_030508_update_account_table.
  */
 class m201125_030508_update_account_table extends Migration
 {
