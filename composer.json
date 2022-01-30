@@ -18,7 +18,6 @@
   "minimum-stability": "stable",
   "require": {
     "php": ">=7.4",
-    "yiisoft/yii2": "~2.0.14",
     "yiisoft/yii2-swiftmailer": "~2.0.0 || ~2.1.0",
     "yiithings/yii2-dotenv": "^1.0",
     "sizeg/yii2-jwt": "^2.0",
@@ -40,7 +39,8 @@
     "guanguans/yii-event": "^1.0",
     "notamedia/yii2-sentry": "^1.7",
     "yiisoft/yii2-bootstrap5": "^2.0",
-    "exileed/yii2-monolog2": "^2.0"
+    "exileed/yii2-monolog2": "^2.0",
+    "yiisoft/yii2": "^2.0"
   },
   "require-dev": {
     "yiisoft/yii2-debug": "~2.1.0",
