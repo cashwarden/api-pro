@@ -16,7 +16,7 @@ use yii\mutex\MysqlMutex;
 use yii\queue\ExecEvent;
 
 return [
-    'timeZone' => env('APP_TIME_ZONE'),
+    'timeZone' => env('APP_TIME_ZONE', 'Asia/Shanghai'),
     'language' => env('APP_LANGUAGE'),
     'name' => env('APP_NAME'),
     'bootstrap' => ['monolog', 'log', 'ideHelper', \app\core\EventBootstrap::class, 'queue'],
