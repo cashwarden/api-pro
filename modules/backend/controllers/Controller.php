@@ -1,9 +1,11 @@
 <?php
-
 /**
- * author     : forecho
- * createTime : 2021/8/11 11:45 上午
- * description:
+ *
+ * @author forecho <caizhenghai@gmail.com>
+ * @link https://cashwarden.com/
+ * @copyright Copyright (c) 2020-2022 forecho
+ * @license https://github.com/cashwarden/api/blob/master/LICENSE.md
+ * @version 1.0.0
  */
 
 namespace app\modules\backend\controllers;
@@ -30,7 +32,7 @@ class Controller extends \yii\web\Controller
                             return User::currUserIsSuperAdmin();
                         },
                     ],
-                ]
+                ],
             ],
             'verbs' => [
                 'class' => VerbFilter::class,

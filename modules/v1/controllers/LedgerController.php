@@ -1,4 +1,12 @@
 <?php
+/**
+ *
+ * @author forecho <caizhenghai@gmail.com>
+ * @link https://cashwarden.com/
+ * @copyright Copyright (c) 2020-2022 forecho
+ * @license https://github.com/cashwarden/api/blob/master/LICENSE.md
+ * @version 1.0.0
+ */
 
 namespace app\modules\v1\controllers;
 
@@ -21,7 +29,7 @@ use yii\web\NotFoundHttpException;
 use yiier\helpers\SearchModel;
 
 /**
- * Ledger controller for the `v1` module
+ * Ledger controller for the `v1` module.
  */
 class LedgerController extends ActiveController
 {
@@ -106,7 +114,7 @@ class LedgerController extends ActiveController
             'model' => $modelClass,
             'scenario' => 'default',
             'partialMatchAttributes' => $this->partialMatchAttributes,
-            'pageSize' => $this->getPageSize()
+            'pageSize' => $this->getPageSize(),
         ]);
 
         $params = $this->formatParams(Yii::$app->request->queryParams);

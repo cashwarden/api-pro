@@ -1,4 +1,12 @@
 <?php
+/**
+ *
+ * @author forecho <caizhenghai@gmail.com>
+ * @link https://cashwarden.com/
+ * @copyright Copyright (c) 2020-2022 forecho
+ * @license https://github.com/cashwarden/api/blob/master/LICENSE.md
+ * @version 1.0.0
+ */
 
 namespace app\modules\v1\controllers;
 
@@ -22,7 +30,7 @@ use yii\web\ForbiddenHttpException;
 use yiier\helpers\Setup;
 
 /**
- * Record controller for the `v1` module
+ * Record controller for the `v1` module.
  */
 class RecordController extends ActiveController
 {
@@ -33,7 +41,7 @@ class RecordController extends ActiveController
     public array $defaultOrder = ['date' => SORT_DESC, 'id' => SORT_DESC];
     public array $stringToIntAttributes = [
         'transaction_type' => TransactionType::class,
-        'reimbursement_status' => ReimbursementStatus::class
+        'reimbursement_status' => ReimbursementStatus::class,
     ];
 
     public function actions()

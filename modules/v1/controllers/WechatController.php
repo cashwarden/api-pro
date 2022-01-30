@@ -1,4 +1,12 @@
 <?php
+/**
+ *
+ * @author forecho <caizhenghai@gmail.com>
+ * @link https://cashwarden.com/
+ * @copyright Copyright (c) 2020-2022 forecho
+ * @license https://github.com/cashwarden/api/blob/master/LICENSE.md
+ * @version 1.0.0
+ */
 
 namespace app\modules\v1\controllers;
 
@@ -43,7 +51,7 @@ class WechatController extends ActiveController
 
         return [
             'user' => $user,
-            'token' => (string)$token,
+            'token' => (string) $token,
             'default_ledger' => LedgerService::getDefaultLedger($authClient->user_id),
         ];
     }

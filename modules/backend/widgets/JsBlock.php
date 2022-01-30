@@ -1,4 +1,12 @@
 <?php
+/**
+ *
+ * @author forecho <caizhenghai@gmail.com>
+ * @link https://cashwarden.com/
+ * @copyright Copyright (c) 2020-2022 forecho
+ * @license https://github.com/cashwarden/api/blob/master/LICENSE.md
+ * @version 1.0.0
+ */
 
 namespace app\modules\backend\widgets;
 
@@ -26,7 +34,7 @@ class JsBlock extends Block
     {
         $block = ob_get_clean();
         if ($this->renderInPlace) {
-            throw new \Exception("not implemented yet ! ");
+            throw new \Exception('not implemented yet ! ');
             // echo $block;
         }
         $block = trim($block);

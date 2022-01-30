@@ -1,4 +1,12 @@
 <?php
+/**
+ *
+ * @author forecho <caizhenghai@gmail.com>
+ * @link https://cashwarden.com/
+ * @copyright Copyright (c) 2020-2022 forecho
+ * @license https://github.com/cashwarden/api/blob/master/LICENSE.md
+ * @version 1.0.0
+ */
 
 namespace app\core\models;
 
@@ -48,7 +56,7 @@ use yiier\validators\MoneyValidator;
 class Transaction extends \yii\db\ActiveRecord
 {
     /**
-     * @var integer
+     * @var int
      */
     public $amount;
 
@@ -68,7 +76,7 @@ class Transaction extends \yii\db\ActiveRecord
     public $reimbursement_status;
 
     /**
-     * @var integer
+     * @var int
      */
     public $currency_amount;
 
@@ -109,7 +117,7 @@ class Transaction extends \yii\db\ActiveRecord
         return [
             [
                 'class' => TimestampBehavior::class,
-                'value' => Yii::$app->formatter->asDatetime('now')
+                'value' => Yii::$app->formatter->asDatetime('now'),
             ],
         ];
     }
@@ -127,7 +135,7 @@ class Transaction extends \yii\db\ActiveRecord
                 'on' => [
                     TransactionType::getName(TransactionType::INCOME),
                     TransactionType::getName(TransactionType::TRANSFER),
-                ]
+                ],
             ],
             [
                 'from_account_id',
@@ -135,7 +143,7 @@ class Transaction extends \yii\db\ActiveRecord
                 'on' => [
                     TransactionType::getName(TransactionType::EXPENSE),
                     TransactionType::getName(TransactionType::TRANSFER),
-                ]
+                ],
             ],
             [
                 [
@@ -146,9 +154,9 @@ class Transaction extends \yii\db\ActiveRecord
                     'category_id',
                     'amount_cent',
                     'currency_amount_cent',
-                    'rating'
+                    'rating',
                 ],
-                'integer'
+                'integer',
             ],
             [
                 'ledger_id',
@@ -165,7 +173,7 @@ class Transaction extends \yii\db\ActiveRecord
                 'compare',
                 'compareValue' => 0,
                 'operator' => '>',
-                'message' => Yii::t('app', 'Accounting failed, the amount must be greater than 0.')
+                'message' => Yii::t('app', 'Accounting failed, the amount must be greater than 0.'),
             ],
             [['amount', 'currency_amount'], MoneyValidator::class], //todo message
 
@@ -220,9 +228,9 @@ class Transaction extends \yii\db\ActiveRecord
             if ($insert) {
                 $this->user_id = Yii::$app->user->id;
             }
-            $this->reimbursement_status = is_null($this->reimbursement_status) ?
+            $this->reimbursement_status = $this->reimbursement_status === null ?
                 ReimbursementStatus::NONE : ReimbursementStatus::toEnumValue($this->reimbursement_status);
-            $this->status = is_null($this->status) ?
+            $this->status = $this->status === null ?
                 TransactionStatus::DONE : TransactionStatus::toEnumValue($this->status);
             $this->type = TransactionType::toEnumValue($this->type);
 
@@ -236,16 +244,15 @@ class Transaction extends \yii\db\ActiveRecord
             $this->tags ? TransactionService::createTags($this->tags, $this->ledger_id) : null;
             if ($this->description) {
                 $this->tags = array_merge(
-                    (array)$this->tags,
+                    (array) $this->tags,
                     TransactionService::matchTagsByDesc($this->description, $this->ledger_id)
                 );
             }
 
             $this->tags = $this->tags ? implode(',', array_unique($this->tags)) : null;
             return true;
-        } else {
-            return false;
         }
+        return false;
     }
 
 

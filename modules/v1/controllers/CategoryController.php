@@ -1,4 +1,12 @@
 <?php
+/**
+ *
+ * @author forecho <caizhenghai@gmail.com>
+ * @link https://cashwarden.com/
+ * @copyright Copyright (c) 2020-2022 forecho
+ * @license https://github.com/cashwarden/api/blob/master/LICENSE.md
+ * @version 1.0.0
+ */
 
 namespace app\modules\v1\controllers;
 
@@ -10,7 +18,7 @@ use app\core\types\AnalysisDateType;
 use app\core\types\TransactionType;
 
 /**
- * Category controller for the `v1` module
+ * Category controller for the `v1` module.
  */
 class CategoryController extends ActiveController
 {

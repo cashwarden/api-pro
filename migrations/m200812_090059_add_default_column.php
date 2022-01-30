@@ -1,9 +1,17 @@
 <?php
+/**
+ *
+ * @author forecho <caizhenghai@gmail.com>
+ * @link https://cashwarden.com/
+ * @copyright Copyright (c) 2020-2022 forecho
+ * @license https://github.com/cashwarden/api/blob/master/LICENSE.md
+ * @version 1.0.0
+ */
 
 use yii\db\Migration;
 
 /**
- * Class m200812_090059_add_default_column
+ * Class m200812_090059_add_default_column.
  */
 class m200812_090059_add_default_column extends Migration
 {

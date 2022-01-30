@@ -1,4 +1,12 @@
 <?php
+/**
+ *
+ * @author forecho <caizhenghai@gmail.com>
+ * @link https://cashwarden.com/
+ * @copyright Copyright (c) 2020-2022 forecho
+ * @license https://github.com/cashwarden/api/blob/master/LICENSE.md
+ * @version 1.0.0
+ */
 
 namespace app\modules\backend\controllers;
 
@@ -10,9 +18,8 @@ use yii\web\Response;
 
 class SiteController extends \yii\web\Controller
 {
-
     /**
-     * Renders the index view for the module
+     * Renders the index view for the module.
      * @return Response|string
      * @throws \Exception
      */

@@ -1,4 +1,12 @@
 <?php
+/**
+ *
+ * @author forecho <caizhenghai@gmail.com>
+ * @link https://cashwarden.com/
+ * @copyright Copyright (c) 2020-2022 forecho
+ * @license https://github.com/cashwarden/api/blob/master/LICENSE.md
+ * @version 1.0.0
+ */
 
 namespace app\modules\v1\controllers;
 
@@ -22,7 +30,6 @@ use yiier\helpers\SearchModel;
 use yiier\helpers\Setup;
 
 /**
- *
  * @property-read int $pageSize
  */
 class ActiveController extends \yii\rest\ActiveController
@@ -35,7 +42,7 @@ class ActiveController extends \yii\rest\ActiveController
     public array $relations = [];
 
     /**
-     * 不参与校验的 actions
+     * 不参与校验的 actions.
      * @var array
      */
     public array $noAuthActions = [];
@@ -59,7 +66,7 @@ class ActiveController extends \yii\rest\ActiveController
                 'Access-Control-Request-Method' => ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
                 'Access-Control-Request-Headers' => ['*'],
                 'Access-Control-Max-Age' => 86400,
-            ]
+            ],
         ];
         $behaviors['authenticator'] = [
             'class' => JwtHttpBearerAuth::class,
@@ -95,7 +102,7 @@ class ActiveController extends \yii\rest\ActiveController
             'relations' => $this->relations,
             'scenario' => 'default',
             'partialMatchAttributes' => $this->partialMatchAttributes,
-            'pageSize' => $this->getPageSize()
+            'pageSize' => $this->getPageSize(),
         ]);
 
         $params = $this->formatParams(Yii::$app->request->queryParams);
@@ -129,7 +136,7 @@ class ActiveController extends \yii\rest\ActiveController
      */
     protected function getPageSize()
     {
-        if ($pageSize = (int)request('pageSize')) {
+        if ($pageSize = (int) request('pageSize')) {
             if ($pageSize < self::MAX_PAGE_SIZE) {
                 return $pageSize;
             }

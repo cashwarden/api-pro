@@ -1,4 +1,12 @@
 <?php
+/**
+ *
+ * @author forecho <caizhenghai@gmail.com>
+ * @link https://cashwarden.com/
+ * @copyright Copyright (c) 2020-2022 forecho
+ * @license https://github.com/cashwarden/api/blob/master/LICENSE.md
+ * @version 1.0.0
+ */
 
 namespace app\core\services;
 
@@ -22,7 +30,7 @@ use yiier\helpers\Setup;
 class FixDataService
 {
     /**
-     * 修复历史数据账本问题
+     * 修复历史数据账本问题.
      * @throws \yii\db\Exception|InvalidArgumentException
      */
     public static function initLedger()
@@ -49,7 +57,7 @@ class FixDataService
                 Rule::updateAll(['ledger_id' => $model->id], ['user_id' => $userId, 'ledger_id' => null]);
                 $transaction->commit();
             } catch (\Exception $e) {
-                Yii::error('修复历史数据账本失败', (string)$e);
+                Yii::error('修复历史数据账本失败', (string) $e);
                 $transaction->rollBack();
                 throw $e;
             }
@@ -76,63 +84,63 @@ class FixDataService
                         'color' => ColorType::RED,
                         'icon_name' => 'food',
                         'transaction_type' => TransactionType::EXPENSE,
-                        'default' => Category::NOT_DEFAULT
+                        'default' => Category::NOT_DEFAULT,
                     ],
                     [
                         'name' => Yii::t('app', 'Home life'),
                         'color' => ColorType::ORANGE,
                         'icon_name' => 'home',
                         'transaction_type' => TransactionType::EXPENSE,
-                        'default' => Category::NOT_DEFAULT
+                        'default' => Category::NOT_DEFAULT,
                     ],
                     [
                         'name' => Yii::t('app', 'Traffic'),
                         'color' => ColorType::BLUE,
                         'icon_name' => 'bus',
                         'transaction_type' => TransactionType::EXPENSE,
-                        'default' => Category::NOT_DEFAULT
+                        'default' => Category::NOT_DEFAULT,
                     ],
                     [
                         'name' => Yii::t('app', 'Recreation'),
                         'color' => ColorType::VOLCANO,
                         'icon_name' => 'game',
                         'transaction_type' => TransactionType::EXPENSE,
-                        'default' => Category::NOT_DEFAULT
+                        'default' => Category::NOT_DEFAULT,
                     ],
                     [
                         'name' => Yii::t('app', 'Health care'),
                         'color' => ColorType::GREEN,
                         'icon_name' => 'medicine-chest',
                         'transaction_type' => TransactionType::EXPENSE,
-                        'default' => Category::NOT_DEFAULT
+                        'default' => Category::NOT_DEFAULT,
                     ],
                     [
                         'name' => Yii::t('app', 'Clothes'),
                         'color' => ColorType::PURPLE,
                         'icon_name' => 'clothes',
                         'transaction_type' => TransactionType::EXPENSE,
-                        'default' => Category::NOT_DEFAULT
+                        'default' => Category::NOT_DEFAULT,
                     ],
                     [
                         'name' => Yii::t('app', 'Cultural education'),
                         'color' => ColorType::CYAN,
                         'icon_name' => 'education',
                         'transaction_type' => TransactionType::EXPENSE,
-                        'default' => Category::NOT_DEFAULT
+                        'default' => Category::NOT_DEFAULT,
                     ],
                     [
                         'name' => Yii::t('app', 'Investment expenditure'),
                         'color' => ColorType::GOLD,
                         'icon_name' => 'investment',
                         'transaction_type' => TransactionType::EXPENSE,
-                        'default' => Category::NOT_DEFAULT
+                        'default' => Category::NOT_DEFAULT,
                     ],
                     [
                         'name' => Yii::t('app', 'Childcare'),
                         'color' => ColorType::LIME,
                         'icon_name' => 'baby',
                         'transaction_type' => TransactionType::EXPENSE,
-                        'default' => Category::NOT_DEFAULT
+                        'default' => Category::NOT_DEFAULT,
                     ],
                     [
                         'name' => Yii::t('app', 'Other expenses'),
@@ -146,14 +154,14 @@ class FixDataService
                         'color' => ColorType::BLUE,
                         'icon_name' => 'work',
                         'transaction_type' => TransactionType::INCOME,
-                        'default' => Category::NOT_DEFAULT
+                        'default' => Category::NOT_DEFAULT,
                     ],
                     [
                         'name' => Yii::t('app', 'Investment income'),
                         'color' => ColorType::GOLD,
                         'icon_name' => 'investment',
                         'transaction_type' => TransactionType::INCOME,
-                        'default' => Category::NOT_DEFAULT
+                        'default' => Category::NOT_DEFAULT,
                     ],
                     [
                         'name' => Yii::t('app', 'Other income'),

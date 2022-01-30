@@ -1,4 +1,12 @@
 <?php
+/**
+ *
+ * @author forecho <caizhenghai@gmail.com>
+ * @link https://cashwarden.com/
+ * @copyright Copyright (c) 2020-2022 forecho
+ * @license https://github.com/cashwarden/api/blob/master/LICENSE.md
+ * @version 1.0.0
+ */
 
 namespace app\modules\backend\widgets;
 
@@ -6,7 +14,7 @@ use Yii;
 
 /**
  * Alert widget renders a message from session flash. All flash messages are displayed
- * in the sequence they were assigned using setFlash. You can set message as following:
+ * in the sequence they were assigned using setFlash. You can set message as following:.
  *
  * ```php
  * Yii::$app->session->setFlash('error', 'This is the message');
@@ -36,7 +44,7 @@ class Alert extends \yii\bootstrap5\Widget
         'danger' => 'alert-danger',
         'success' => 'alert-success',
         'info' => 'alert-info',
-        'warning' => 'alert-warning'
+        'warning' => 'alert-warning',
     ];
     /**
      * @var array the options for rendering the close button tag.
@@ -59,7 +67,7 @@ class Alert extends \yii\bootstrap5\Widget
                 continue;
             }
 
-            foreach ((array)$flash as $i => $message) {
+            foreach ((array) $flash as $i => $message) {
                 echo \yii\bootstrap5\Alert::widget([
                     'body' => $message,
                     'closeButton' => $this->closeButton,

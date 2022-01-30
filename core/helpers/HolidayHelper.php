@@ -1,10 +1,17 @@
 <?php
+/**
+ *
+ * @author forecho <caizhenghai@gmail.com>
+ * @link https://cashwarden.com/
+ * @copyright Copyright (c) 2020-2022 forecho
+ * @license https://github.com/cashwarden/api/blob/master/LICENSE.md
+ * @version 1.0.0
+ */
 
 namespace app\core\helpers;
 
 use app\core\exceptions\ThirdPartyServiceErrorException;
 use app\core\traits\SendRequestTrait;
-use yiier\graylog\Log;
 
 class HolidayHelper
 {
@@ -20,7 +27,6 @@ class HolidayHelper
     {
         $baseUrl = 'http://timor.tech/api/holiday/workday/next';
         /** @var HolidayHelper $self */
-
         try {
             $self = \Yii::createObject(self::class);
             $response = $self->sendRequest('GET', $baseUrl);
@@ -30,7 +36,7 @@ class HolidayHelper
             }
         } catch (\Throwable $e) {
             self::$times++;
-            Log::error('holiday-error', [$response ?? [], self::$times, (string)$e]);
+            \Yii::error('holiday-error', [$response ?? [], self::$times, (string) $e]);
             if (self::$times > 3) {
                 throw new ThirdPartyServiceErrorException();
             }

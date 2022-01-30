@@ -1,4 +1,12 @@
 <?php
+/**
+ *
+ * @author forecho <caizhenghai@gmail.com>
+ * @link https://cashwarden.com/
+ * @copyright Copyright (c) 2020-2022 forecho
+ * @license https://github.com/cashwarden/api/blob/master/LICENSE.md
+ * @version 1.0.0
+ */
 
 namespace app\core\services;
 
@@ -62,7 +70,7 @@ class TelegramService extends BaseObject
                 $user = $this->userService->getUserByResetToken($token);
                 $expand = [
                     'client_username' => $message->getFrom()->getUsername() ?: $message->getFrom()->getFirstName(),
-                    'client_id' => (string)$message->getFrom()->getId(),
+                    'client_id' => (string) $message->getFrom()->getId(),
                     'data' => $message->toJson(),
                 ];
                 UserService::findOrCreateAuthClient($user->id, AuthClientType::TELEGRAM, $expand);
@@ -137,9 +145,9 @@ class TelegramService extends BaseObject
             $text .= $categoryMap[$record->category_id] . '|';
             $text .= $record->account->name . '|';
             $text .= $record->direction == DirectionType::EXPENSE ? '-' : '';
-            $text .= Setup::toYuan($record->amount_cent) . "|";
+            $text .= Setup::toYuan($record->amount_cent) . '|';
             $transaction = $record->transaction;
-            $remark = $transaction->remark ? "（{$transaction->remark}）" : "";
+            $remark = $transaction->remark ? "（{$transaction->remark}）" : '';
             $text .= "{$transaction->description}$remark\n";
         }
 
@@ -161,7 +169,7 @@ class TelegramService extends BaseObject
                 'text' => '🚮删除',
                 'callback_data' => Json::encode([
                     'action' => TelegramAction::TRANSACTION_DELETE,
-                    'id' => $model->id
+                    'id' => $model->id,
                 ]),
             ],
             [
@@ -169,7 +177,7 @@ class TelegramService extends BaseObject
                 'callback_data' => Json::encode([
                     'action' => TelegramAction::TRANSACTION_RATING,
                     'id' => $model->id,
-                    'value' => TransactionRating::MUST
+                    'value' => TransactionRating::MUST,
                 ]),
             ],
             [
@@ -177,7 +185,7 @@ class TelegramService extends BaseObject
                 'callback_data' => Json::encode([
                     'action' => TelegramAction::TRANSACTION_RATING,
                     'id' => $model->id,
-                    'value' => TransactionRating::NEED
+                    'value' => TransactionRating::NEED,
                 ]),
             ],
             [
@@ -185,9 +193,9 @@ class TelegramService extends BaseObject
                 'callback_data' => Json::encode([
                     'action' => TelegramAction::TRANSACTION_RATING,
                     'id' => $model->id,
-                    'value' => TransactionRating::WANT
+                    'value' => TransactionRating::WANT,
                 ]),
-            ]
+            ],
         ];
 
         return new InlineKeyboardMarkup([$items]);
@@ -198,7 +206,6 @@ class TelegramService extends BaseObject
      * @param int|null $chatId
      * @param null $keyboard
      * @param int $userId
-     * @return void
      */
     public function sendMessage(string $messageText, int $chatId = null, $keyboard = null, int $userId = 0): void
     {
@@ -206,7 +213,7 @@ class TelegramService extends BaseObject
         if (!$chatId) {
             $telegram = AuthClient::find()->select('data')->where([
                 'user_id' => $userId,
-                'type' => AuthClientType::TELEGRAM
+                'type' => AuthClientType::TELEGRAM,
             ])->scalar();
             if (!$telegram) {
                 return;
@@ -218,7 +225,7 @@ class TelegramService extends BaseObject
             }
         }
 
-        $bot = TelegramService::newClient();
+        $bot = self::newClient();
         // 重试五次
         for ($i = 0; $i < 5; $i++) {
             /** @var BotApi $bot */
@@ -226,7 +233,7 @@ class TelegramService extends BaseObject
                 $bot->sendMessage($chatId, $messageText, null, false, null, $keyboard);
                 break;
             } catch (Exception $e) {
-                Log::error('发送 telegram 消息失败', [$messageText, (string)$e]);
+                Log::error('发送 telegram 消息失败', [$messageText, (string) $e]);
             }
         }
     }
@@ -266,7 +273,6 @@ class TelegramService extends BaseObject
     /**
      * @param int $userId
      * @param string $type
-     * @return void
      * @throws \Exception
      */
     public function sendReport(int $userId, string $type): void
@@ -312,7 +318,7 @@ class TelegramService extends BaseObject
                     'action' => TelegramAction::FIND_CATEGORY_RECORDS,
                     'ledger_id' => $model->ledger_id,
                     'category_id' => $model->category_id,
-                    'page' => $page
+                    'page' => $page,
                 ]),
             ],
         ];
@@ -327,7 +333,7 @@ class TelegramService extends BaseObject
                 'text' => '🚮删除',
                 'callback_data' => Json::encode([
                     'action' => TelegramAction::RECORD_DELETE,
-                    'id' => $record->id
+                    'id' => $record->id,
                 ]),
             ],
             [
@@ -361,7 +367,7 @@ class TelegramService extends BaseObject
                     Log::warning('telegram callback error', $message->getData());
                     return;
                 }
-                $bot->answerCallbackQuery($message->getId(), "Loading...");
+                $bot->answerCallbackQuery($message->getId(), 'Loading...');
                 switch (data_get($data, 'action')) {
                     case TelegramAction::TRANSACTION_DELETE:
                         $this->transactionDelete($message, $bot, $data);
@@ -376,7 +382,7 @@ class TelegramService extends BaseObject
                         $this->transactionRating($message, $bot, $data);
                         break;
                     default:
-                        # code...
+                        // code...
                         break;
                 }
             }
@@ -397,7 +403,7 @@ class TelegramService extends BaseObject
                 $bot->editMessageText($chatId, $message->getMessage()->getMessageId(), $text);
             } catch (Throwable $e) {
                 $transaction->rollBack();
-                Log::error('删除记录失败', ['model' => $model->attributes, 'e' => (string)$e]);
+                Log::error('删除记录失败', ['model' => $model->attributes, 'e' => (string) $e]);
             }
         } else {
             $text = '删除失败，记录已被删除或者不存在';
@@ -424,7 +430,7 @@ class TelegramService extends BaseObject
                 $transaction->rollBack();
                 Log::error(
                     '删除记录失败',
-                    ['message' => $message->toJson(), 'model' => $model->attributes, 'e' => (string)$e]
+                    ['message' => $message->toJson(), 'model' => $model->attributes, 'e' => (string) $e]
                 );
             }
         } else {
@@ -485,7 +491,7 @@ class TelegramService extends BaseObject
                 TelegramKeyword::TODAY,
                 TelegramKeyword::YESTERDAY,
                 TelegramKeyword::LAST_MONTH,
-                TelegramKeyword::CURRENT_MONTH
+                TelegramKeyword::CURRENT_MONTH,
             ];
             if ($msg && in_array($msg->getText(), $report)) {
                 return true;
@@ -497,7 +503,7 @@ class TelegramService extends BaseObject
     public function passwordReset(Client $bot)
     {
         $bot->command(ltrim(TelegramKeyword::PASSWORD_RESET, '/'), function (Message $message) use ($bot) {
-            $text = "您还未绑定账号，请先访问「个人设置」中的「账号绑定」进行绑定账号，然后才能使用此功能。";
+            $text = '您还未绑定账号，请先访问「个人设置」中的「账号绑定」进行绑定账号，然后才能使用此功能。';
             $user = $this->userService->getUserByClientId(
                 AuthClientType::TELEGRAM,
                 $message->getFrom()->getId()
@@ -517,7 +523,7 @@ class TelegramService extends BaseObject
     public function start(Client $bot)
     {
         $bot->command(ltrim(TelegramKeyword::START, '/'), function (Message $message) use ($bot) {
-            $text = "您还未绑定账号，请先访问「个人设置」中的「账号绑定」进行绑定账号，然后才能快速记账。";
+            $text = '您还未绑定账号，请先访问「个人设置」中的「账号绑定」进行绑定账号，然后才能快速记账。';
             $user = $this->userService->getUserByClientId(
                 AuthClientType::TELEGRAM,
                 $message->getFrom()->getId()
@@ -538,7 +544,7 @@ class TelegramService extends BaseObject
     public static function setMyCommands()
     {
         /** @var BotApi $bot */
-        $bot = TelegramService::newClient();
+        $bot = self::newClient();
         $commands = [];
         foreach (TelegramKeyword::commands() as $key => $value) {
             array_push($commands, ['command' => $key, 'description' => $value]);

@@ -1,4 +1,12 @@
 <?php
+/**
+ *
+ * @author forecho <caizhenghai@gmail.com>
+ * @link https://cashwarden.com/
+ * @copyright Copyright (c) 2020-2022 forecho
+ * @license https://github.com/cashwarden/api/blob/master/LICENSE.md
+ * @version 1.0.0
+ */
 
 namespace app\core\requests;
 
@@ -24,7 +32,7 @@ class JoinConfirm extends Model
                 'exist',
                 'targetClass' => User::class,
                 'targetAttribute' => 'password_reset_token',
-                'message' => \Yii::t('app', 'The Token is not valid.')
+                'message' => \Yii::t('app', 'The Token is not valid.'),
             ],
         ];
     }

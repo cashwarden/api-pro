@@ -1,9 +1,17 @@
 <?php
+/**
+ *
+ * @author forecho <caizhenghai@gmail.com>
+ * @link https://cashwarden.com/
+ * @copyright Copyright (c) 2020-2022 forecho
+ * @license https://github.com/cashwarden/api/blob/master/LICENSE.md
+ * @version 1.0.0
+ */
 
 use yii\db\Migration;
 
 /**
- * Class m201102_072500_add_ledger_id
+ * Class m201102_072500_add_ledger_id.
  */
 class m201102_072500_add_ledger_id extends Migration
 {

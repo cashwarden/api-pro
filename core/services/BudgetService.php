@@ -1,4 +1,12 @@
 <?php
+/**
+ *
+ * @author forecho <caizhenghai@gmail.com>
+ * @link https://cashwarden.com/
+ * @copyright Copyright (c) 2020-2022 forecho
+ * @license https://github.com/cashwarden/api/blob/master/LICENSE.md
+ * @version 1.0.0
+ */
 
 namespace app\core\services;
 
@@ -83,7 +91,7 @@ class BudgetService extends BaseObject
                 if (!$model->save(false)) {
                     throw new Exception(Setup::errorMessage($model->firstErrors));
                 }
-                # code...
+                // code...
                 break;
         }
         // 计算预算
@@ -114,7 +122,7 @@ class BudgetService extends BaseObject
             $query = Transaction::find()
                 ->where($baseConditions + ['type' => $budgetConfig->transaction_type])
                 ->andWhere(['between', 'date', $budget->started_at, $budget->ended_at])
-                ->andFilterWhere(['ledger_id' => $budgetConfig->ledger_id, 'category_id' => $categoryIds,]);
+                ->andFilterWhere(['ledger_id' => $budgetConfig->ledger_id, 'category_id' => $categoryIds]);
             if ($tag = $budgetConfig->include_tags) {
                 $query->andWhere(new Expression('FIND_IN_SET(:tag, tags)'))
                     ->addParams([':tag' => $tag]);
@@ -128,7 +136,7 @@ class BudgetService extends BaseObject
                     ->where(['user_id' => $budgetConfig->user_id])
                     ->andWhere([
                         'transaction_id' => array_map('intval', $query->column()),
-                        'exclude_from_stats' => (int)false,
+                        'exclude_from_stats' => (int) false,
                         'reimbursement_status' => [ReimbursementStatus::NONE, ReimbursementStatus::TODO],
                     ]);
                 $recordIds = $recordQuery->column();

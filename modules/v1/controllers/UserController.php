@@ -1,4 +1,12 @@
 <?php
+/**
+ *
+ * @author forecho <caizhenghai@gmail.com>
+ * @link https://cashwarden.com/
+ * @copyright Copyright (c) 2020-2022 forecho
+ * @license https://github.com/cashwarden/api/blob/master/LICENSE.md
+ * @version 1.0.0
+ */
 
 namespace app\modules\v1\controllers;
 
@@ -23,7 +31,7 @@ use yii\base\Exception;
 use yiier\helpers\Setup;
 
 /**
- * User controller for the `v1` module
+ * User controller for the `v1` module.
  */
 class UserController extends ActiveController
 {
@@ -62,7 +70,7 @@ class UserController extends ActiveController
             $token = $this->userService->getToken();
             return [
                 'user' => $user,
-                'token' => (string)$token,
+                'token' => (string) $token,
                 'default_ledger' => LedgerService::getDefaultLedger($user->id),
             ];
         });
@@ -86,7 +94,7 @@ class UserController extends ActiveController
 
         return [
             'user' => $user,
-            'token' => (string)$token,
+            'token' => (string) $token,
             'default_ledger' => LedgerService::getDefaultLedger($user->id),
         ];
     }
@@ -97,7 +105,7 @@ class UserController extends ActiveController
         $token = $this->userService->getToken();
         return [
             'user' => $user,
-            'token' => (string)$token,
+            'token' => (string) $token,
             'default_ledger' => LedgerService::getDefaultLedger($user->id),
         ];
     }
@@ -113,7 +121,7 @@ class UserController extends ActiveController
         $this->userService->setPasswordResetToken($user);
         return [
             'reset_token' => $user->password_reset_token,
-            'expire_in' => params('userPasswordResetTokenExpire')
+            'expire_in' => params('userPasswordResetTokenExpire'),
         ];
     }
 
@@ -177,7 +185,7 @@ class UserController extends ActiveController
     }
 
     /**
-     * Process password reset request
+     * Process password reset request.
      *
      * @return string
      * @throws Exception
@@ -193,7 +201,7 @@ class UserController extends ActiveController
     }
 
     /**
-     * Verify password reset token
+     * Verify password reset token.
      * @return string
      * @throws InvalidArgumentException
      */
@@ -206,7 +214,7 @@ class UserController extends ActiveController
     }
 
     /**
-     * Process user sign-up confirmation
+     * Process user sign-up confirmation.
      *
      * @return array
      * @throws InvalidArgumentException|\Throwable
@@ -221,13 +229,13 @@ class UserController extends ActiveController
         $token = $this->userService->getToken();
         return [
             'user' => $user,
-            'token' => (string)$token,
+            'token' => (string) $token,
             'default_ledger' => LedgerService::getDefaultLedger($user->id),
         ];
     }
 
     /**
-     * Process password reset
+     * Process password reset.
      * @return bool
      * @throws InvalidArgumentException|Exception
      */

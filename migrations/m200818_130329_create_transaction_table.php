@@ -1,4 +1,12 @@
 <?php
+/**
+ *
+ * @author forecho <caizhenghai@gmail.com>
+ * @link https://cashwarden.com/
+ * @copyright Copyright (c) 2020-2022 forecho
+ * @license https://github.com/cashwarden/api/blob/master/LICENSE.md
+ * @version 1.0.0
+ */
 
 use yii\db\Migration;
 
@@ -36,7 +44,7 @@ class m200818_130329_create_transaction_table extends Migration
 
         $this->createIndex('transaction_user_id', '{{%transaction}}', 'user_id');
 
-        $this->execute("ALTER TABLE {{%transaction}} ADD FULLTEXT INDEX `full_text` (`description`, `tags`, `remark`)");
+        $this->execute('ALTER TABLE {{%transaction}} ADD FULLTEXT INDEX `full_text` (`description`, `tags`, `remark`)');
     }
 
     /**

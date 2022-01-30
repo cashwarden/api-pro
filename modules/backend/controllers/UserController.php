@@ -1,4 +1,12 @@
 <?php
+/**
+ *
+ * @author forecho <caizhenghai@gmail.com>
+ * @link https://cashwarden.com/
+ * @copyright Copyright (c) 2020-2022 forecho
+ * @license https://github.com/cashwarden/api/blob/master/LICENSE.md
+ * @version 1.0.0
+ */
 
 namespace app\modules\backend\controllers;
 
@@ -33,7 +41,7 @@ class UserController extends Controller
             'pagination' => [
                 'pageSize' => 20,
             ],
-            'sort' => ['defaultOrder' => ['id' => SORT_DESC]]
+            'sort' => ['defaultOrder' => ['id' => SORT_DESC]],
         ]);
 
         return $this->render('index', [
@@ -73,7 +81,7 @@ class UserController extends Controller
     /**
      * Finds the Resource model based on its primary key value.
      * If the model is not found, a 404 HTTP exception will be thrown.
-     * @param integer $id
+     * @param int $id
      * @return User the loaded model
      * @throws NotFoundHttpException if the model cannot be found
      */

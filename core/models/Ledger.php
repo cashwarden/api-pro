@@ -1,4 +1,12 @@
 <?php
+/**
+ *
+ * @author forecho <caizhenghai@gmail.com>
+ * @link https://cashwarden.com/
+ * @copyright Copyright (c) 2020-2022 forecho
+ * @license https://github.com/cashwarden/api/blob/master/LICENSE.md
+ * @version 1.0.0
+ */
 
 namespace app\core\models;
 
@@ -56,7 +64,7 @@ class Ledger extends \yii\db\ActiveRecord
         return [
             [
                 'class' => TimestampBehavior::class,
-                'value' => Yii::$app->formatter->asDatetime('now')
+                'value' => Yii::$app->formatter->asDatetime('now'),
             ],
         ];
     }
@@ -125,9 +133,8 @@ class Ledger extends \yii\db\ActiveRecord
                 }
             }
             return true;
-        } else {
-            return false;
         }
+        return false;
     }
 
     /**
@@ -192,11 +199,11 @@ class Ledger extends \yii\db\ActiveRecord
         };
 
         $fields['default'] = function (self $model) {
-            return (bool)$model->default;
+            return (bool) $model->default;
         };
 
         $fields['creator'] = function (self $model) {
-            return (bool)($model->user_id == Yii::$app->user->id);
+            return (bool) ($model->user_id == Yii::$app->user->id);
         };
 
         $fields['created_at'] = function (self $model) {

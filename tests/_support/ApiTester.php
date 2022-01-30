@@ -1,7 +1,15 @@
 <?php
+/**
+ *
+ * @author forecho <caizhenghai@gmail.com>
+ * @link https://cashwarden.com/
+ * @copyright Copyright (c) 2020-2022 forecho
+ * @license https://github.com/cashwarden/api/blob/master/LICENSE.md
+ * @version 1.0.0
+ */
 
 /**
- * Inherited Methods
+ * Inherited Methods.
  * @method void wantToTest($text)
  * @method void wantTo($text)
  * @method void execute($callable)
@@ -21,6 +29,6 @@ class ApiTester extends \Codeception\Actor
     use _generated\ApiTesterActions;
 
     /**
-     * Define custom actions here
+     * Define custom actions here.
      */
 }

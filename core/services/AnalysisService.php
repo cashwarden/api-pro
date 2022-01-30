@@ -1,4 +1,12 @@
 <?php
+/**
+ *
+ * @author forecho <caizhenghai@gmail.com>
+ * @link https://cashwarden.com/
+ * @copyright Copyright (c) 2020-2022 forecho
+ * @license https://github.com/cashwarden/api/blob/master/LICENSE.md
+ * @version 1.0.0
+ */
 
 namespace app\core\services;
 
@@ -19,7 +27,6 @@ use yiier\helpers\DateHelper;
 use yiier\helpers\Setup;
 
 /**
- *
  * @property-read array $recordOverview
  */
 class AnalysisService extends BaseObject
@@ -35,7 +42,7 @@ class AnalysisService extends BaseObject
         $data = [];
         $texts = AnalysisDateType::texts();
         foreach ($items as $item) {
-            $date = AnalysisService::getDateRange($item);
+            $date = self::getDateRange($item);
             $data[$item]['overview'] = $this->getRecordOverviewByDate($date, $params);
             $data[$item]['key'] = $item;
             $data[$item]['text'] = $texts[$item];
@@ -63,16 +70,16 @@ class AnalysisService extends BaseObject
             ->andWhere(['direction' => DirectionType::INCOME])
             ->andWhere($conditions)
             ->sum('amount_cent');
-        $items['income'] = $sum ? (float)Setup::toYuan($sum) : 0;
+        $items['income'] = $sum ? (float) Setup::toYuan($sum) : 0;
 
         $sum = Record::find()
             ->where($baseConditions)
             ->andWhere(['direction' => DirectionType::EXPENSE])
             ->andWhere($conditions)
             ->sum('amount_cent');
-        $items['expense'] = $sum ? (float)Setup::toYuan($sum) : 0;
+        $items['expense'] = $sum ? (float) Setup::toYuan($sum) : 0;
 
-        $items['surplus'] = (float)bcsub($items['income'], $items['expense'], 2);
+        $items['surplus'] = (float) bcsub($items['income'], $items['expense'], 2);
 
         return $items;
     }
@@ -118,8 +125,8 @@ class AnalysisService extends BaseObject
             if ($sumCent) {
                 $item = [
                     'name' => $category['name'],
-                    'value' => (float)Setup::toYuan($sumCent),
-                    'percent' => (bcdiv($sumCent, $totalCent, 4) * 100) . '%'
+                    'value' => (float) Setup::toYuan($sumCent),
+                    'percent' => (bcdiv($sumCent, $totalCent, 4) * 100) . '%',
                 ];
                 array_push($items, $item);
             }
@@ -127,7 +134,7 @@ class AnalysisService extends BaseObject
 
         return [
             'items' => ArrayHelper::sort2DArray($items, 'value', 'DESC'),
-            'total' => (float)Setup::toYuan($totalCent)
+            'total' => (float) Setup::toYuan($totalCent),
         ];
     }
 
@@ -153,12 +160,12 @@ class AnalysisService extends BaseObject
 
         $items = [];
         foreach ($dates as $key => $date) {
-            $items[$key]['x'] = sprintf("%02d", $key + 1);
+            $items[$key]['x'] = sprintf('%02d', $key + 1);
             $sum = Record::find()
                 ->where($baseConditions)
                 ->andWhere(['between', 'date', $date[0], $date[1]])
                 ->sum('amount_cent');
-            $items[$key]['y'] = $sum ? (float)Setup::toYuan($sum) : 0;
+            $items[$key]['y'] = $sum ? (float) Setup::toYuan($sum) : 0;
         }
         return $items;
     }
@@ -188,8 +195,8 @@ class AnalysisService extends BaseObject
                 break;
             case AnalysisDateType::LAST_WEEK:
                 $date = [
-                    DateHelper::beginTimestamp(strtotime("last week monday")),
-                    DateHelper::endTimestamp(strtotime("last week sunday"))
+                    DateHelper::beginTimestamp(strtotime('last week monday')),
+                    DateHelper::endTimestamp(strtotime('last week sunday')),
                 ];
                 break;
             case AnalysisDateType::CURRENT_MONTH:
@@ -222,7 +229,7 @@ class AnalysisService extends BaseObject
             $data = $this->getBaseQuery($params)
                 ->select([
                     'category_id',
-                    'SUM(amount_cent) AS amount_cent'
+                    'SUM(amount_cent) AS amount_cent',
                 ])
                 ->andWhere(['transaction_type' => $type])
                 ->groupBy('category_id')
@@ -234,12 +241,12 @@ class AnalysisService extends BaseObject
             foreach ($data as $value) {
                 $v['category_id'] = $value['category_id'];
                 $v['category_name'] = data_get($categoriesMap, $value['category_id'], 0);
-                $v['amount'] = (float)Setup::toYuan($value['amount_cent']);
+                $v['amount'] = (float) Setup::toYuan($value['amount_cent']);
                 $items['total'][$k] += $v['amount'];
                 $items[$k][] = $v;
             }
         }
-        $items['total']['surplus'] = (float)bcsub(
+        $items['total']['surplus'] = (float) bcsub(
             data_get($items['total'], TransactionType::getName(TransactionType::INCOME), 0),
             data_get($items['total'], TransactionType::getName(TransactionType::EXPENSE), 0),
             2
@@ -262,7 +269,7 @@ class AnalysisService extends BaseObject
             $data = $this->getBaseQuery($params)
                 ->select([
                     "DATE_FORMAT(date, '{$format}') as m_date",
-                    'SUM(amount_cent) AS amount_cent'
+                    'SUM(amount_cent) AS amount_cent',
                 ])
                 ->andWhere(['transaction_type' => $type])
                 ->groupBy('m_date')
@@ -274,12 +281,12 @@ class AnalysisService extends BaseObject
             $items[$k] = [];
             foreach ($data as $value) {
                 $v['date'] = $value['m_date'];
-                $v['amount'] = (float)Setup::toYuan($value['amount_cent']);
+                $v['amount'] = (float) Setup::toYuan($value['amount_cent']);
                 $items['total'][$k] += $v['amount'];
                 $items[$k][] = $v;
             }
         }
-        $items['total']['surplus'] = (float)bcsub(
+        $items['total']['surplus'] = (float) bcsub(
             data_get($items['total'], TransactionType::getName(TransactionType::INCOME), 0),
             data_get($items['total'], TransactionType::getName(TransactionType::EXPENSE), 0),
             2
@@ -304,7 +311,7 @@ class AnalysisService extends BaseObject
 
         $condition = [
             'category_id' => data_get($params, 'category_id'),
-            'type' => data_get($params, 'transaction_type')
+            'type' => data_get($params, 'transaction_type'),
         ];
         $query = Transaction::find()->where($baseConditions)->andFilterWhere($condition);
         if (isset($params['keyword']) && $searchKeywords = trim($params['keyword'])) {
@@ -323,7 +330,7 @@ class AnalysisService extends BaseObject
             ->where($baseConditions)
             ->andWhere([
                 'transaction_id' => array_map('intval', $transactionIds),
-                'exclude_from_stats' => (int)false,
+                'exclude_from_stats' => (int) false,
                 'reimbursement_status' => [ReimbursementStatus::NONE, ReimbursementStatus::TODO],
             ])
             ->andFilterWhere([

@@ -1,4 +1,12 @@
 <?php
+/**
+ *
+ * @author forecho <caizhenghai@gmail.com>
+ * @link https://cashwarden.com/
+ * @copyright Copyright (c) 2020-2022 forecho
+ * @license https://github.com/cashwarden/api/blob/master/LICENSE.md
+ * @version 1.0.0
+ */
 
 namespace app\core\models;
 
@@ -39,7 +47,7 @@ class Budget extends \yii\db\ActiveRecord
         return [
             [
                 'class' => TimestampBehavior::class,
-                'value' => Yii::$app->formatter->asDatetime('now')
+                'value' => Yii::$app->formatter->asDatetime('now'),
             ],
         ];
     }
@@ -53,7 +61,7 @@ class Budget extends \yii\db\ActiveRecord
             [['user_id', 'budget_config_id', 'budget_amount_cent', 'actual_amount_cent'], 'required'],
             [
                 ['user_id', 'budget_config_id', 'budget_amount_cent', 'actual_amount_cent', 'relation_budget_id'],
-                'integer'
+                'integer',
             ],
             [['record_ids'], 'string'],
             [['started_at', 'ended_at', 'created_at', 'updated_at'], 'safe'],

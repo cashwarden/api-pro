@@ -1,4 +1,12 @@
 <?php
+/**
+ *
+ * @author forecho <caizhenghai@gmail.com>
+ * @link https://cashwarden.com/
+ * @copyright Copyright (c) 2020-2022 forecho
+ * @license https://github.com/cashwarden/api/blob/master/LICENSE.md
+ * @version 1.0.0
+ */
 
 namespace app\modules\v1\controllers;
 
@@ -44,7 +52,7 @@ class TelegramController extends ActiveController
 
             $bot->command('ping', function (Message $message) use ($bot) {
                 $keyboard = new ReplyKeyboardMarkup(
-                    [["one", "two", "three"]],
+                    [['one', 'two', 'three']],
                     true
                 ); // true for one-time keyboard
                 /** @var BotApi $bot */
@@ -93,7 +101,7 @@ class TelegramController extends ActiveController
 
             $bot->run();
         } catch (Exception $e) {
-            Log::error('webHook error' . $e->getMessage(), (string)$e);
+            Log::error('webHook error' . $e->getMessage(), (string) $e);
             throw $e;
         }
     }

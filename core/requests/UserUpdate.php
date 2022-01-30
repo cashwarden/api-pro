@@ -1,4 +1,12 @@
 <?php
+/**
+ *
+ * @author forecho <caizhenghai@gmail.com>
+ * @link https://cashwarden.com/
+ * @copyright Copyright (c) 2020-2022 forecho
+ * @license https://github.com/cashwarden/api/blob/master/LICENSE.md
+ * @version 1.0.0
+ */
 
 namespace app\core\requests;
 
@@ -32,7 +40,7 @@ class UserUpdate extends Model
                 'message' => Yii::t('app', 'This username has already been taken.'),
                 'filter' => function ($query) {
                     $query->andWhere(['!=', 'id', $this->id]);
-                }
+                },
             ],
 
             ['email', 'string', 'min' => 2, 'max' => 120],
@@ -44,7 +52,7 @@ class UserUpdate extends Model
                 'message' => Yii::t('app', 'This email address has already been taken.'),
                 'filter' => function ($query) {
                     $query->andWhere(['!=', 'id', $this->id]);
-                }
+                },
             ],
         ];
     }

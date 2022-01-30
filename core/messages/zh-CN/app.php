@@ -1,4 +1,12 @@
 <?php
+/**
+ *
+ * @author forecho <caizhenghai@gmail.com>
+ * @link https://cashwarden.com/
+ * @copyright Copyright (c) 2020-2022 forecho
+ * @license https://github.com/cashwarden/api/blob/master/LICENSE.md
+ * @version 1.0.0
+ */
 
 return [
     'Success Message' => '成功',
@@ -22,7 +30,7 @@ return [
     'Adjust Balance' => '调整余额',
     'Currency Amount' => '金额',
     'Adjust' => '调整',
-    # 'Cash' => '',
+    // 'Cash' => '',
     'Must' => '必须',
     'Want' => '享乐',
     'Need' => '可选',
@@ -102,6 +110,5 @@ return [
     'You have successfully joined this account, please do not repeat the process.' => '您已经成功加入此账本，请勿重复操作。',
     'You do not have permission to operate.' => '您没有权限操作。',
     'Not found account.' => '账户未找到。',
-    'Cannot delete the default ledger.' => '不能删除默认账本。'
-
+    'Cannot delete the default ledger.' => '不能删除默认账本。',
 ];
