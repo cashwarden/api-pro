@@ -2,12 +2,19 @@
 /**
  *
  * @author forecho <caizhenghai@gmail.com>
+ * @link https://cashwarden.com/
+ * @copyright Copyright (c) 2020-2022 forecho
+ * @license https://github.com/cashwarden/api/blob/master/LICENSE.md
+ * @version 1.0.0
+ */
+
+/**
+ * @author forecho <caizhenghai@gmail.com>
  * @link https://github.com/cashwarden
  * @copyright Copyright (c) 2019 - 2022 forecho
  * @license https://github.com/cashwarden/api-pro/blob/master/LICENSE.md
  * @version 1.0.0
  */
-
 class Yii extends \yii\BaseYii
 {
     /**

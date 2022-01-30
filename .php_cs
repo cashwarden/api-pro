@@ -7,9 +7,9 @@ $currentYear = date('Y');
 $projectHeader = <<<HEADER
 
 @author forecho <caizhenghai@gmail.com>
-@link https://github.com/cashwarden
-@copyright Copyright (c) 2019 - {$currentYear} forecho
-@license https://github.com/cashwarden/api-pro/blob/master/LICENSE.md
+@link https://cashwarden.com/
+@copyright Copyright (c) 2020-{$currentYear} forecho
+@license https://github.com/cashwarden/api/blob/master/LICENSE.md
 @version {$composerProject->version}
 HEADER;
 
