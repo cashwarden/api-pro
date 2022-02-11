@@ -127,6 +127,14 @@ php yii user/upgrade-pro 1 2022-12-23
 - 第一个参数是用户 ID
 - 第二个参数是到期时间，默认是1年之后到期，也可以指定到期时间，目前支持最大值是 `2038-01-18`
 
+## For DEV
+
+## Code Formatting
+
+```shell
+composer cs-fix
+```
+
 Check out the packages
 ------------
 
