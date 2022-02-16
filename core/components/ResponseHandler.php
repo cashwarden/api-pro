@@ -71,5 +71,6 @@ class ResponseHandler
                 break;
         }
         \Yii::info('response success', $response->data);
+        $response->setStatusCode(200);
     }
 }
