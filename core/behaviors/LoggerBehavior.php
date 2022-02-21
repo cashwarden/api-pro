@@ -36,6 +36,9 @@ class LoggerBehavior extends Behavior
         $response = $event->sender;
         if ($response->format != 'html') {
             $request = \Yii::$app->request;
+            if ($response->data === null) {
+                return;
+            }
             $params = Yii::$app->params;
             $requestId = Yii::$app->requestId->id;
             $code = ArrayHelper::getValue($response->data, 'code');
@@ -70,8 +73,8 @@ class LoggerBehavior extends Behavior
 
 
     /**
-     * @param array $params
-     * @param array $ignoredHeaderKeys
+     * @param  array  $params
+     * @param  array  $ignoredHeaderKeys
      * @return array
      */
     protected function headerFilter(array $params, array $ignoredHeaderKeys)
@@ -86,9 +89,9 @@ class LoggerBehavior extends Behavior
 
     /**
      * @param $params array
-     * @param array $ignoredKeys
-     * @param array $hideKeys
-     * @param array $halfHideKeys
+     * @param  array  $ignoredKeys
+     * @param  array  $hideKeys
+     * @param  array  $halfHideKeys
      * @return string|int|array
      */
     protected function paramsFilter(array $params, array $ignoredKeys, array $hideKeys, array $halfHideKeys)
@@ -113,7 +116,7 @@ class LoggerBehavior extends Behavior
     }
 
     /**
-     * @param string $value
+     * @param  string  $value
      * @return string
      */
     protected function paramReplace(string $value)
