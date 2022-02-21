@@ -50,7 +50,7 @@ return [
         ],
         'db' => [
             'class' => 'yii\db\Connection',
-            'dsn' => 'mysql:host=' . env('MYSQL_HOST') . ';port=' . env('MYSQL_PORT') . ';dbname=' . env('MYSQL_DATABASE'),
+            'dsn' => 'mysql:host='.env('MYSQL_HOST').';port='.env('MYSQL_PORT').';dbname='.env('MYSQL_DATABASE'),
             'username' => env('MYSQL_USERNAME'),
             'password' => env('MYSQL_PASSWORD'),
             'charset' => 'utf8mb4',
@@ -91,7 +91,7 @@ return [
                     ],
                     'processors' => [
                         function ($record) {
-                            $record['extra']['app'] = env('APP_NAME') . '_' . env('YII_ENV');
+                            $record['extra']['app'] = env('APP_NAME').'_'.env('YII_ENV');
                             $record['extra']['request_id'] = Yii::$app->requestId->id;
 
                             return $record;
