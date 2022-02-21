@@ -36,7 +36,7 @@ class LoggerBehavior extends Behavior
         $response = $event->sender;
         if ($response->format != 'html') {
             $request = \Yii::$app->request;
-            if (is_null($response->data)) {
+            if ($response->data === null) {
                 return;
             }
             $params = Yii::$app->params;
@@ -136,8 +136,8 @@ class LoggerBehavior extends Behavior
             $showLength = ceil($valueLength * 0.2);
             $hideLength = $valueLength - $showLength * 2;
             $newValue = mb_substr($value, 0, $showLength)
-                .str_repeat('*', $hideLength)
-                .mb_substr($value, -1 * $showLength);
+                . str_repeat('*', $hideLength)
+                . mb_substr($value, -1 * $showLength);
         } else {
             $newValue = $this->paramReplace($value);
         }
