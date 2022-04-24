@@ -65,6 +65,7 @@ class TelegramController extends ActiveController
             // 查询 && 记账
             $bot->on(function (Update $Update) use ($bot) {
                 $message = $Update->getMessage();
+                Log::info('telegram_message', $message->toJson());
                 $keyboard = null;
                 $text = '';
                 $chatId = $message->getChat()->getId();
@@ -94,7 +95,6 @@ class TelegramController extends ActiveController
                     if (ArrayHelper::strPosArr($message->getMessage()->getText(), TelegramKeyword::items()) === 0) {
                         return false;
                     }
-                    Log::info('telegram_message', $message->getMessage()->getText());
                     return true;
                 }
                 return false;
