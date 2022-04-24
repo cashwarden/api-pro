@@ -10,6 +10,10 @@
 
 use app\core\components\ResponseHandler;
 use app\core\models\User;
+use Lcobucci\Clock\SystemClock;
+use Lcobucci\JWT\Validation\Constraint\IdentifiedBy;
+use Lcobucci\JWT\Validation\Constraint\IssuedBy;
+use Lcobucci\JWT\Validation\Constraint\LooseValidAt;
 
 $common = require __DIR__ . '/common.php';
 $params = require __DIR__ . '/params.php';
@@ -75,6 +79,11 @@ $config = [
             'class' => \bizley\jwt\Jwt::class,
             'signer' => \bizley\jwt\Jwt::HS256,
             'signingKey' => env('JWT_SECRET'),
+            'validationConstraints' => [
+                new IdentifiedBy(env('APP_NAME')),
+                new IssuedBy(env('APP_URL')),
+                new LooseValidAt(SystemClock::fromSystemTimezone()),
+            ],
         ],
         'user' => [
             'identityClass' => User::class,

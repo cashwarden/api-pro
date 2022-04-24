@@ -13,6 +13,7 @@ namespace app\core\models;
 use app\core\types\UserProRecordStatus;
 use app\core\types\UserStatus;
 use Carbon\Carbon;
+use Lcobucci\JWT\Token\Plain;
 use Yii;
 use yii\behaviors\TimestampBehavior;
 use yii\db\ActiveRecord;
@@ -91,13 +92,16 @@ class User extends ActiveRecord implements IdentityInterface
 
 
     /**
-     * @param mixed $token
-     * @param null $type
+     * @param  string  $token
+     * @param  null  $type
      * @return void|IdentityInterface
+     * @throws \yii\base\InvalidConfigException
      */
     public static function findIdentityByAccessToken($token, $type = null)
     {
-        $userId = (string) $token->getClaim('id');
+        /** @var Plain $jwt */
+        $jwt = Yii::$app->jwt->parse($token);
+        $userId = $jwt->claims()->get('id');
         return self::findIdentity($userId);
     }
 
@@ -128,7 +132,7 @@ class User extends ActiveRecord implements IdentityInterface
     /**
      * Validates password.
      *
-     * @param string $password password to validate
+     * @param  string  $password  password to validate
      * @return bool if password provided is valid for current user
      */
     public function validatePassword(string $password)
@@ -139,7 +143,7 @@ class User extends ActiveRecord implements IdentityInterface
     /**
      * Generates password hash from password and sets it to the model.
      *
-     * @param string $password
+     * @param  string  $password
      * @throws \yii\base\Exception
      */
     public function setPassword($password)
@@ -176,7 +180,7 @@ class User extends ActiveRecord implements IdentityInterface
     /**
      * Finds user by password reset token.
      *
-     * @param string $token password reset token
+     * @param  string  $token  password reset token
      * @return User|array|ActiveRecord|null
      */
     public static function findByPasswordResetToken(string $token)
@@ -193,7 +197,7 @@ class User extends ActiveRecord implements IdentityInterface
     /**
      * Finds out if password reset token is valid.
      *
-     * @param string|null $token password reset token
+     * @param  string|null  $token  password reset token
      * @return bool
      */
     public static function isPasswordResetTokenValid(?string $token)
