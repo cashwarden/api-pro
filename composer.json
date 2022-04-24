@@ -18,10 +18,9 @@
   "minimum-stability": "stable",
   "require": {
     "php": ">=7.4",
-    "yiisoft/yii2": "^2.0",
     "yiisoft/yii2-swiftmailer": "~2.0.0 || ~2.1.0",
     "yiithings/yii2-dotenv": "^1.0",
-    "sizeg/yii2-jwt": "^2.0",
+    "bizley/jwt": "^3.0",
     "yiier/yii2-helpers": "^2.0",
     "yiier/yii2-graylog-target": "^1.1",
     "yiier/yii2-validators": "^0.3.0",
@@ -30,7 +29,6 @@
     "ext-json": "*",
     "ext-bcmath": "*",
     "guzzlehttp/guzzle": "^7.0",
-    "light/hashids": "^2.0",
     "nesbot/carbon": "^2.42",
     "yiisoft/yii2-queue": "^2.3",
     "guanguans/yii-pay": "^1.1",
@@ -40,7 +38,9 @@
     "guanguans/yii-event": "^1.0",
     "notamedia/yii2-sentry": "^1.7",
     "yiisoft/yii2-bootstrap5": "^2.0",
-    "exileed/yii2-monolog2": "^2.0"
+    "exileed/yii2-monolog2": "^2.0",
+    "yiisoft/yii2": "~2.0.14",
+    "yiier/yii2-hashids": "^3.0"
   },
   "require-dev": {
     "yiisoft/yii2-debug": "~2.1.0",
@@ -56,8 +56,8 @@
     "codeception/module-rest": "^1.0.0",
     "codeception/module-phpbrowser": "^1.0.0",
     "squizlabs/php_codesniffer": "^3.5.5",
-    "phpro/grumphp": "^0.19.1",
-    "plumthedev/yii2-php-cs-fixer-config": "^1.2"
+    "plumthedev/yii2-php-cs-fixer-config": "^1.2",
+    "phpro/grumphp": "^1.11"
   },
   "config": {
     "process-timeout": 1800,
