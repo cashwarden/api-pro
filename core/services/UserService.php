@@ -29,9 +29,12 @@ use app\core\types\LedgerType;
 use app\core\types\TransactionType;
 use app\core\types\UserSettingKeys;
 use app\core\types\UserStatus;
+use bizley\jwt\Jwt;
 use Carbon\Carbon;
+use DateTimeImmutable;
 use Exception;
-use sizeg\jwt\Jwt;
+use Lcobucci\Clock\SystemClock;
+use Lcobucci\JWT\Validation\Constraint\LooseValidAt;
 use Yii;
 use yii\db\ActiveRecord;
 use yii\db\Exception as DBException;
@@ -44,7 +47,7 @@ class UserService
     use ServiceTrait;
 
     /**
-     * @param JoinRequest $request
+     * @param  JoinRequest  $request
      * @return User
      * @throws InternalException|\Throwable
      */
@@ -88,25 +91,26 @@ class UserService
     {
         /** @var Jwt $jwt */
         $jwt = Yii::$app->jwt;
-        if (!$jwt->key) {
+        if (!$jwt->signingKey) {
             throw new InternalException(t('app', 'The JWT secret must be configured first.'));
         }
-        $signer = $jwt->getSigner('HS256');
-        $key = $jwt->getKey();
-        $time = time();
-        return (string) $jwt->getBuilder()
+        $jwt->getConfiguration()->setValidationConstraints(new LooseValidAt(SystemClock::fromSystemTimezone()));
+
+        $now = new DateTimeImmutable();
+        return $jwt->getBuilder()
             ->issuedBy(params('appURL'))
-            ->identifiedBy(Yii::$app->name, true)
-            ->issuedAt($time)
-            ->expiresAt($time + 3600 * 24 * 7)
+            ->identifiedBy(Yii::$app->name)
+            ->issuedAt($now)
+            ->expiresAt($now->modify('+7 day'))
             ->withClaim('username', \user('username'))
             ->withClaim('id', \user('id'))
-            ->getToken($signer, $key);
+            ->getToken($jwt->getConfiguration()->signer(), $jwt->getConfiguration()->signingKey())
+            ->toString();
     }
 
 
     /**
-     * @param string $value
+     * @param  string  $value
      * @return User|ActiveRecord|null
      */
     public static function getUserByUsernameOrEmail(string $value)
@@ -116,7 +120,7 @@ class UserService
     }
 
     /**
-     * @param User $user
+     * @param  User  $user
      * @return bool
      * @throws \yii\base\Exception
      */
@@ -137,7 +141,7 @@ class UserService
     }
 
     /**
-     * @param User $user
+     * @param  User  $user
      * @throws DBException
      * @throws \app\core\exceptions\InvalidArgumentException
      */
@@ -302,7 +306,7 @@ class UserService
     }
 
     /**
-     * @param string $token
+     * @param  string  $token
      * @return User|array|ActiveRecord|null
      * @throws InvalidArgumentException
      */
@@ -321,8 +325,8 @@ class UserService
     }
 
     /**
-     * @param int $type
-     * @param string $clientId
+     * @param  int  $type
+     * @param  string  $clientId
      * @return User
      * @throws Exception
      */
@@ -336,7 +340,7 @@ class UserService
     }
 
     /**
-     * @param PasswordResetRequest $request
+     * @param  PasswordResetRequest  $request
      * @return bool whether the email was send
      * @throws \yii\base\Exception
      * @throws \yii\base\InvalidConfigException
@@ -351,7 +355,7 @@ class UserService
 
 
     /**
-     * @param array $params
+     * @param  array  $params
      * @return bool
      * @throws UserNotProException
      */
@@ -372,8 +376,8 @@ class UserService
     }
 
     /**
-     * @param int $userId
-     * @param array $params
+     * @param  int  $userId
+     * @param  array  $params
      * @throws InvalidArgumentException
      */
     public static function validateBySetting(int $userId, array $params): void
@@ -391,9 +395,9 @@ class UserService
     }
 
     /**
-     * @param int $userId
-     * @param int $type
-     * @param array $expand
+     * @param  int  $userId
+     * @param  int  $type
+     * @param  array  $expand
      * @return AuthClient|array|ActiveRecord
      * @throws DBException
      */
@@ -416,7 +420,7 @@ class UserService
     }
 
     /**
-     * @param string $type
+     * @param  string  $type
      * @return array
      * @throws InternalException
      * @throws InvalidArgumentException
