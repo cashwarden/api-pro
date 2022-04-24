@@ -94,6 +94,7 @@ class TelegramController extends ActiveController
                     if (ArrayHelper::strPosArr($message->getMessage()->getText(), TelegramKeyword::items()) === 0) {
                         return false;
                     }
+                    Log::info('telegram_message', $message->getMessage()->getText());
                     return true;
                 }
                 return false;
