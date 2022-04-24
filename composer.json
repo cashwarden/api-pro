@@ -32,14 +32,14 @@
     "yiisoft/yii2-queue": "^2.3",
     "guanguans/yii-pay": "^1.1",
     "hightman/xunsearch": "^1.4",
-    "overtrue/wechat": "^5.4",
     "yiier/yii2-user-setting": "^0.2.0",
     "guanguans/yii-event": "^1.0",
     "notamedia/yii2-sentry": "^1.7",
     "yiisoft/yii2-bootstrap5": "^2.0",
     "exileed/yii2-monolog2": "^2.0",
     "yiisoft/yii2": "~2.0.14",
-    "yiier/yii2-hashids": "^3.0"
+    "yiier/yii2-hashids": "^3.0",
+    "w7corp/easywechat": "^6.4"
   },
   "require-dev": {
     "yiisoft/yii2-debug": "~2.1.0",
