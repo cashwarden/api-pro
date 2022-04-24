@@ -33,8 +33,6 @@ use bizley\jwt\Jwt;
 use Carbon\Carbon;
 use DateTimeImmutable;
 use Exception;
-use Lcobucci\Clock\SystemClock;
-use Lcobucci\JWT\Validation\Constraint\LooseValidAt;
 use Yii;
 use yii\db\ActiveRecord;
 use yii\db\Exception as DBException;
@@ -94,8 +92,6 @@ class UserService
         if (!$jwt->signingKey) {
             throw new InternalException(t('app', 'The JWT secret must be configured first.'));
         }
-        $jwt->getConfiguration()->setValidationConstraints(new LooseValidAt(SystemClock::fromSystemTimezone()));
-
         $now = new DateTimeImmutable();
         return $jwt->getBuilder()
             ->issuedBy(params('appURL'))
