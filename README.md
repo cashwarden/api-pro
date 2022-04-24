@@ -135,6 +135,12 @@ php yii user/upgrade-pro 1 2022-12-23
 composer cs-fix
 ```
 
+## Ide Helper
+
+```shell
+php yii ide-helper/generate
+```
+
 Check out the packages
 ------------
 

@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "da7c5bbd5a47d9824edac58589d25a26",
+    "content-hash": "08b3632d3e0457f2f6d19758048ae879",
     "packages": [
         {
             "name": "bizley/jwt",
@@ -1487,63 +1487,6 @@
                 }
             ],
             "time": "2021-09-28T19:34:56+00:00"
-        },
-        {
-            "name": "mis/yii2-ide-helper",
-            "version": "v1.0.2",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/takashiki/yii2-ide-helper.git",
-                "reference": "51b25fbad8b4be1ac056acc242b2e8c4193cf2e4"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/takashiki/yii2-ide-helper/zipball/51b25fbad8b4be1ac056acc242b2e8c4193cf2e4",
-                "reference": "51b25fbad8b4be1ac056acc242b2e8c4193cf2e4",
-                "shasum": ""
-            },
-            "require": {
-                "php": ">=5.4.0",
-                "yiisoft/yii2": "*"
-            },
-            "type": "library",
-            "extra": {
-                "branch-alias": {
-                    "dev-master": "1.0-dev"
-                }
-            },
-            "autoload": {
-                "psr-4": {
-                    "Mis\\IdeHelper\\": "src"
-                }
-            },
-            "notification-url": "https://packagist.org/downloads/",
-            "license": [
-                "MIT"
-            ],
-            "authors": [
-                {
-                    "name": "takashiki",
-                    "email": "857995137@qq.com"
-                }
-            ],
-            "description": "Yii2 IDE Helper, generates correct PHPDocs for all components, to improve auto-completion.",
-            "keywords": [
-                "autocomplete",
-                "codeintel",
-                "helper",
-                "ide",
-                "netbeans",
-                "phpdoc",
-                "phpstorm",
-                "sublime",
-                "yii2"
-            ],
-            "support": {
-                "issues": "https://github.com/takashiki/yii2-ide-helper/issues",
-                "source": "https://github.com/takashiki/yii2-ide-helper/tree/master"
-            },
-            "time": "2016-11-22T01:26:36+00:00"
         },
         {
             "name": "monolog/monolog",
@@ -8457,6 +8400,63 @@
                 "source": "https://github.com/laravel/serializable-closure"
             },
             "time": "2022-02-11T19:23:53+00:00"
+        },
+        {
+            "name": "mis/yii2-ide-helper",
+            "version": "v1.0.2",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/takashiki/yii2-ide-helper.git",
+                "reference": "51b25fbad8b4be1ac056acc242b2e8c4193cf2e4"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/takashiki/yii2-ide-helper/zipball/51b25fbad8b4be1ac056acc242b2e8c4193cf2e4",
+                "reference": "51b25fbad8b4be1ac056acc242b2e8c4193cf2e4",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=5.4.0",
+                "yiisoft/yii2": "*"
+            },
+            "type": "library",
+            "extra": {
+                "branch-alias": {
+                    "dev-master": "1.0-dev"
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "Mis\\IdeHelper\\": "src"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "takashiki",
+                    "email": "857995137@qq.com"
+                }
+            ],
+            "description": "Yii2 IDE Helper, generates correct PHPDocs for all components, to improve auto-completion.",
+            "keywords": [
+                "autocomplete",
+                "codeintel",
+                "helper",
+                "ide",
+                "netbeans",
+                "phpdoc",
+                "phpstorm",
+                "sublime",
+                "yii2"
+            ],
+            "support": {
+                "issues": "https://github.com/takashiki/yii2-ide-helper/issues",
+                "source": "https://github.com/takashiki/yii2-ide-helper/tree/master"
+            },
+            "time": "2016-11-22T01:26:36+00:00"
         },
         {
             "name": "myclabs/deep-copy",

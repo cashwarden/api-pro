@@ -72,8 +72,9 @@ $config = [
             ],
         ],
         'jwt' => [
-            'class' => \sizeg\jwt\Jwt::class,
-            'key' => env('JWT_SECRET'),
+            'class' => \bizley\jwt\Jwt::class,
+            'signer' => \bizley\jwt\Jwt::HS256,
+            'signingKey' => env('JWT_SECRET'),
         ],
         'user' => [
             'identityClass' => User::class,

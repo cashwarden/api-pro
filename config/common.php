@@ -33,7 +33,7 @@ return [
             'class' => \yiier\helpers\RequestId::class,
         ],
         'hashids' => [
-            'class' => 'light\hashids\Hashids',
+            'class' => yiier\hashids\Hashids::class,
             'salt' => env('JWT_SECRET'),
             'alphabet' => 'ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890',
             'minHashLength' => 20,
