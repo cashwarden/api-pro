@@ -47,7 +47,7 @@ class TransactionService extends BaseObject
     use ServiceTrait;
 
     /**
-     * @param Transaction $transaction
+     * @param  Transaction  $transaction
      * @return bool
      * @throws \yii\db\Exception
      */
@@ -188,8 +188,8 @@ class TransactionService extends BaseObject
     }
 
     /**
-     * @param Transaction $transaction
-     * @param array $changedAttributes
+     * @param  Transaction  $transaction
+     * @param  array  $changedAttributes
      * @throws Exception|\Throwable
      */
     public static function deleteRecord(Transaction $transaction, array $changedAttributes)
@@ -202,8 +202,8 @@ class TransactionService extends BaseObject
     }
 
     /**
-     * @param int $id
-     * @param int $userId
+     * @param  int  $id
+     * @param  int  $userId
      * @return Transaction
      * @throws NotFoundHttpException
      * @throws Exception
@@ -224,8 +224,8 @@ class TransactionService extends BaseObject
     }
 
     /**
-     * @param string $desc
-     * @param int|null $source
+     * @param  string  $desc
+     * @param  int|null  $source
      * @return Transaction|Account
      * @throws InternalException
      * @throws \Throwable
@@ -268,7 +268,7 @@ class TransactionService extends BaseObject
 
 
     /**
-     * @param string $desc
+     * @param  string  $desc
      * @return Account
      * @throws Exception
      */
@@ -286,7 +286,7 @@ class TransactionService extends BaseObject
     }
 
     /**
-     * @param string $desc
+     * @param  string  $desc
      * @return Transaction
      * @throws CannotOperateException
      * @throws InvalidArgumentException
@@ -312,7 +312,10 @@ class TransactionService extends BaseObject
             $rules,
             'then_transaction_type',
             function () use ($desc) {
-                if (ArrayHelper::strPosArr($desc, ['收到', '收入', '退款']) !== false) {
+                if (ArrayHelper::strPosArr($desc, ['-']) !== false) {
+                    return TransactionType::getName(TransactionType::EXPENSE);
+                }
+                if (ArrayHelper::strPosArr($desc, ['收到', '收入', '退款', '+']) !== false) {
                     return TransactionType::getName(TransactionType::INCOME);
                 }
                 return TransactionType::getName(TransactionType::EXPENSE);
@@ -324,7 +327,7 @@ class TransactionService extends BaseObject
             $model->type = TransactionType::getName(TransactionType::TRANSFER);
             $model->from_account_id = $transferAccountIds[0];
             $model->to_account_id = $transferAccountIds[1];
-            $transactionType = $transactionType = TransactionType::toEnumValue($model->type);
+            $transactionType = TransactionType::toEnumValue($model->type);
         } else {
             $transactionType = TransactionType::toEnumValue($model->type);
             // 先去账号根据关键词查找
@@ -378,7 +381,7 @@ class TransactionService extends BaseObject
 
 
     /**
-     * @param Record[] $records
+     * @param  Record[]  $records
      * @return array
      * @throws InvalidConfigException
      */
@@ -406,8 +409,8 @@ class TransactionService extends BaseObject
     }
 
     /**
-     * @param int $id
-     * @param int $rating
+     * @param  int  $id
+     * @param  int  $rating
      * @return int
      * @throws InvalidConfigException
      */
@@ -420,7 +423,7 @@ class TransactionService extends BaseObject
     }
 
     /**
-     * @param Account $account
+     * @param  Account  $account
      * @return bool
      * @throws \yii\db\Exception
      * @throws InvalidConfigException
@@ -454,8 +457,8 @@ class TransactionService extends BaseObject
 
 
     /**
-     * @param string $desc
-     * @param int $ledgerId
+     * @param  string  $desc
+     * @param  int  $ledgerId
      * @return array
      * @throws Exception
      */
@@ -472,8 +475,8 @@ class TransactionService extends BaseObject
     }
 
     /**
-     * @param array $tags
-     * @param int $ledgerId
+     * @param  array  $tags
+     * @param  int  $ledgerId
      * @throws InvalidConfigException
      */
     public static function createTags(array $tags, int $ledgerId)
@@ -494,7 +497,7 @@ class TransactionService extends BaseObject
     }
 
     /**
-     * @param string $desc
+     * @param  string  $desc
      * @return mixed|null
      * @throws Exception
      */
@@ -510,9 +513,9 @@ class TransactionService extends BaseObject
     }
 
     /**
-     * @param array $rules
-     * @param string $field
-     * @param \Closure|array|null $callback
+     * @param  array  $rules
+     * @param  string  $field
+     * @param  \Closure|array|null  $callback
      * @return null|int|string
      * @throws Exception
      */
@@ -547,7 +550,7 @@ class TransactionService extends BaseObject
     }
 
     /**
-     * @param string $desc
+     * @param  string  $desc
      * @return string date Y-m-d
      * @throws InvalidConfigException
      */
@@ -598,7 +601,7 @@ class TransactionService extends BaseObject
     }
 
     /**
-     * @param string $desc
+     * @param  string  $desc
      * @return array
      */
     private function getTransferAccountIdsByDesc(string $desc): array
@@ -624,8 +627,8 @@ class TransactionService extends BaseObject
     }
 
     /**
-     * @param string $value
-     * @param string $format
+     * @param  string  $value
+     * @param  string  $format
      * @return string
      * @throws InvalidConfigException
      */
@@ -636,9 +639,9 @@ class TransactionService extends BaseObject
 
 
     /**
-     * @param string $tag
-     * @param int $ledgerId
-     * @param int $userId
+     * @param  string  $tag
+     * @param  int  $ledgerId
+     * @param  int  $userId
      * @return bool|int|string|null
      */
     public static function countTransactionByTag(string $tag, int $ledgerId, int $userId)
@@ -650,9 +653,9 @@ class TransactionService extends BaseObject
     }
 
     /**
-     * @param int $categoryId
-     * @param int $ledgerId
-     * @param int $userId
+     * @param  int  $categoryId
+     * @param  int  $ledgerId
+     * @param  int  $userId
      * @return bool|int|string|null
      */
     public static function countTransactionByCategoryId(int $categoryId, int $ledgerId, int $userId)
@@ -663,8 +666,8 @@ class TransactionService extends BaseObject
     }
 
     /**
-     * @param int $id
-     * @param int $userId
+     * @param  int  $id
+     * @param  int  $userId
      * @return Transaction|object
      * @throws NotFoundHttpException
      */
@@ -723,7 +726,7 @@ class TransactionService extends BaseObject
     }
 
     /**
-     * @param array $params
+     * @param  array  $params
      * @return array
      * @throws \yii\web\ForbiddenHttpException
      * @throws Exception
@@ -755,7 +758,7 @@ class TransactionService extends BaseObject
     }
 
     /**
-     * @param array $params
+     * @param  array  $params
      * @return array
      * @throws \yii\web\ForbiddenHttpException
      * @throws Exception
@@ -786,7 +789,7 @@ class TransactionService extends BaseObject
     }
 
     /**
-     * @param array $ids
+     * @param  array  $ids
      */
     public static function updateXunSearch(array $ids): void
     {
@@ -801,7 +804,7 @@ class TransactionService extends BaseObject
     }
 
     /**
-     * @param array $ids
+     * @param  array  $ids
      */
     public static function deleteXunSearch(array $ids): void
     {
@@ -813,8 +816,8 @@ class TransactionService extends BaseObject
 
 
     /**
-     * @param Transaction $transaction
-     * @param string $baseCurrencyCode
+     * @param  Transaction  $transaction
+     * @param  string  $baseCurrencyCode
      * @return float
      * @throws InvalidArgumentException
      */
