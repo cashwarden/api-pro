@@ -1,4 +1,12 @@
 <?php
+/**
+ *
+ * @author forecho <caizhenghai@gmail.com>
+ * @link https://cashwarden.com/
+ * @copyright Copyright (c) 2020-2022 forecho
+ * @license https://github.com/cashwarden/api/blob/master/LICENSE.md
+ * @version 1.0.0
+ */
 
 namespace app\commands;
 
@@ -35,9 +43,9 @@ class CrontabController extends Controller
     {
         /** @var Transaction[] $transactions */
         $transactions = [];
+        $date = Yii::$app->formatter->asDatetime('now', 'php:Y-m-d');
         $items = Recurrence::find()
-            ->where(['status' => RecurrenceStatus::ACTIVE])
-            ->andWhere(['execution_date' => Yii::$app->formatter->asDatetime('now', 'php:Y-m-d')])
+            ->where(['status' => RecurrenceStatus::ACTIVE, 'execution_date' => $date])
             ->asArray()
             ->all();
         $transaction = Yii::$app->db->beginTransaction();
@@ -48,14 +56,14 @@ class CrontabController extends Controller
                 array_push($ids, $item['id']);
                 if ($newTransaction = $this->transactionService->copy($item['transaction_id'], $item['user_id'])) {
                     array_push($transactions, $newTransaction);
-                    $this->stdout("定时记账成功，transaction_id：{$newTransaction->id}\n");
+                    $this->stdout("{$date} 定时记账成功，transaction_id：{$newTransaction->id}\n");
                 }
             }
             RecurrenceService::updateAllExecutionDate($ids);
             $transaction->commit();
         } catch (\Exception $e) {
             $ids = implode(',', $ids);
-            $this->stdout("定时记账失败：依次执行的 Recurrence ID 为 {$ids}，{$e->getMessage()}\n");
+            $this->stdout("{$date} 定时记账失败：依次执行的 Recurrence ID 为 {$ids}，{$e->getMessage()}\n");
             $transaction->rollBack();
             throw $e;
         }
@@ -65,7 +73,7 @@ class CrontabController extends Controller
                 \Yii::$app->user->switchIdentity(User::findOne($transaction->user_id));
                 $keyboard = $this->telegramService->getTransactionMarkup($transaction);
                 $text = $this->telegramService->getMessageTextByTransaction($transaction, '定时记账成功');
-                $this->telegramService->sendMessage($text, $keyboard);
+                $this->telegramService->sendMessage($text, null, $keyboard);
             }
         }
     }
@@ -73,7 +81,7 @@ class CrontabController extends Controller
     /**
      * 0 10 * * * 每天的 10:00 执行 php yii crontab/report yesterday
      * 5 10 * * 1 每周一的 10:05 执行 php yii crontab/report last_week
-     * 10 10 1 * * 每月1日的 10:10 执行 php yii crontab/report last_month
+     * 10 10 1 * * 每月1日的 10:10 执行 php yii crontab/report last_month.
      * @param string $type
      * @throws Exception
      */

@@ -1,4 +1,12 @@
 <?php
+/**
+ *
+ * @author forecho <caizhenghai@gmail.com>
+ * @link https://cashwarden.com/
+ * @copyright Copyright (c) 2020-2022 forecho
+ * @license https://github.com/cashwarden/api/blob/master/LICENSE.md
+ * @version 1.0.0
+ */
 
 namespace app\core\requests;
 
@@ -22,7 +30,7 @@ class UpdateStatus extends \yii\base\Model
      * @param array $config
      * @throws InternalException
      */
-    public function __construct(array $statusRange, $config = [])
+    public function __construct(array $statusRange, array $config = [])
     {
         if (!count($statusRange)) {
             throw new InternalException(\Yii::t('app', 'Status range cannot be blank.'));

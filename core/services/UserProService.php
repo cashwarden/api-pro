@@ -1,4 +1,12 @@
 <?php
+/**
+ *
+ * @author forecho <caizhenghai@gmail.com>
+ * @link https://cashwarden.com/
+ * @copyright Copyright (c) 2020-2022 forecho
+ * @license https://github.com/cashwarden/api/blob/master/LICENSE.md
+ * @version 1.0.0
+ */
 
 namespace app\core\services;
 
@@ -6,6 +14,7 @@ use app\core\exceptions\PayException;
 use app\core\exceptions\UserNotProException;
 use app\core\models\Account;
 use app\core\models\BudgetConfig;
+use app\core\models\Currency;
 use app\core\models\Ledger;
 use app\core\models\LedgerMember;
 use app\core\models\Recurrence;
@@ -46,7 +55,7 @@ class UserProService
      * @param string $action
      * @param null $model
      * @return bool
-     * @throws UserNotProException
+     * @throws UserNotProException|\app\core\exceptions\InvalidArgumentException
      */
     public static function checkAccess(string $modelClass, string $action, $model = null): bool
     {
@@ -60,10 +69,11 @@ class UserProService
 
         switch ($modelClass) {
             case Account::class:
-                if (Account::find()->where($baseConditions)->count('id') >= params('userAccountTotal')) {
+                $count = Account::find()->where($baseConditions)->count('id');
+                if ($action == 'create' && $count >= params('userAccountTotal')) {
                     throw new UserNotProException();
                 }
-                if (in_array(data_get($model, 'type'), [AccountType::INVESTMENT_ACCOUNT])) {
+                if (data_get($model, 'type') == AccountType::getName(AccountType::INVESTMENT_ACCOUNT)) {
                     throw new UserNotProException();
                 }
                 break;
@@ -81,12 +91,14 @@ class UserProService
                 }
                 break;
             case Rule::class:
-                if (Rule::find()->where($baseConditions)->count('id') >= params('userRuleTotal')) {
+                $count = Rule::find()->where($baseConditions)->count('id');
+                if ($action == 'create' && $count >= params('userRuleTotal')) {
                     throw new UserNotProException();
                 }
                 break;
             case BudgetConfig::class:
             case LedgerMember::class:
+            case Currency::class:
             case WishList::class:
                 throw new UserNotProException();
         }

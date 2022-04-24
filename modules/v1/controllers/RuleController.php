@@ -1,4 +1,12 @@
 <?php
+/**
+ *
+ * @author forecho <caizhenghai@gmail.com>
+ * @link https://cashwarden.com/
+ * @copyright Copyright (c) 2020-2022 forecho
+ * @license https://github.com/cashwarden/api/blob/master/LICENSE.md
+ * @version 1.0.0
+ */
 
 namespace app\modules\v1\controllers;
 
@@ -12,15 +20,15 @@ use yii\db\Exception;
 use yii\web\NotFoundHttpException;
 
 /**
- * Rule controller for the `v1` module
+ * Rule controller for the `v1` module.
  */
 class RuleController extends ActiveController
 {
     use ServiceTrait;
 
     public $modelClass = Rule::class;
-    public $defaultOrder = ['sort' => SORT_ASC, 'id' => SORT_DESC];
-    public $partialMatchAttributes = ['name'];
+    public array $defaultOrder = ['sort' => SORT_ASC, 'id' => SORT_DESC];
+    public array $partialMatchAttributes = ['name'];
 
     /**
      * @param int $id

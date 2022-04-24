@@ -1,9 +1,17 @@
 <?php
+/**
+ *
+ * @author forecho <caizhenghai@gmail.com>
+ * @link https://cashwarden.com/
+ * @copyright Copyright (c) 2020-2022 forecho
+ * @license https://github.com/cashwarden/api/blob/master/LICENSE.md
+ * @version 1.0.0
+ */
 
 use yii\db\Migration;
 
 /**
- * Class m201125_030508_update_account_table
+ * Class m201125_030508_update_account_table.
  */
 class m201125_030508_update_account_table extends Migration
 {
@@ -12,8 +20,8 @@ class m201125_030508_update_account_table extends Migration
      */
     public function safeUp()
     {
-        $this->addColumn('{{account}}', 'keywords', $this->string()->after('name'));
-        $this->addColumn('{{account}}', 'remark', $this->string()->after('sort'));
+        $this->addColumn('{{%account}}', 'keywords', $this->string()->after('name'));
+        $this->addColumn('{{%account}}', 'remark', $this->string()->after('sort'));
     }
 
     /**
@@ -26,19 +34,4 @@ class m201125_030508_update_account_table extends Migration
         $this->dropColumn('{{%account}}', 'remark');
         return true;
     }
-
-    /*
-    // Use up()/down() to run migration code without a transaction.
-    public function up()
-    {
-
-    }
-
-    public function down()
-    {
-        echo "m201125_030508_update_account_table cannot be reverted.\n";
-
-        return false;
-    }
-    */
 }

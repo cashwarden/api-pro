@@ -1,4 +1,12 @@
 <?php
+/**
+ *
+ * @author forecho <caizhenghai@gmail.com>
+ * @link https://cashwarden.com/
+ * @copyright Copyright (c) 2020-2022 forecho
+ * @license https://github.com/cashwarden/api/blob/master/LICENSE.md
+ * @version 1.0.0
+ */
 
 namespace app\commands;
 
@@ -7,7 +15,6 @@ use app\core\models\Transaction;
 use app\core\models\User;
 use app\core\services\TelegramService;
 use app\core\services\UserProService;
-use app\core\services\UserService;
 use app\core\traits\FixDataTrait;
 use app\core\traits\ServiceTrait;
 use Carbon\Carbon;
@@ -25,16 +32,22 @@ class InitController extends Controller
      */
     private $count;
 
-    public function actionTelegram()
+    /**
+     * @throws \TelegramBot\Api\InvalidJsonException
+     * @throws \TelegramBot\Api\Exception
+     * @throws \TelegramBot\Api\HttpException
+     */
+    public function actionTelegram(string $url = '/v1/telegram/hook'): int
     {
-        $url = Url::to('/v1/telegram/hook', true);
+        $url = Url::to($url, true);
         TelegramService::newClient()->setWebHook($url);
+        TelegramService::setMyCommands();
         $this->stdout("Telegram set Webhook url success!: {$url}\n");
         return ExitCode::OK;
     }
 
     /**
-     * @param int $userId
+     * @param  int  $userId
      * @throws \app\core\exceptions\InvalidArgumentException
      * @throws \yii\db\Exception
      */
@@ -72,7 +85,7 @@ class InitController extends Controller
                 return false;
             },
             function (User $item) {
-                $endedAt = Carbon::parse("2020-12-31")->endOfDay();
+                $endedAt = Carbon::parse('2020-12-31')->endOfDay();
                 if (UserProService::upgradeToProBySystem($item->id, $endedAt)) {
                     $this->count++;
                 }

@@ -1,4 +1,12 @@
 <?php
+/**
+ *
+ * @author forecho <caizhenghai@gmail.com>
+ * @link https://cashwarden.com/
+ * @copyright Copyright (c) 2020-2022 forecho
+ * @license https://github.com/cashwarden/api/blob/master/LICENSE.md
+ * @version 1.0.0
+ */
 
 namespace app\core\services;
 
@@ -6,9 +14,17 @@ use app\core\exceptions\InternalException;
 use app\core\exceptions\InvalidArgumentException;
 use app\core\helpers\RuleControlHelper;
 use app\core\models\Account;
+use app\core\models\Budget;
+use app\core\models\BudgetConfig;
 use app\core\models\Category;
 use app\core\models\Ledger;
 use app\core\models\LedgerMember;
+use app\core\models\Record;
+use app\core\models\Recurrence;
+use app\core\models\Rule;
+use app\core\models\Tag;
+use app\core\models\Transaction;
+use app\core\models\WishList;
 use app\core\requests\LedgerInvitingMember;
 use app\core\types\ColorType;
 use app\core\types\LedgerMemberRule;
@@ -27,8 +43,8 @@ use yiier\helpers\Setup;
 class LedgerService
 {
     /**
-     * @param int $ledgerId
-     * @param int $permission
+     * @param  int  $ledgerId
+     * @param  int  $permission
      * @throws ForbiddenHttpException
      */
     public static function checkAccess(int $ledgerId, $permission = RuleControlHelper::VIEW)
@@ -56,7 +72,7 @@ class LedgerService
     }
 
     /**
-     * @param int $ledgerId
+     * @param  int  $ledgerId
      * @return array
      */
     public static function getLedgerMemberUserIds(int $ledgerId): array
@@ -69,7 +85,7 @@ class LedgerService
     }
 
     /**
-     * @param int $ledgerId
+     * @param  int  $ledgerId
      * @return array
      */
     public static function getLedgerMemberUserIdsByType(int $ledgerId): array
@@ -80,16 +96,16 @@ class LedgerService
                 ->select('user_id')
                 ->where([
                     'ledger_id' => $ledgerId,
-                    'status' => [LedgerMemberStatus::NORMAL, LedgerMemberStatus::ARCHIVED]
+                    'status' => [LedgerMemberStatus::NORMAL, LedgerMemberStatus::ARCHIVED],
                 ])
                 ->column();
             return array_map('intval', $userIds);
         }
-        return [(int)Yii::$app->user->id];
+        return [(int) Yii::$app->user->id];
     }
 
     /**
-     * @param int $userId
+     * @param  int  $userId
      * @return array
      */
     public static function getLedgerIds(int $userId = 0): array
@@ -103,7 +119,7 @@ class LedgerService
     }
 
     /**
-     * @param int $userId
+     * @param  int  $userId
      * @return array|\yii\db\ActiveRecord|null
      */
     public static function getDefaultLedger(int $userId)
@@ -115,7 +131,7 @@ class LedgerService
     }
 
     /**
-     * @param Ledger $ledger
+     * @param  Ledger  $ledger
      * @return bool
      * @throws InternalException
      */
@@ -173,14 +189,30 @@ class LedgerService
                 throw new DBException('Init Category fail');
             }
         } catch (\Exception $e) {
-            Log::error('创建账本失败', [$ledger->attributes, (string)$e]);
+            Yii::error('创建账本失败', [$ledger->attributes, (string) $e]);
             throw new InternalException($e->getMessage());
         }
         return true;
     }
 
+    public static function afterDelete(int $ledgerId)
+    {
+        LedgerMember::deleteAll(['ledger_id' => $ledgerId]);
+        Category::deleteAll(['ledger_id' => $ledgerId]);
+        $budgetConfigIds = BudgetConfig::find()->where(['ledger_id' => $ledgerId])->column();
+        Budget::deleteAll(['budget_config_id' => $budgetConfigIds]);
+        BudgetConfig::deleteAll(['ledger_id' => $ledgerId]);
+        Record::deleteAll(['ledger_id' => $ledgerId]);
+        Rule::deleteAll(['ledger_id' => $ledgerId]);
+        Tag::deleteAll(['ledger_id' => $ledgerId]);
+        WishList::deleteAll(['ledger_id' => $ledgerId]);
+        $transactionIds = Transaction::find()->where(['ledger_id' => $ledgerId])->column();
+        Recurrence::deleteAll(['transaction_id' => $transactionIds]);
+        Transaction::deleteAll(['ledger_id' => $ledgerId]);
+    }
+
     /**
-     * @param LedgerInvitingMember $model
+     * @param  LedgerInvitingMember  $model
      * @return bool
      * @throws InternalException
      */
@@ -194,7 +226,7 @@ class LedgerService
                 throw new \yii\db\Exception(Setup::errorMessage($ledgerMember->firstErrors));
             }
         } catch (\Exception $e) {
-            Log::error('邀请用户到账本失败', [['ledger_id' => $model->attributes], (string)$e]);
+            Log::error('邀请用户到账本失败', [['ledger_id' => $model->attributes], (string) $e]);
             throw new InternalException($e->getMessage());
         }
         return true;
@@ -224,7 +256,7 @@ class LedgerService
 
 
     /**
-     * @param string $token
+     * @param  string  $token
      * @return Ledger
      * @throws NotFoundHttpException
      */
@@ -239,7 +271,7 @@ class LedgerService
     }
 
     /**
-     * @param string $token
+     * @param  string  $token
      * @return bool
      * @throws DBException
      * @throws InvalidArgumentException

@@ -1,4 +1,12 @@
 <?php
+/**
+ *
+ * @author forecho <caizhenghai@gmail.com>
+ * @link https://cashwarden.com/
+ * @copyright Copyright (c) 2020-2022 forecho
+ * @license https://github.com/cashwarden/api/blob/master/LICENSE.md
+ * @version 1.0.0
+ */
 
 namespace app\modules\v1\controllers;
 
@@ -20,17 +28,17 @@ use yiier\helpers\SearchModel;
 use yiier\helpers\Setup;
 
 /**
- * Account controller for the `v1` module
+ * Account controller for the `v1` module.
  */
 class AccountController extends ActiveController
 {
     use ServiceTrait;
 
     public $modelClass = Account::class;
-    public $noAuthActions = [];
-    public $defaultOrder = ['sort' => SORT_ASC, 'id' => SORT_DESC];
-    public $partialMatchAttributes = ['name'];
-    public $stringToIntAttributes = ['type' => AccountType::class, 'status' => AccountStatus::class];
+    public array $noAuthActions = [];
+    public array $defaultOrder = ['sort' => SORT_ASC, 'id' => SORT_DESC];
+    public array $partialMatchAttributes = ['name'];
+    public array $stringToIntAttributes = ['type' => AccountType::class, 'status' => AccountStatus::class];
 
     public function actions()
     {
@@ -153,7 +161,7 @@ class AccountController extends ActiveController
             'model' => $modelClass,
             'scenario' => 'default',
             'partialMatchAttributes' => $this->partialMatchAttributes,
-            'pageSize' => $this->getPageSize()
+            'pageSize' => $this->getPageSize(),
         ]);
 
         $params = $this->formatParams(Yii::$app->request->queryParams);

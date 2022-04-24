@@ -1,4 +1,12 @@
 <?php
+/**
+ *
+ * @author forecho <caizhenghai@gmail.com>
+ * @link https://cashwarden.com/
+ * @copyright Copyright (c) 2020-2022 forecho
+ * @license https://github.com/cashwarden/api/blob/master/LICENSE.md
+ * @version 1.0.0
+ */
 
 namespace app\core\models;
 
@@ -10,6 +18,7 @@ use app\core\services\RecurrenceService;
 use app\core\types\DirectionType;
 use app\core\types\RecordSource;
 use app\core\types\ReimbursementStatus;
+use app\core\types\ReviewStatus;
 use Yii;
 use yii\behaviors\TimestampBehavior;
 use yii\db\ActiveRecord;
@@ -35,6 +44,7 @@ use yiier\helpers\Setup;
  * @property int $source
  * @property int $exclude_from_stats
  * @property int $reimbursement_status
+ * @property int $review
  * @property string|null $created_at
  * @property string|null $updated_at
  *
@@ -63,7 +73,7 @@ class Record extends ActiveRecord
         return [
             [
                 'class' => TimestampBehavior::class,
-                'value' => Yii::$app->formatter->asDatetime('now')
+                'value' => Yii::$app->formatter->asDatetime('now'),
             ],
         ];
     }
@@ -93,7 +103,7 @@ class Record extends ActiveRecord
                     'currency_code',
                     'direction',
                 ],
-                'required'
+                'required',
             ],
             [
                 [
@@ -105,12 +115,13 @@ class Record extends ActiveRecord
                     'amount_cent',
                     'currency_amount_cent',
                     'transaction_id',
-                    'direction'
+                    'direction',
                 ],
-                'integer'
+                'integer',
             ],
             ['direction', 'in', 'range' => [DirectionType::INCOME, DirectionType::EXPENSE]],
             ['source', 'in', 'range' => array_keys(RecordSource::names())],
+            ['review', 'in', 'range' => array_keys(ReviewStatus::names())],
             ['reimbursement_status', 'in', 'range' => array_keys(ReimbursementStatus::names())],
             [['date'], 'datetime', 'format' => 'php:Y-m-d H:i'],
             ['exclude_from_stats', 'boolean', 'trueValue' => true, 'falseValue' => false, 'strict' => true],
@@ -138,6 +149,7 @@ class Record extends ActiveRecord
             'source' => Yii::t('app', 'Source'),
             'exclude_from_stats' => Yii::t('app', 'Exclude From Stats'),
             'reimbursement_status' => Yii::t('app', 'Reimbursement Status'),
+            'review' => Yii::t('app', 'Review'),
             'created_at' => Yii::t('app', 'Created At'),
             'updated_at' => Yii::t('app', 'Updated At'),
         ];
@@ -177,15 +189,13 @@ class Record extends ActiveRecord
             if (!$this->amount_cent) {
                 if ($this->currency_code == user('base_currency_code')) {
                     $this->amount_cent = $this->currency_amount_cent;
-                } else {
-                    // $this->amount_cent = $this->currency_amount_cent;
-                    // todo 计算汇率
                 }
+                // $this->amount_cent = $this->currency_amount_cent;
+                    // todo 计算汇率
             }
             return true;
-        } else {
-            return false;
         }
+        return false;
     }
 
 
@@ -234,7 +244,7 @@ class Record extends ActiveRecord
             if ($transaction = Transaction::find()->where(['id' => $this->transaction_id])->one()) {
                 $transaction->delete();
             }
-            $record = Record::find()
+            $record = self::find()
                 ->where(['user_id' => $this->user_id, 'transaction_id' => $this->transaction_id])
                 ->one();
             if ($record) {
@@ -270,8 +280,8 @@ class Record extends ActiveRecord
             return $model->transaction ? ArrayHelper::merge(
                 ArrayHelper::toArray($model->transaction),
                 [
-                    'exclude_from_stats' => (bool)$model->exclude_from_stats,
-                    'reimbursement_status' => ReimbursementStatus::getName($model->reimbursement_status)
+                    'exclude_from_stats' => (bool) $model->exclude_from_stats,
+                    'reimbursement_status' => ReimbursementStatus::getName($model->reimbursement_status),
                 ]
             ) : null;
         };
@@ -297,11 +307,15 @@ class Record extends ActiveRecord
         };
 
         $fields['exclude_from_stats'] = function (self $model) {
-            return (bool)$model->exclude_from_stats;
+            return (bool) $model->exclude_from_stats;
         };
 
         $fields['reimbursement_status'] = function (self $model) {
             return ReimbursementStatus::getName($model->reimbursement_status);
+        };
+
+        $fields['review'] = function (self $model) {
+            return ReviewStatus::getName($model->review);
         };
 
         $fields['created_at'] = function (self $model) {
@@ -313,7 +327,7 @@ class Record extends ActiveRecord
         };
 
         $fields['creator'] = function (self $model) {
-            return (bool)($model->user_id == Yii::$app->user->id);
+            return (bool) ($model->user_id == Yii::$app->user->id);
         };
 
         return $fields;

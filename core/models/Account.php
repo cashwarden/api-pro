@@ -1,4 +1,12 @@
 <?php
+/**
+ *
+ * @author forecho <caizhenghai@gmail.com>
+ * @link https://cashwarden.com/
+ * @copyright Copyright (c) 2020-2022 forecho
+ * @license https://github.com/cashwarden/api/blob/master/LICENSE.md
+ * @version 1.0.0
+ */
 
 namespace app\core\models;
 
@@ -8,7 +16,7 @@ use app\core\services\TransactionService;
 use app\core\types\AccountStatus;
 use app\core\types\AccountType;
 use app\core\types\ColorType;
-use app\core\types\CurrencyCode;
+use app\core\types\CurrencyType;
 use Yii;
 use yii\behaviors\TimestampBehavior;
 use yiier\helpers\DateHelper;
@@ -40,7 +48,6 @@ use yiier\validators\MoneyValidator;
  * @property string|null $updated_at
  *
  * @property-read User $user
- *
  */
 class Account extends \yii\db\ActiveRecord
 {
@@ -76,7 +83,7 @@ class Account extends \yii\db\ActiveRecord
         return [
             [
                 'class' => TimestampBehavior::class,
-                'value' => Yii::$app->formatter->asDatetime('now')
+                'value' => Yii::$app->formatter->asDatetime('now'),
             ],
         ];
     }
@@ -91,7 +98,7 @@ class Account extends \yii\db\ActiveRecord
             [
                 ['credit_card_limit', 'credit_card_repayment_day', 'credit_card_billing_day'],
                 'required',
-                'on' => self::SCENARIO_CREDIT_CARD
+                'on' => self::SCENARIO_CREDIT_CARD,
             ],
             [
                 [
@@ -103,7 +110,7 @@ class Account extends \yii\db\ActiveRecord
                     'credit_card_billing_day',
                     'sort',
                 ],
-                'integer'
+                'integer',
             ],
             ['status', 'in', 'range' => AccountStatus::names()],
             [['name'], 'string', 'max' => 120],
@@ -113,7 +120,7 @@ class Account extends \yii\db\ActiveRecord
             [['balance', 'currency_balance'], MoneyValidator::class, 'allowsNegative' => true], //todo message
             ['exclude_from_stats', 'boolean', 'trueValue' => true, 'falseValue' => false, 'strict' => true],
             ['default', 'boolean', 'trueValue' => true, 'falseValue' => false, 'strict' => true],
-            ['currency_code', 'in', 'range' => CurrencyCode::getKeys()],
+            ['currency_code', 'in', 'range' => CurrencyType::currentUseCodes()],
             [['keywords'], ArrayValidator::class],
             [
                 'name',
@@ -122,7 +129,7 @@ class Account extends \yii\db\ActiveRecord
                 'when' => function ($model, $attribute) {
                     return $this->id != $model->id;
                 },
-                'message' => Yii::t('app', 'The {attribute} has been used.')
+                'message' => Yii::t('app', 'The {attribute} has been used.'),
             ],
         ];
     }
@@ -155,8 +162,7 @@ class Account extends \yii\db\ActiveRecord
         ];
     }
 
-    /**
-     */
+
     public function afterFind()
     {
         parent::afterFind();
@@ -175,21 +181,20 @@ class Account extends \yii\db\ActiveRecord
                 $ran = ColorType::items();
                 $this->color = $this->color ?: $ran[mt_rand(0, count($ran) - 1)];
             }
-            $this->status = is_null($this->status) ? AccountStatus::ACTIVE : AccountStatus::toEnumValue($this->status);
+            $this->status = $this->status === null ? AccountStatus::ACTIVE : AccountStatus::toEnumValue($this->status);
             $this->currency_balance_cent = Setup::toFen($this->currency_balance);
             if ($this->currency_code == $this->user->base_currency_code) {
                 $this->balance_cent = $this->currency_balance_cent;
-            } else {
-                // $this->balance_cent = $this->currency_balance_cent;
-                // todo 计算汇率
             }
+            // $this->balance_cent = $this->currency_balance_cent;
+            // todo 计算汇率
+
             $this->keywords = $this->keywords ? implode(',', $this->keywords) : null;
 
             $this->type = AccountType::toEnumValue($this->type);
             return true;
-        } else {
-            return false;
         }
+        return false;
     }
 
     public function getUser()
@@ -210,7 +215,7 @@ class Account extends \yii\db\ActiveRecord
             TransactionService::createAdjustRecord($this);
         }
         if ($this->default) {
-            Account::updateAll(
+            self::updateAll(
                 ['default' => self::NO_DEFAULT, 'updated_at' => Yii::$app->formatter->asDatetime('now')],
                 ['and', ['user_id' => $this->user_id, 'default' => self::DEFAULT], ['!=', 'id', $this->id]]
             );
@@ -274,11 +279,11 @@ class Account extends \yii\db\ActiveRecord
         };
 
         $fields['default'] = function (self $model) {
-            return (bool)$model->default;
+            return (bool) $model->default;
         };
 
         $fields['exclude_from_stats'] = function (self $model) {
-            return (bool)$model->exclude_from_stats;
+            return (bool) $model->exclude_from_stats;
         };
 
         $fields['created_at'] = function (self $model) {

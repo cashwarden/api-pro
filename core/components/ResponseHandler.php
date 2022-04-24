@@ -1,4 +1,12 @@
 <?php
+/**
+ *
+ * @author forecho <caizhenghai@gmail.com>
+ * @link https://cashwarden.com/
+ * @copyright Copyright (c) 2020-2022 forecho
+ * @license https://github.com/cashwarden/api/blob/master/LICENSE.md
+ * @version 1.0.0
+ */
 
 namespace app\core\components;
 
@@ -10,7 +18,7 @@ class ResponseHandler
     public $successMessage;
 
     /**
-     * 返回数据统一处理
+     * 返回数据统一处理.
      */
     public function formatResponse()
     {
@@ -19,7 +27,7 @@ class ResponseHandler
             if (isset($response->data['code']) && isset($response->data['message'])) {
                 $response->data = [
                     'code' => $response->data['code'] ?: $response->statusCode,
-                    'data' => isset($response->data['data']) ? $response->data['data'] : null,
+                    'data' => $response->data['data'] ?? null,
                     'message' => $response->data['message'],
                 ];
             } elseif ($response->format != 'html' && !isset($response->data['message'])) {
@@ -33,7 +41,7 @@ class ResponseHandler
                 unset($response->data['message']);
                 $response->data = [
                     'code' => 0,
-                    'data' => isset($response->data[0]) ? $response->data[0] : $response->data,
+                    'data' => $response->data[0] ?? $response->data,
                     'message' => $message,
                 ];
             }
@@ -59,10 +67,10 @@ class ResponseHandler
                 $response->data['message'] = current($response->data['data'])['message'];
                 break;
             default:
-                # code...
+                // code...
                 break;
         }
-
+        \Yii::info('response success', $response->data);
         $response->setStatusCode(200);
     }
 }

@@ -1,4 +1,12 @@
 <?php
+/**
+ *
+ * @author forecho <caizhenghai@gmail.com>
+ * @link https://cashwarden.com/
+ * @copyright Copyright (c) 2020-2022 forecho
+ * @license https://github.com/cashwarden/api/blob/master/LICENSE.md
+ * @version 1.0.0
+ */
 
 namespace app\modules\v1\controllers;
 
@@ -10,7 +18,7 @@ use app\core\exceptions\UserNotProException;
 use app\core\helpers\SearchHelper;
 use app\core\services\LedgerService;
 use app\core\services\UserProService;
-use sizeg\jwt\JwtHttpBearerAuth;
+use bizley\jwt\JwtHttpBearerAuth;
 use Yii;
 use yii\base\InvalidConfigException;
 use yii\base\Model;
@@ -22,23 +30,22 @@ use yiier\helpers\SearchModel;
 use yiier\helpers\Setup;
 
 /**
- *
  * @property-read int $pageSize
  */
 class ActiveController extends \yii\rest\ActiveController
 {
     protected const MAX_PAGE_SIZE = 100;
     protected const DEFAULT_PAGE_SIZE = 20;
-    public $defaultOrder = ['id' => SORT_DESC];
-    public $partialMatchAttributes = [];
-    public $stringToIntAttributes = [];
-    public $relations = [];
+    public array $defaultOrder = ['id' => SORT_DESC];
+    public array $partialMatchAttributes = [];
+    public array $stringToIntAttributes = [];
+    public array $relations = [];
 
     /**
-     * 不参与校验的 actions
+     * 不参与校验的 actions.
      * @var array
      */
-    public $noAuthActions = [];
+    public array $noAuthActions = [];
 
     // 序列化输出
     public $serializer = [
@@ -59,7 +66,7 @@ class ActiveController extends \yii\rest\ActiveController
                 'Access-Control-Request-Method' => ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
                 'Access-Control-Request-Headers' => ['*'],
                 'Access-Control-Max-Age' => 86400,
-            ]
+            ],
         ];
         $behaviors['authenticator'] = [
             'class' => JwtHttpBearerAuth::class,
@@ -95,7 +102,7 @@ class ActiveController extends \yii\rest\ActiveController
             'relations' => $this->relations,
             'scenario' => 'default',
             'partialMatchAttributes' => $this->partialMatchAttributes,
-            'pageSize' => $this->getPageSize()
+            'pageSize' => $this->getPageSize(),
         ]);
 
         $params = $this->formatParams(Yii::$app->request->queryParams);
@@ -129,7 +136,7 @@ class ActiveController extends \yii\rest\ActiveController
      */
     protected function getPageSize()
     {
-        if ($pageSize = (int)request('pageSize')) {
+        if ($pageSize = (int) request('pageSize')) {
             if ($pageSize < self::MAX_PAGE_SIZE) {
                 return $pageSize;
             }
@@ -140,8 +147,8 @@ class ActiveController extends \yii\rest\ActiveController
 
 
     /**
-     * @param Model $model
-     * @param array $params
+     * @param  Model  $model
+     * @param  array  $params
      * @return Model
      * @throws InvalidArgumentException
      */
@@ -155,9 +162,9 @@ class ActiveController extends \yii\rest\ActiveController
     }
 
     /**
-     * @param string $action
-     * @param null $model
-     * @param array $params
+     * @param  string  $action
+     * @param  null  $model
+     * @param  array  $params
      * @throws ForbiddenHttpException|UserNotProException
      */
     public function checkAccess($action, $model = null, $params = [])

@@ -1,12 +1,4 @@
 grumphp:
-    tasks:
-        phpcs:
-            standard: PSR12
-            ignore_patterns:
-                - ./web/*
-                - ./migrations/*,
-                - ./vendor/*
-                - ./mail/*
-                - ./runtime/*
-                - ./requirements.php
-                - ./_ide_helper.php
+  tasks:
+    phpcsfixer:
+      config: .php_cs

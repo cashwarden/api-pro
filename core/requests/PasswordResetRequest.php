@@ -1,9 +1,16 @@
 <?php
+/**
+ *
+ * @author forecho <caizhenghai@gmail.com>
+ * @link https://cashwarden.com/
+ * @copyright Copyright (c) 2020-2022 forecho
+ * @license https://github.com/cashwarden/api/blob/master/LICENSE.md
+ * @version 1.0.0
+ */
 
 namespace app\core\requests;
 
 use app\core\models\User;
-use app\core\types\UserStatus;
 use Yii;
 use yii\base\Model;
 
@@ -24,8 +31,7 @@ class PasswordResetRequest extends Model
                 'email',
                 'exist',
                 'targetClass' => User::class,
-                'filter' => ['status' => UserStatus::ACTIVE],
-                'message' => Yii::t('app', 'There is no user with this email address.')
+                'message' => Yii::t('app', 'There is no user with this email address.'),
             ],
         ];
     }

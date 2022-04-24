@@ -1,4 +1,12 @@
 <?php
+/**
+ *
+ * @author forecho <caizhenghai@gmail.com>
+ * @link https://cashwarden.com/
+ * @copyright Copyright (c) 2020-2022 forecho
+ * @license https://github.com/cashwarden/api/blob/master/LICENSE.md
+ * @version 1.0.0
+ */
 
 namespace app\core\services;
 
@@ -10,11 +18,13 @@ use app\core\exceptions\UserNotProException;
 use app\core\helpers\ArrayHelper;
 use app\core\models\Account;
 use app\core\models\Category;
+use app\core\models\Currency;
 use app\core\models\Record;
 use app\core\models\Search;
 use app\core\models\Tag;
 use app\core\models\Transaction;
 use app\core\traits\ServiceTrait;
+use app\core\types\CurrencyStatus;
 use app\core\types\DirectionType;
 use app\core\types\RecordSource;
 use app\core\types\TransactionType;
@@ -78,14 +88,14 @@ class TransactionService extends BaseObject
 
     public function createByCSV(string $filename, int $ledgerId): array
     {
-        ini_set("memory_limit", "1024M");
-        ini_set("set_time_limit", "0");
+        ini_set('memory_limit', '1024M');
+        ini_set('set_time_limit', '0');
         ini_set('max_execution_time', 1200); //1200 seconds = 20 minutes
         $filename = $this->uploadService->getFullFilename($filename);
         $row = $total = $success = $fail = 0;
         $items = [];
         $model = new Transaction();
-        if (($handle = fopen($filename, "r")) !== false) {
+        if (($handle = fopen($filename, 'r')) !== false) {
             while (($data = fgetcsv($handle)) !== false) {
                 $row++;
                 // 去除第一行数据
@@ -134,7 +144,7 @@ class TransactionService extends BaseObject
                             }
                             break;
                         default:
-                            # code...
+                            // code...
                             break;
                     }
                     $_model->currency_amount = abs($newData[3]);
@@ -149,7 +159,7 @@ class TransactionService extends BaseObject
                     }
                     array_push($items, $_model);
                 } catch (\Exception $e) {
-                    Log::error('导入运费失败', [$newData, (string)$e]);
+                    Log::error('导入运费失败', [$newData, (string) $e]);
                     $failList[] = [
                         'data' => $newData,
                         'reason' => $e->getMessage(),
@@ -172,7 +182,7 @@ class TransactionService extends BaseObject
                 'total' => $total,
                 'success' => $success,
                 'fail' => $fail,
-                'fail_list' => $failList ?? []
+                'fail_list' => $failList ?? [],
             ];
         }
     }
@@ -208,19 +218,19 @@ class TransactionService extends BaseObject
         $transaction->source = RecordSource::CRONTAB;
         $transaction->load($values, '');
         if (!$transaction->save(false)) {
-            throw new Exception(Setup::errorMessage($transaction->firstErrors));
+            throw new \yii\db\Exception(Setup::errorMessage($transaction->firstErrors));
         }
         return $transaction;
     }
 
     /**
      * @param string $desc
-     * @param null|int $source
+     * @param int|null $source
      * @return Transaction|Account
      * @throws InternalException
      * @throws \Throwable
      */
-    public function createByDesc(string $desc, $source = null)
+    public function createByDesc(string $desc, int $chatId = null)
     {
         try {
             if (strpos($desc, '余额') !== false) {
@@ -237,8 +247,10 @@ class TransactionService extends BaseObject
             if (!$model->save()) {
                 throw new DBException(Setup::errorMessage($model->firstErrors));
             }
-            event(new CreateRecordSuccessEvent(), $model);
-            $source ? Record::updateAll(['source' => $source], ['transaction_id' => $model->id]) : null;
+            event(new CreateRecordSuccessEvent(), ['model' => $model, 'chat_id' => $chatId]);
+            if ($chatId) {
+                Record::updateAll(['source' => RecordSource::TELEGRAM], ['transaction_id' => $model->id]);
+            }
             return $model;
         } catch (Exception $e) {
             Yii::error(
@@ -246,7 +258,7 @@ class TransactionService extends BaseObject
                     'request_id' => Yii::$app->requestId->id,
                     empty($model) ? '' : $model->attributes,
                     empty($model) ? '' : $model->errors,
-                    (string)$e
+                    (string) $e,
                 ],
                 __FUNCTION__
             );
@@ -345,7 +357,7 @@ class TransactionService extends BaseObject
             $rules,
             'then_category_id',
             function () use ($transactionType) {
-                return (int)data_get(CategoryService::getDefaultCategory($transactionType), 'id', 0);
+                return (int) data_get(CategoryService::getDefaultCategory($transactionType), 'id', 0);
             }
         );
 
@@ -436,7 +448,7 @@ class TransactionService extends BaseObject
             );
             throw new DBException(Setup::errorMessage($model->firstErrors));
         }
-        event(new CreateRecordSuccessEvent(), $model);
+        event(new CreateRecordSuccessEvent(), ['model' => $model]);
         return true;
     }
 
@@ -476,7 +488,7 @@ class TransactionService extends BaseObject
             try {
                 $tagService->create(['name' => $item, 'ledger_id' => $ledgerId]);
             } catch (Exception $e) {
-                Log::error('add tag fail', [$item, (string)$e]);
+                Log::error('add tag fail', [$item, (string) $e]);
             }
         }
     }
@@ -521,7 +533,7 @@ class TransactionService extends BaseObject
     public function getAccountIdByDesc(): int
     {
         $userId = Yii::$app->user->id;
-        return (int)data_get(AccountService::getDefaultAccount($userId), 'id', 0);
+        return (int) data_get(AccountService::getDefaultAccount($userId), 'id', 0);
     }
 
     /**
@@ -531,7 +543,7 @@ class TransactionService extends BaseObject
     public function getLedgerIdByDesc(): int
     {
         $userId = Yii::$app->user->id;
-        return (int)data_get(LedgerService::getDefaultLedger($userId), 'id', 0);
+        return (int) data_get(LedgerService::getDefaultLedger($userId), 'id', 0);
     }
 
     /**
@@ -566,8 +578,8 @@ class TransactionService extends BaseObject
             if (($m = data_get($matches, '1.0')) && $d = data_get($matches, '3.0')) {
                 $currMonth = Yii::$app->formatter->asDatetime('now', 'php:m');
                 $y = Yii::$app->formatter->asDatetime($m > $currMonth ? strtotime('-1 year') : time(), 'php:Y');
-                $m = sprintf("%02d", $m);
-                $d = sprintf("%02d", $d);
+                $m = sprintf('%02d', $m);
+                $d = sprintf('%02d', $d);
                 return "{$y}-{$m}-{$d} {$time}";
             }
 
@@ -575,7 +587,7 @@ class TransactionService extends BaseObject
             if ($d = data_get($matches, '1.0')) {
                 $currDay = Yii::$app->formatter->asDatetime('now', 'php:d');
                 $m = Yii::$app->formatter->asDatetime($d > $currDay ? strtotime('-1 month') : time(), 'php:Y-m');
-                $d = sprintf("%02d", $d);
+                $d = sprintf('%02d', $d);
                 return "{$m}-{$d} {$time}";
             }
         } catch (Exception $e) {
@@ -680,7 +692,7 @@ class TransactionService extends BaseObject
             ->orderBy(['date' => SORT_DESC])
             ->asArray()
             ->all();
-        foreach ($items as $k => $item) {
+        foreach ($items as $item) {
             $datum['date'] = $item['date'];
             $datum['category_name'] = data_get($categoriesMap, $item['category_id'], '');
             $datum['type'] = data_get($types, $item['type'], '');
@@ -702,7 +714,7 @@ class TransactionService extends BaseObject
                     $datum['account2'] = data_get($accountsMap, $item['to_account_id'], '');
                     break;
                 default:
-                    # code...
+                    // code...
                     break;
             }
             array_push($data, array_values($datum));
@@ -763,17 +775,13 @@ class TransactionService extends BaseObject
             $query->andWhere($searchKeywords);
         }
 
-//        if (($date = explode('~', data_get($params, 'date'))) && count($date) == 2) {
-//            $query->andWhere(['between', 'date', strtotime($date[0]), strtotime($date[1])]);
-//        }
-
         $query->andFilterWhere(['category_id' => data_get($params, 'category_id')]);
         $search = $query->asArray()
             ->orderBy(['date' => SORT_DESC, 'id' => SORT_DESC])
             ->all();
 
         return \yii\helpers\ArrayHelper::getColumn($search, function ($element) {
-            return (int)$element['id'];
+            return (int) $element['id'];
         });
     }
 
@@ -801,5 +809,30 @@ class TransactionService extends BaseObject
             return;
         }
         Search::deleteAll(['id' => $ids]);
+    }
+
+
+    /**
+     * @param Transaction $transaction
+     * @param string $baseCurrencyCode
+     * @return float
+     * @throws InvalidArgumentException
+     */
+    public static function getRate(Transaction $transaction, string $baseCurrencyCode): float
+    {
+        $currency = Currency::find()
+            ->select('rate')
+            ->where([
+                'ledger_id' => $transaction->ledger_id,
+                'currency_code_to' => $baseCurrencyCode,
+                'currency_code_from' => $transaction->currency_code,
+                'status' => CurrencyStatus::ACTIVE,
+            ])
+            ->limit(1)
+            ->one();
+        if (!$currency) {
+            throw new InvalidArgumentException('汇率不存在');
+        }
+        return $currency->rate;
     }
 }

@@ -1,4 +1,12 @@
 <?php
+/**
+ *
+ * @author forecho <caizhenghai@gmail.com>
+ * @link https://cashwarden.com/
+ * @copyright Copyright (c) 2020-2022 forecho
+ * @license https://github.com/cashwarden/api/blob/master/LICENSE.md
+ * @version 1.0.0
+ */
 
 namespace app\tests\api;
 
@@ -31,7 +39,7 @@ class CreateUserCest
                     'password' => 'pass123',
                     'base_currency_code' => 'CNS',
                 ],
-                'code' => ErrorCodes::INVALID_ARGUMENT_ERROR
+                'code' => ErrorCodes::INVALID_ARGUMENT_ERROR,
             ],
             [
                 'data' => [
@@ -39,7 +47,7 @@ class CreateUserCest
                     'email' => 'demo@yii.com',
                     'password' => 'pass123',
                 ],
-                'code' => ErrorCodes::INVALID_ARGUMENT_ERROR
+                'code' => ErrorCodes::INVALID_ARGUMENT_ERROR,
             ],
             [
                 'data' => [
@@ -47,7 +55,7 @@ class CreateUserCest
                     'email' => 'demo',
                     'password' => 'pass123',
                 ],
-                'code' => ErrorCodes::INVALID_ARGUMENT_ERROR
+                'code' => ErrorCodes::INVALID_ARGUMENT_ERROR,
             ],
             [
                 'data' => [
@@ -55,7 +63,7 @@ class CreateUserCest
                     'email' => 'demo@yii.com',
                     'password' => 'pass123',
                 ],
-                'code' => ErrorCodes::INVALID_ARGUMENT_ERROR
+                'code' => ErrorCodes::INVALID_ARGUMENT_ERROR,
             ],
             [
                 'data' => [
@@ -63,14 +71,14 @@ class CreateUserCest
                     'email' => 'demo@yii.com',
                     'password' => 'pass1',
                 ],
-                'code' => ErrorCodes::INVALID_ARGUMENT_ERROR
+                'code' => ErrorCodes::INVALID_ARGUMENT_ERROR,
             ],
             [
                 'data' => [
                     'username' => 'demo-sdsdkj',
                     'password' => 'pass1',
                 ],
-                'code' => ErrorCodes::INVALID_ARGUMENT_ERROR
+                'code' => ErrorCodes::INVALID_ARGUMENT_ERROR,
             ],
         ];
     }

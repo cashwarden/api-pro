@@ -1,4 +1,12 @@
 <?php
+/**
+ *
+ * @author forecho <caizhenghai@gmail.com>
+ * @link https://cashwarden.com/
+ * @copyright Copyright (c) 2020-2022 forecho
+ * @license https://github.com/cashwarden/api/blob/master/LICENSE.md
+ * @version 1.0.0
+ */
 
 namespace app\core\behaviors;
 
@@ -15,7 +23,7 @@ class LoggerBehavior extends Behavior
     {
         return [
             Response::EVENT_BEFORE_SEND => 'beforeSend',
-            Controller::EVENT_BEFORE_ACTION => 'beforeAction'
+            Controller::EVENT_BEFORE_ACTION => 'beforeAction',
         ];
     }
 
@@ -28,6 +36,9 @@ class LoggerBehavior extends Behavior
         $response = $event->sender;
         if ($response->format != 'html') {
             $request = \Yii::$app->request;
+            if ($response->data === null) {
+                return;
+            }
             $params = Yii::$app->params;
             $requestId = Yii::$app->requestId->id;
             $code = ArrayHelper::getValue($response->data, 'code');
@@ -46,7 +57,7 @@ class LoggerBehavior extends Behavior
                 'header' => Json::encode($requestHeaderParams),
                 'params' => Json::encode($requestParams),
                 'url' => $request->absoluteUrl,
-                'response' => Json::encode($response->data)
+                'response' => Json::encode($response->data),
             ];
             if (is_array($response->data)) {
                 $response->data = ['request_id' => $requestId] + $response->data;
@@ -62,8 +73,8 @@ class LoggerBehavior extends Behavior
 
 
     /**
-     * @param array $params
-     * @param array $ignoredHeaderKeys
+     * @param  array  $params
+     * @param  array  $ignoredHeaderKeys
      * @return array
      */
     protected function headerFilter(array $params, array $ignoredHeaderKeys)
@@ -78,9 +89,9 @@ class LoggerBehavior extends Behavior
 
     /**
      * @param $params array
-     * @param array $ignoredKeys
-     * @param array $hideKeys
-     * @param array $halfHideKeys
+     * @param  array  $ignoredKeys
+     * @param  array  $hideKeys
+     * @param  array  $halfHideKeys
      * @return string|int|array
      */
     protected function paramsFilter(array $params, array $ignoredKeys, array $hideKeys, array $halfHideKeys)
@@ -105,7 +116,7 @@ class LoggerBehavior extends Behavior
     }
 
     /**
-     * @param string $value
+     * @param  string  $value
      * @return string
      */
     protected function paramReplace(string $value)

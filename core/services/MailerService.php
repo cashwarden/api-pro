@@ -1,4 +1,12 @@
 <?php
+/**
+ *
+ * @author forecho <caizhenghai@gmail.com>
+ * @link https://cashwarden.com/
+ * @copyright Copyright (c) 2020-2022 forecho
+ * @license https://github.com/cashwarden/api/blob/master/LICENSE.md
+ * @version 1.0.0
+ */
 
 namespace app\core\services;
 
@@ -103,7 +111,7 @@ class MailerService
     }
 
     /**
-     * 验证邮箱邮件
+     * 验证邮箱邮件.
      *
      * @param User $user
      * @return bool
@@ -118,7 +126,7 @@ class MailerService
     }
 
     /**
-     * 忘记密码邮件
+     * 忘记密码邮件.
      *
      * @param User $user
      * @return bool

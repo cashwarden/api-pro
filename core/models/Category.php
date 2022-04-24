@@ -1,4 +1,12 @@
 <?php
+/**
+ *
+ * @author forecho <caizhenghai@gmail.com>
+ * @link https://cashwarden.com/
+ * @copyright Copyright (c) 2020-2022 forecho
+ * @license https://github.com/cashwarden/api/blob/master/LICENSE.md
+ * @version 1.0.0
+ */
 
 namespace app\core\models;
 
@@ -51,7 +59,7 @@ class Category extends \yii\db\ActiveRecord
         return [
             [
                 'class' => TimestampBehavior::class,
-                'value' => Yii::$app->formatter->asDatetime('now')
+                'value' => Yii::$app->formatter->asDatetime('now'),
             ],
         ];
     }
@@ -80,7 +88,7 @@ class Category extends \yii\db\ActiveRecord
                 'name',
                 'unique',
                 'targetAttribute' => ['user_id', 'ledger_id', 'name'],
-                'message' => Yii::t('app', 'The {attribute} has been used.')
+                'message' => Yii::t('app', 'The {attribute} has been used.'),
             ],
         ];
     }
@@ -132,9 +140,8 @@ class Category extends \yii\db\ActiveRecord
             $this->keywords = $this->keywords ? implode(',', $this->keywords) : null;
             $this->transaction_type = TransactionType::toEnumValue($this->transaction_type);
             return true;
-        } else {
-            return false;
         }
+        return false;
     }
 
     /**
@@ -146,16 +153,16 @@ class Category extends \yii\db\ActiveRecord
     {
         parent::afterSave($insert, $changedAttributes);
         if ($this->default) {
-            Category::updateAll(
+            self::updateAll(
                 ['default' => self::NOT_DEFAULT, 'updated_at' => Yii::$app->formatter->asDatetime('now')],
                 [
                     'and',
                     [
                         'ledger_id' => $this->ledger_id,
                         'default' => self::DEFAULT,
-                        'transaction_type' => $this->transaction_type
+                        'transaction_type' => $this->transaction_type,
                     ],
-                    ['!=', 'id', $this->id]
+                    ['!=', 'id', $this->id],
                 ]
             );
         }
@@ -194,7 +201,7 @@ class Category extends \yii\db\ActiveRecord
         };
 
         $fields['default'] = function (self $model) {
-            return (bool)$model->default;
+            return (bool) $model->default;
         };
 
         $fields['created_at'] = function (self $model) {

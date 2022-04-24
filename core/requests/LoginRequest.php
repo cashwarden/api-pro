@@ -1,4 +1,12 @@
 <?php
+/**
+ *
+ * @author forecho <caizhenghai@gmail.com>
+ * @link https://cashwarden.com/
+ * @copyright Copyright (c) 2020-2022 forecho
+ * @license https://github.com/cashwarden/api/blob/master/LICENSE.md
+ * @version 1.0.0
+ */
 
 namespace app\core\requests;
 
@@ -8,6 +16,7 @@ use Yii;
 class LoginRequest extends \yii\base\Model
 {
     public $username;
+    public $code;
     public $password;
 
     /**
@@ -16,8 +25,9 @@ class LoginRequest extends \yii\base\Model
     public function rules()
     {
         return [
-            [['username'], 'filter', 'filter' => 'trim'],
+            [['username', 'code'], 'filter', 'filter' => 'trim'],
             [['username', 'password'], 'required'],
+            [['code'], 'string'],
 
             ['password', 'validatePassword'],
         ];

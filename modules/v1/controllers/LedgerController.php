@@ -1,4 +1,12 @@
 <?php
+/**
+ *
+ * @author forecho <caizhenghai@gmail.com>
+ * @link https://cashwarden.com/
+ * @copyright Copyright (c) 2020-2022 forecho
+ * @license https://github.com/cashwarden/api/blob/master/LICENSE.md
+ * @version 1.0.0
+ */
 
 namespace app\modules\v1\controllers;
 
@@ -21,24 +29,15 @@ use yii\web\NotFoundHttpException;
 use yiier\helpers\SearchModel;
 
 /**
- * Ledger controller for the `v1` module
+ * Ledger controller for the `v1` module.
  */
 class LedgerController extends ActiveController
 {
     use ServiceTrait;
 
     public $modelClass = Ledger::class;
-    public $partialMatchAttributes = ['name'];
-    public $stringToIntAttributes = ['type' => LedgerType::class];
-
-
-    public function actions()
-    {
-        $actions = parent::actions();
-        // 注销系统自带的实现方法
-        unset($actions['delete']);
-        return $actions;
-    }
+    public array $partialMatchAttributes = ['name'];
+    public array $stringToIntAttributes = ['type' => LedgerType::class];
 
     /**
      * @return bool
@@ -115,7 +114,7 @@ class LedgerController extends ActiveController
             'model' => $modelClass,
             'scenario' => 'default',
             'partialMatchAttributes' => $this->partialMatchAttributes,
-            'pageSize' => $this->getPageSize()
+            'pageSize' => $this->getPageSize(),
         ]);
 
         $params = $this->formatParams(Yii::$app->request->queryParams);
@@ -136,7 +135,7 @@ class LedgerController extends ActiveController
      * @param null $model
      * @param array $params
      * @throws ForbiddenHttpException
-     * @throws UserNotProException
+     * @throws UserNotProException|InvalidArgumentException
      */
     public function checkAccess($action, $model = null, $params = [])
     {

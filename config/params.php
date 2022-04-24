@@ -1,4 +1,12 @@
 <?php
+/**
+ *
+ * @author forecho <caizhenghai@gmail.com>
+ * @link https://cashwarden.com/
+ * @copyright Copyright (c) 2020-2022 forecho
+ * @license https://github.com/cashwarden/api/blob/master/LICENSE.md
+ * @version 1.0.0
+ */
 
 return [
     'appURL' => env('APP_URL'),
@@ -35,4 +43,5 @@ return [
     'wechatAppId' => env('WECHAT_APP_ID'),
     'wechatAppSecret' => env('WECHAT_APP_SECRET'),
     'wechatToken' => env('WECHAT_TOKEN'),
+    'superAdminUserId' => env('SUPER_ADMIN_USER_ID'),
 ];

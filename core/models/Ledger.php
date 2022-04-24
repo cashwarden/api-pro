@@ -1,11 +1,23 @@
 <?php
+/**
+ *
+ * @author forecho <caizhenghai@gmail.com>
+ * @link https://cashwarden.com/
+ * @copyright Copyright (c) 2020-2022 forecho
+ * @license https://github.com/cashwarden/api/blob/master/LICENSE.md
+ * @version 1.0.0
+ */
 
 namespace app\core\models;
 
+use app\core\exceptions\CannotOperateException;
+use app\core\exceptions\InvalidArgumentException;
 use app\core\services\LedgerService;
+use app\core\types\CurrencyType;
 use app\core\types\LedgerType;
 use Yii;
 use yii\behaviors\TimestampBehavior;
+use yii\web\ForbiddenHttpException;
 use yiier\helpers\DateHelper;
 
 /**
@@ -15,6 +27,7 @@ use yiier\helpers\DateHelper;
  * @property string $name
  * @property int|string $type 类型
  * @property int $user_id
+ * @property string $base_currency_code
  * @property string|null $cover
  * @property string|null $remark
  * @property int|null $default
@@ -51,7 +64,7 @@ class Ledger extends \yii\db\ActiveRecord
         return [
             [
                 'class' => TimestampBehavior::class,
-                'value' => Yii::$app->formatter->asDatetime('now')
+                'value' => Yii::$app->formatter->asDatetime('now'),
             ],
         ];
     }
@@ -76,6 +89,7 @@ class Ledger extends \yii\db\ActiveRecord
             [['name', 'user_id', 'type'], 'required'],
             [['user_id'], 'integer'],
             ['type', 'in', 'range' => LedgerType::names()],
+            [['base_currency_code'], 'string', 'max' => 3],
             [['name'], 'string', 'max' => 100],
             [['cover', 'remark'], 'string', 'max' => 255],
             ['default', 'boolean', 'trueValue' => true, 'falseValue' => false, 'strict' => true],
@@ -92,6 +106,7 @@ class Ledger extends \yii\db\ActiveRecord
             'name' => Yii::t('app', 'Name'),
             'type' => Yii::t('app', 'Type'),
             'user_id' => Yii::t('app', 'User ID'),
+            'base_currency_code' => Yii::t('app', 'Base Currency Code'),
             'cover' => Yii::t('app', 'Cover'),
             'remark' => Yii::t('app', 'Remark'),
             'default' => Yii::t('app', 'Default'),
@@ -109,11 +124,17 @@ class Ledger extends \yii\db\ActiveRecord
     public function beforeSave($insert)
     {
         if (parent::beforeSave($insert)) {
+            $this->base_currency_code = $this->base_currency_code ?: CurrencyType::CNY_KEY;
             $this->type = LedgerType::toEnumValue($this->type);
+            // 有记录时不支持修改基础货币
+            if (!$insert && Transaction::find()->where(['ledger_id' => $this->id])->count('id')) {
+                if (data_get($this->oldAttributes, 'base_currency_code') != $this->base_currency_code) {
+                    throw new InvalidArgumentException('账本有数据之后不再支持修改基础货币');
+                }
+            }
             return true;
-        } else {
-            return false;
         }
+        return false;
     }
 
     /**
@@ -127,6 +148,27 @@ class Ledger extends \yii\db\ActiveRecord
         if ($insert) {
             LedgerService::createLedgerAfter($this);
         }
+    }
+
+    /**
+     * @return bool
+     * @throws CannotOperateException|ForbiddenHttpException
+     */
+    public function beforeDelete()
+    {
+        if ($this->default) {
+            throw new CannotOperateException(Yii::t('app', 'Cannot delete the default ledger.'));
+        }
+        if ($this->user_id !== Yii::$app->user->id) {
+            throw new ForbiddenHttpException(Yii::t('app', 'You do not have permission to operate.'));
+        }
+        return parent::beforeDelete();
+    }
+
+    public function afterDelete()
+    {
+        parent::afterDelete();
+        LedgerService::afterDelete($this->id);
     }
 
     public function getCategories()
@@ -157,11 +199,11 @@ class Ledger extends \yii\db\ActiveRecord
         };
 
         $fields['default'] = function (self $model) {
-            return (bool)$model->default;
+            return (bool) $model->default;
         };
 
         $fields['creator'] = function (self $model) {
-            return (bool)($model->user_id == Yii::$app->user->id);
+            return (bool) ($model->user_id == Yii::$app->user->id);
         };
 
         $fields['created_at'] = function (self $model) {

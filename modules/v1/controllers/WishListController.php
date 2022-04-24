@@ -1,4 +1,12 @@
 <?php
+/**
+ *
+ * @author forecho <caizhenghai@gmail.com>
+ * @link https://cashwarden.com/
+ * @copyright Copyright (c) 2020-2022 forecho
+ * @license https://github.com/cashwarden/api/blob/master/LICENSE.md
+ * @version 1.0.0
+ */
 
 namespace app\modules\v1\controllers;
 
@@ -18,15 +26,15 @@ use yii\web\ForbiddenHttpException;
 use yii\web\NotFoundHttpException;
 
 /**
- * WishList controller for the `v1` module
+ * WishList controller for the `v1` module.
  */
 class WishListController extends ActiveController
 {
     use ServiceTrait;
 
     public $modelClass = WishList::class;
-    public $defaultOrder = ['id' => SORT_DESC];
-    public $partialMatchAttributes = ['name'];
+    public array $defaultOrder = ['id' => SORT_DESC];
+    public array $partialMatchAttributes = ['name'];
 
     /**
      * @param int $id
@@ -50,7 +58,7 @@ class WishListController extends ActiveController
      * @param string $action
      * @param null $model
      * @param array $params
-     * @throws ForbiddenHttpException|UserNotProException
+     * @throws ForbiddenHttpException|UserNotProException|InvalidArgumentException
      */
     public function checkAccess($action, $model = null, $params = [])
     {

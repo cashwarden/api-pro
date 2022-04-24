@@ -1,4 +1,12 @@
 <?php
+/**
+ *
+ * @author forecho <caizhenghai@gmail.com>
+ * @link https://cashwarden.com/
+ * @copyright Copyright (c) 2020-2022 forecho
+ * @license https://github.com/cashwarden/api/blob/master/LICENSE.md
+ * @version 1.0.0
+ */
 
 namespace app\core\models;
 
@@ -41,14 +49,13 @@ use yiier\validators\MoneyValidator;
  */
 class BudgetConfig extends \yii\db\ActiveRecord
 {
-
     /**
-     * @var integer
+     * @var int
      */
     public $amount;
 
     /**
-     * @var integer
+     * @var int
      */
     public $init_amount;
 
@@ -78,7 +85,7 @@ class BudgetConfig extends \yii\db\ActiveRecord
         return [
             [
                 'class' => TimestampBehavior::class,
-                'value' => Yii::$app->formatter->asDatetime('now')
+                'value' => Yii::$app->formatter->asDatetime('now'),
             ],
         ];
     }
@@ -91,7 +98,7 @@ class BudgetConfig extends \yii\db\ActiveRecord
         return [
             [
                 ['name', 'ledger_id', 'transaction_type', 'amount', 'period', 'category_ids', 'started_at', 'ended_at'],
-                'required'
+                'required',
             ],
             [['amount', 'init_amount'], MoneyValidator::class],
             ['period', 'in', 'range' => BudgetPeriod::names()],
@@ -102,7 +109,7 @@ class BudgetConfig extends \yii\db\ActiveRecord
                 'range' => [
                     TransactionType::getName(TransactionType::EXPENSE),
                     TransactionType::getName(TransactionType::INCOME),
-                ]
+                ],
             ],
             [
                 'ledger_id',
@@ -127,7 +134,7 @@ class BudgetConfig extends \yii\db\ActiveRecord
     {
         parent::afterFind();
         $this->status = BudgetStatus::getName($this->status);
-        $this->rollover = (bool)$this->rollover;
+        $this->rollover = (bool) $this->rollover;
     }
 
     /**
@@ -146,12 +153,11 @@ class BudgetConfig extends \yii\db\ActiveRecord
             $this->period = BudgetPeriod::toEnumValue($this->period);
             $this->formatDate();
             $this->transaction_type = TransactionType::toEnumValue($this->transaction_type);
-            $this->status = is_null($this->status) ? BudgetStatus::ACTIVE : BudgetStatus::toEnumValue($this->status);
+            $this->status = $this->status === null ? BudgetStatus::ACTIVE : BudgetStatus::toEnumValue($this->status);
             $this->category_ids = $this->category_ids ? implode(',', array_unique($this->category_ids)) : null;
             return true;
-        } else {
-            return false;
         }
+        return false;
     }
 
 
@@ -244,7 +250,7 @@ class BudgetConfig extends \yii\db\ActiveRecord
             'actual_amount' => Setup::toYuan($actualAmountCent),
             'budget_amount' => Setup::toYuan($budgetAmountCent),
             'surplus_amount' => Setup::toYuan($budgetAmountCent - $actualAmountCent),
-            'progress' => $budgetAmountCent ? bcmul(bcdiv($actualAmountCent, $budgetAmountCent, 4), 100, 1) : 100
+            'progress' => $budgetAmountCent ? bcmul(bcdiv($actualAmountCent, $budgetAmountCent, 4), 100, 1) : 100,
         ];
     }
 

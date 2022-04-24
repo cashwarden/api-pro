@@ -1,4 +1,12 @@
 <?php
+/**
+ *
+ * @author forecho <caizhenghai@gmail.com>
+ * @link https://cashwarden.com/
+ * @copyright Copyright (c) 2020-2022 forecho
+ * @license https://github.com/cashwarden/api/blob/master/LICENSE.md
+ * @version 1.0.0
+ */
 
 namespace app\core\services;
 
@@ -27,7 +35,7 @@ class UploadService extends BaseObject
             $this->checkEncoding($filename);
             return $this->getFullFilename($filename, params('uploadWebPath'));
         } catch (\Exception $e) {
-            Log::error('upload record error', [$uploadedFile, (string)$e]);
+            Log::error('upload record error', [$uploadedFile, (string) $e]);
             throw new \Exception($e->getMessage(), $e->getCode());
         }
     }

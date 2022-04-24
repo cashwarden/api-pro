@@ -40,8 +40,9 @@ You can then install this project template using the following command:
 composer create-project --prefer-dist cashwarden/api <rest-api>
 cd <rest-api>
 cp .env.example .env
-chmod 777 -R runtime/
-chmod 777 -R web/uploads/
+chmod 777 -R runtime
+chmod 777 -R web/uploads
+chmod 777 -R web/assets
 php yii migrate
 php yii queue-migrate
 php yii migrate --migrationPath=@yiier/userSetting/migrations/
@@ -63,8 +64,9 @@ Accessing [Use this template](https://github.com/cashwarden/api/generate) Create
 git clone xxxx
 cd <rest-api>
 cp .env.example .env
-chmod 777 -R runtime/
-chmod 777 -R web/uploads/
+chmod 777 -R runtime
+chmod 777 -R web/uploads
+chmod 777 -R web/assets
 php yii migrate
 php yii queue-migrate
 php yii migrate --migrationPath=@yiier/userSetting/migrations/
@@ -108,6 +110,30 @@ http://127.0.0.1:8000
 - Minimum required Docker engine version `17.04` for development (
   see [Performance tuning for volume mounts](https://docs.docker.com/docker-for-mac/osxfs-caching/))
 - The default configuration uses a host-volume in your home directory `.docker-composer` for composer caches
+
+使用手册
+---------
+
+### 给指定用户升级为 Pro
+
+```shell
+php yii user/upgrade-pro 1
+
+# or
+
+php yii user/upgrade-pro 1 2022-12-23
+```
+
+- 第一个参数是用户 ID
+- 第二个参数是到期时间，默认是1年之后到期，也可以指定到期时间，目前支持最大值是 `2038-01-18`
+
+## For DEV
+
+## Code Formatting
+
+```shell
+composer cs-fix
+```
 
 Check out the packages
 ------------

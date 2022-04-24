@@ -1,4 +1,12 @@
 <?php
+/**
+ *
+ * @author forecho <caizhenghai@gmail.com>
+ * @link https://cashwarden.com/
+ * @copyright Copyright (c) 2020-2022 forecho
+ * @license https://github.com/cashwarden/api/blob/master/LICENSE.md
+ * @version 1.0.0
+ */
 
 namespace app\core\models;
 
@@ -42,7 +50,7 @@ use yiier\validators\MoneyValidator;
 class Rule extends \yii\db\ActiveRecord
 {
     /**
-     * @var integer
+     * @var int
      */
     public $then_currency_amount;
 
@@ -63,7 +71,7 @@ class Rule extends \yii\db\ActiveRecord
         return [
             [
                 'class' => TimestampBehavior::class,
-                'value' => Yii::$app->formatter->asDatetime('now')
+                'value' => Yii::$app->formatter->asDatetime('now'),
             ],
         ];
     }
@@ -77,7 +85,7 @@ class Rule extends \yii\db\ActiveRecord
             [['name', 'if_keywords', 'then_transaction_type'], 'required'],
             [
                 ['user_id', 'ledger_id', 'then_category_id', 'then_from_account_id', 'then_to_account_id', 'sort'],
-                'integer'
+                'integer',
             ],
             [
                 'ledger_id',
@@ -136,20 +144,19 @@ class Rule extends \yii\db\ActiveRecord
             if ($insert) {
                 $this->user_id = Yii::$app->user->id;
             }
-            $this->then_reimbursement_status = is_null($this->then_reimbursement_status) ?
+            $this->then_reimbursement_status = $this->then_reimbursement_status === null ?
                 ReimbursementStatus::NONE : ReimbursementStatus::toEnumValue($this->then_reimbursement_status);
-            $this->then_transaction_status = is_null($this->then_transaction_status) ?
+            $this->then_transaction_status = $this->then_transaction_status === null ?
                 TransactionStatus::DONE : TransactionStatus::toEnumValue($this->then_transaction_status);
 
             $this->then_currency_amount_cent = Setup::toFen($this->then_currency_amount);
-            $this->status = is_null($this->status) ? RuleStatus::ACTIVE : RuleStatus::toEnumValue($this->status);
+            $this->status = $this->status === null ? RuleStatus::ACTIVE : RuleStatus::toEnumValue($this->status);
             $this->then_transaction_type = TransactionType::toEnumValue($this->then_transaction_type);
             $this->if_keywords = $this->if_keywords ? implode(',', $this->if_keywords) : null;
             $this->then_tags = $this->then_tags ? implode(',', $this->then_tags) : null;
             return true;
-        } else {
-            return false;
         }
+        return false;
     }
 
     public function getThenCategory()

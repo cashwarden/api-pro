@@ -1,4 +1,12 @@
 <?php
+/**
+ *
+ * @author forecho <caizhenghai@gmail.com>
+ * @link https://cashwarden.com/
+ * @copyright Copyright (c) 2020-2022 forecho
+ * @license https://github.com/cashwarden/api/blob/master/LICENSE.md
+ * @version 1.0.0
+ */
 
 namespace app\modules\v1\controllers;
 
@@ -10,8 +18,10 @@ use app\core\requests\UpdateStatus;
 use app\core\services\LedgerService;
 use app\core\traits\ServiceTrait;
 use app\core\types\AnalysisDateType;
+use app\core\types\ExcludeFromStats;
 use app\core\types\RecordSource;
 use app\core\types\ReimbursementStatus;
+use app\core\types\ReviewStatus;
 use app\core\types\TransactionType;
 use Exception;
 use Yii;
@@ -20,18 +30,18 @@ use yii\web\ForbiddenHttpException;
 use yiier\helpers\Setup;
 
 /**
- * Record controller for the `v1` module
+ * Record controller for the `v1` module.
  */
 class RecordController extends ActiveController
 {
     use ServiceTrait;
 
     public $modelClass = Record::class;
-    public $noAuthActions = [];
-    public $defaultOrder = ['date' => SORT_DESC, 'id' => SORT_DESC];
-    public $stringToIntAttributes = [
+    public array $noAuthActions = [];
+    public array $defaultOrder = ['date' => SORT_DESC, 'id' => SORT_DESC];
+    public array $stringToIntAttributes = [
         'transaction_type' => TransactionType::class,
-        'reimbursement_status' => ReimbursementStatus::class
+        'reimbursement_status' => ReimbursementStatus::class,
     ];
 
     public function actions()
@@ -144,29 +154,43 @@ class RecordController extends ActiveController
     }
 
     /**
+     * @param string $key
      * @param int $id
      * @return bool
      * @throws ForbiddenHttpException
+     * @throws InternalException
      * @throws InvalidArgumentException
      * @throws \yii\db\Exception
-     * @throws InternalException
      */
-    public function actionUpdateReimbursementStatus(int $id): bool
+    public function actionUpdateStatus(string $key, int $id): bool
     {
         $params = Yii::$app->request->bodyParams;
-        $model = new UpdateStatus(ReimbursementStatus::names());
-        /** @var UpdateStatus $requestModel */
-        $requestModel = $this->validate($model, $params);
-
-        $model = Record::findOne($id);
-        $this->checkAccess('update', $model);
-        if ($model->transaction_type != TransactionType::EXPENSE) {
-            throw new InvalidArgumentException();
+        $record = Record::findOne($id);
+        $this->checkAccess('update', $record);
+        switch ($key) {
+            case 'reimbursement_status':
+                $statusClass = new ReimbursementStatus();
+                if ($record->transaction_type != TransactionType::EXPENSE) {
+                    throw new InvalidArgumentException();
+                }
+                break;
+            case 'exclude_from_stats':
+                $statusClass = new ExcludeFromStats();
+                break;
+            case 'review':
+                $statusClass = new ReviewStatus();
+                break;
+            default:
+                throw new InvalidArgumentException('错误的 key');
         }
 
-        $model->reimbursement_status = ReimbursementStatus::toEnumValue($requestModel->status);
-        if (!$model->save(false)) {
-            throw new \yii\db\Exception(Setup::errorMessage($model->firstErrors));
+        $model = new UpdateStatus($statusClass::names());
+        /** @var UpdateStatus $requestModel */
+        $requestModel = $this->validate($model, $params);
+        $record->$key = $statusClass::toEnumValue($requestModel->status);
+
+        if (!$record->save(false)) {
+            throw new \yii\db\Exception(Setup::errorMessage($record->firstErrors));
         }
         return true;
     }

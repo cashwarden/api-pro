@@ -1,9 +1,17 @@
 <?php
+/**
+ *
+ * @author forecho <caizhenghai@gmail.com>
+ * @link https://cashwarden.com/
+ * @copyright Copyright (c) 2020-2022 forecho
+ * @license https://github.com/cashwarden/api/blob/master/LICENSE.md
+ * @version 1.0.0
+ */
 
 namespace app\core\requests;
 
 use app\core\models\User;
-use app\core\types\CurrencyCode;
+use app\core\types\CurrencyType;
 
 class JoinRequest extends \yii\base\Model
 {
@@ -31,7 +39,7 @@ class JoinRequest extends \yii\base\Model
             ['password', 'required'],
             ['password', 'string', 'min' => 6],
 
-            ['base_currency_code', 'in', 'range' => CurrencyCode::getKeys()],
+            ['base_currency_code', 'in', 'range' => CurrencyType::currentUseCodes()],
         ];
     }
 

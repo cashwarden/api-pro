@@ -1,4 +1,12 @@
 <?php
+/**
+ *
+ * @author forecho <caizhenghai@gmail.com>
+ * @link https://cashwarden.com/
+ * @copyright Copyright (c) 2020-2022 forecho
+ * @license https://github.com/cashwarden/api/blob/master/LICENSE.md
+ * @version 1.0.0
+ */
 
 namespace app\core\services;
 
@@ -14,6 +22,7 @@ use app\core\requests\JoinRequest;
 use app\core\requests\PasswordResetRequest;
 use app\core\traits\ServiceTrait;
 use app\core\types\AccountType;
+use app\core\types\AuthClientStatus;
 use app\core\types\AuthClientType;
 use app\core\types\ColorType;
 use app\core\types\LedgerType;
@@ -55,14 +64,14 @@ class UserService
             }
             $this->createUserAfterInitData($user);
 
-            $endedAt = Carbon::parse("2020-12-31")->endOfDay();
+            $endedAt = Carbon::parse('2020-12-31')->endOfDay();
             UserProService::upgradeToProBySystem($user->id, $endedAt);
 
             $transaction->commit();
         } catch (Exception $e) {
             $transaction->rollBack();
             Yii::error(
-                ['request_id' => Yii::$app->requestId->id, $user->attributes, $user->errors, (string)$e],
+                ['request_id' => Yii::$app->requestId->id, $user->attributes, $user->errors, (string) $e],
                 __FUNCTION__
             );
             throw new InternalException($e->getMessage());
@@ -85,7 +94,7 @@ class UserService
         $signer = $jwt->getSigner('HS256');
         $key = $jwt->getKey();
         $time = time();
-        return (string)$jwt->getBuilder()
+        return (string) $jwt->getBuilder()
             ->issuedBy(params('appURL'))
             ->identifiedBy(Yii::$app->name, true)
             ->issuedAt($time)
@@ -141,8 +150,8 @@ class UserService
                 'type' => AccountType::getName(AccountType::GENERAL_ACCOUNT),
                 'user_id' => $user->id,
                 'currency_balance' => 0,
-                'default' => (bool)Account::DEFAULT,
-                'currency_code' => $user->base_currency_code
+                'default' => (bool) Account::DEFAULT,
+                'currency_code' => $user->base_currency_code,
             ]);
             if (!$account->save()) {
                 throw new DBException('Init Account fail ' . Setup::errorMessage($account->firstErrors));
@@ -161,63 +170,63 @@ class UserService
                     'color' => ColorType::RED,
                     'icon_name' => 'food',
                     'transaction_type' => TransactionType::EXPENSE,
-                    'default' => Category::NOT_DEFAULT
+                    'default' => Category::NOT_DEFAULT,
                 ],
                 [
                     'name' => Yii::t('app', 'Home life'),
                     'color' => ColorType::ORANGE,
                     'icon_name' => 'home',
                     'transaction_type' => TransactionType::EXPENSE,
-                    'default' => Category::NOT_DEFAULT
+                    'default' => Category::NOT_DEFAULT,
                 ],
                 [
                     'name' => Yii::t('app', 'Traffic'),
                     'color' => ColorType::BLUE,
                     'icon_name' => 'bus',
                     'transaction_type' => TransactionType::EXPENSE,
-                    'default' => Category::NOT_DEFAULT
+                    'default' => Category::NOT_DEFAULT,
                 ],
                 [
                     'name' => Yii::t('app', 'Recreation'),
                     'color' => ColorType::VOLCANO,
                     'icon_name' => 'game',
                     'transaction_type' => TransactionType::EXPENSE,
-                    'default' => Category::NOT_DEFAULT
+                    'default' => Category::NOT_DEFAULT,
                 ],
                 [
                     'name' => Yii::t('app', 'Health care'),
                     'color' => ColorType::GREEN,
                     'icon_name' => 'medicine-chest',
                     'transaction_type' => TransactionType::EXPENSE,
-                    'default' => Category::NOT_DEFAULT
+                    'default' => Category::NOT_DEFAULT,
                 ],
                 [
                     'name' => Yii::t('app', 'Clothes'),
                     'color' => ColorType::PURPLE,
                     'icon_name' => 'clothes',
                     'transaction_type' => TransactionType::EXPENSE,
-                    'default' => Category::NOT_DEFAULT
+                    'default' => Category::NOT_DEFAULT,
                 ],
                 [
                     'name' => Yii::t('app', 'Cultural education'),
                     'color' => ColorType::CYAN,
                     'icon_name' => 'education',
                     'transaction_type' => TransactionType::EXPENSE,
-                    'default' => Category::NOT_DEFAULT
+                    'default' => Category::NOT_DEFAULT,
                 ],
                 [
                     'name' => Yii::t('app', 'Investment expenditure'),
                     'color' => ColorType::GOLD,
                     'icon_name' => 'investment',
                     'transaction_type' => TransactionType::EXPENSE,
-                    'default' => Category::NOT_DEFAULT
+                    'default' => Category::NOT_DEFAULT,
                 ],
                 [
                     'name' => Yii::t('app', 'Childcare'),
                     'color' => ColorType::LIME,
                     'icon_name' => 'baby',
                     'transaction_type' => TransactionType::EXPENSE,
-                    'default' => Category::NOT_DEFAULT
+                    'default' => Category::NOT_DEFAULT,
                 ],
                 [
                     'name' => Yii::t('app', 'Other expenses'),
@@ -231,14 +240,14 @@ class UserService
                     'color' => ColorType::BLUE,
                     'icon_name' => 'work',
                     'transaction_type' => TransactionType::INCOME,
-                    'default' => Category::NOT_DEFAULT
+                    'default' => Category::NOT_DEFAULT,
                 ],
                 [
                     'name' => Yii::t('app', 'Investment income'),
                     'color' => ColorType::GOLD,
                     'icon_name' => 'investment',
                     'transaction_type' => TransactionType::INCOME,
-                    'default' => Category::NOT_DEFAULT
+                    'default' => Category::NOT_DEFAULT,
                 ],
                 [
                     'name' => Yii::t('app', 'Other income'),
@@ -279,14 +288,13 @@ class UserService
         }
     }
 
-    public function getAuthClients()
+    public function getAuthClients(): array
     {
         $data = [];
         if ($items = AuthClient::find()->where(['user_id' => Yii::$app->user->id])->all()) {
             $items = ArrayHelper::index($items, 'type');
-
             foreach (AuthClientType::names() as $key => $value) {
-                $data[$value] = $items[$key];
+                $data[$value] = data_get($items, $key, '');
             }
         }
 
@@ -328,7 +336,6 @@ class UserService
     }
 
     /**
-     *
      * @param PasswordResetRequest $request
      * @return bool whether the email was send
      * @throws \yii\base\Exception
@@ -337,7 +344,7 @@ class UserService
     public function sendPasswordResetEmail(PasswordResetRequest $request): bool
     {
         /* @var $user User */
-        $user = User::findOne(['status' => UserStatus::ACTIVE, 'email' => $request->email]);
+        $user = User::findOne(['status' => [UserStatus::ACTIVE, UserStatus::UNACTIVATED], 'email' => $request->email]);
         $this->setPasswordResetToken($user);
         return $this->getMailerService()->sendPasswordResetMessage($user);
     }
@@ -381,5 +388,51 @@ class UserService
                 throw new InvalidArgumentException('请先绑定 Telegram');
             }
         }
+    }
+
+    /**
+     * @param int $userId
+     * @param int $type
+     * @param array $expand
+     * @return AuthClient|array|ActiveRecord
+     * @throws DBException
+     */
+    public static function findOrCreateAuthClient(int $userId, int $type, array $expand = [])
+    {
+        $conditions = [
+            'type' => $type,
+            'user_id' => $userId,
+            'status' => AuthClientStatus::ACTIVE,
+        ];
+        if (!$model = AuthClient::find()->where($conditions)->one()) {
+            $model = new AuthClient();
+            $model->load($conditions, '');
+        }
+        $model->load($expand, '');
+        if (!$model->save()) {
+            throw new DBException(Setup::errorMessage($model->firstErrors));
+        }
+        return $model;
+    }
+
+    /**
+     * @param string $type
+     * @return array
+     * @throws InternalException
+     * @throws InvalidArgumentException
+     * @throws \Throwable
+     * @throws \yii\db\StaleObjectException
+     */
+    public function deleteAuthClient(string $type): array
+    {
+        if (!in_array($type, AuthClientType::names())) {
+            throw new InvalidArgumentException('参数错误');
+        }
+        $type = AuthClientType::toEnumValue($type);
+        $client = AuthClient::find()->where(['user_id' => Yii::$app->user->id, 'type' => $type])->one();
+        if ($client && $client->delete()) {
+            return $this->getAuthClients();
+        }
+        throw new InternalException('删除失败');
     }
 }

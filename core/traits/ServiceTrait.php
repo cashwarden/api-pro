@@ -1,9 +1,11 @@
 <?php
-
 /**
- * author     : forecho <caizhenghai@gmail.com>
- * createTime : 2019/5/12 4:58 PM
- * description:
+ *
+ * @author forecho <caizhenghai@gmail.com>
+ * @link https://cashwarden.com/
+ * @copyright Copyright (c) 2020-2022 forecho
+ * @license https://github.com/cashwarden/api/blob/master/LICENSE.md
+ * @version 1.0.0
  */
 
 namespace app\core\traits;
@@ -29,7 +31,7 @@ use Yii;
 use yii\base\InvalidConfigException;
 
 /**
- * Trait ServiceTrait
+ * Trait ServiceTrait.
  * @property UserService $userService
  * @property UserProService $userProService
  * @property AccountService $accountService

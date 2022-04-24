@@ -1,4 +1,12 @@
 <?php
+/**
+ *
+ * @author forecho <caizhenghai@gmail.com>
+ * @link https://cashwarden.com/
+ * @copyright Copyright (c) 2020-2022 forecho
+ * @license https://github.com/cashwarden/api/blob/master/LICENSE.md
+ * @version 1.0.0
+ */
 
 namespace app\modules\v1\controllers;
 
@@ -16,14 +24,14 @@ use yii\web\ForbiddenHttpException;
 use yii\web\UploadedFile;
 
 /**
- * Transaction controller for the `v1` module
+ * Transaction controller for the `v1` module.
  */
 class TransactionController extends ActiveController
 {
     use ServiceTrait;
 
     public $modelClass = Transaction::class;
-    public $noAuthActions = [];
+    public array $noAuthActions = [];
 
     public function actions()
     {
@@ -54,7 +62,6 @@ class TransactionController extends ActiveController
         $items = [];
         $texts = TransactionType::texts();
         $names = TransactionType::names();
-        // unset($names[TransactionType::ADJUST]);
         foreach ($names as $key => $name) {
             $items[] = ['type' => $name, 'name' => data_get($texts, $key)];
         }
