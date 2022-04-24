@@ -59,7 +59,7 @@ class TelegramService extends BaseObject
 
 
     /**
-     * @param Client $bot
+     * @param  Client  $bot
      */
     public function bind(Client $bot): void
     {
@@ -93,8 +93,8 @@ class TelegramService extends BaseObject
 
 
     /**
-     * @param Transaction $transaction
-     * @param int $page
+     * @param  Transaction  $transaction
+     * @param  int  $page
      * @return string
      * @throws InvalidConfigException
      */
@@ -202,10 +202,10 @@ class TelegramService extends BaseObject
     }
 
     /**
-     * @param string $messageText
-     * @param int|null $chatId
-     * @param null $keyboard
-     * @param int $userId
+     * @param  string  $messageText
+     * @param  int|null  $chatId
+     * @param  null  $keyboard
+     * @param  int  $userId
      */
     public function sendMessage(string $messageText, int $chatId = null, $keyboard = null, int $userId = 0): void
     {
@@ -271,8 +271,8 @@ class TelegramService extends BaseObject
     }
 
     /**
-     * @param int $userId
-     * @param string $type
+     * @param  int  $userId
+     * @param  string  $type
      * @throws \Exception
      */
     public function sendReport(int $userId, string $type): void
@@ -283,7 +283,7 @@ class TelegramService extends BaseObject
     }
 
     /**
-     * @param string $type
+     * @param  string  $type
      * @return string
      * @throws \Exception
      */
@@ -478,7 +478,7 @@ class TelegramService extends BaseObject
             );
             if ($user) {
                 \Yii::$app->user->setIdentity($user);
-                $type = ltrim($message->getText(), '/');
+                $type = StringHelper::between('/', '@', $message->getText());
                 $text = $this->telegramService->getReportTextByType($type);
             } else {
                 $text = '请先绑定您的账号';
@@ -493,7 +493,7 @@ class TelegramService extends BaseObject
                 TelegramKeyword::LAST_MONTH,
                 TelegramKeyword::CURRENT_MONTH,
             ];
-            if ($msg && in_array($msg->getText(), $report)) {
+            if ($msg && in_array(StringHelper::before('@', $msg->getText()), $report)) {
                 return true;
             }
             return false;
