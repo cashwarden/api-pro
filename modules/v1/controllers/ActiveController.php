@@ -18,7 +18,7 @@ use app\core\exceptions\UserNotProException;
 use app\core\helpers\SearchHelper;
 use app\core\services\LedgerService;
 use app\core\services\UserProService;
-use sizeg\jwt\JwtHttpBearerAuth;
+use bizley\jwt\JwtHttpBearerAuth;
 use Yii;
 use yii\base\InvalidConfigException;
 use yii\base\Model;
@@ -147,8 +147,8 @@ class ActiveController extends \yii\rest\ActiveController
 
 
     /**
-     * @param Model $model
-     * @param array $params
+     * @param  Model  $model
+     * @param  array  $params
      * @return Model
      * @throws InvalidArgumentException
      */
@@ -162,9 +162,9 @@ class ActiveController extends \yii\rest\ActiveController
     }
 
     /**
-     * @param string $action
-     * @param null $model
-     * @param array $params
+     * @param  string  $action
+     * @param  null  $model
+     * @param  array  $params
      * @throws ForbiddenHttpException|UserNotProException
      */
     public function checkAccess($action, $model = null, $params = [])
