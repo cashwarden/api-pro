@@ -91,8 +91,16 @@ class TelegramController extends ActiveController
                     $bot->sendMessage($chatId, $text, null, false, null, $keyboard);
                 }
             }, function (Update $message) {
-                if ($message->getMessage()) {
+                if ($msg = $message->getMessage()) {
+                    $text = $msg->getText();
                     if (ArrayHelper::strPosArr($message->getMessage()->getText(), TelegramKeyword::items()) === 0) {
+                        return false;
+                    }
+                    // 群组消息 必须 `+`、`-` 开头
+                    if ($msg->getChat()->getType() === 'group') {
+                        if (ArrayHelper::strPosArr($text, ['+', '-']) === 0) {
+                            return true;
+                        }
                         return false;
                     }
                     return true;
