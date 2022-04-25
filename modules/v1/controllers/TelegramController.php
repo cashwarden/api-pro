@@ -97,7 +97,7 @@ class TelegramController extends ActiveController
                         return false;
                     }
                     // 群组消息 必须 `+`、`-` 开头
-                    if ($msg->getChat()->getType() === 'group') {
+                    if (in_array($msg->getChat()->getType(), ['supergroup', 'group'])) {
                         if (ArrayHelper::strPosArr($text, ['+', '-']) === 0) {
                             return true;
                         }
