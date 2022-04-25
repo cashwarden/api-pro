@@ -93,7 +93,7 @@ class TelegramController extends ActiveController
             }, function (Update $message) {
                 if ($msg = $message->getMessage()) {
                     $text = $msg->getText();
-                    if (ArrayHelper::strPosArr($message->getMessage()->getText(), TelegramKeyword::items()) === 0) {
+                    if (ArrayHelper::strPosArr($text, TelegramKeyword::items()) === 0) {
                         return false;
                     }
                     // 群组消息 必须 `+`、`-` 开头
