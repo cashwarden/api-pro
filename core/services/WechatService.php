@@ -58,7 +58,7 @@ class WechatService extends BaseObject
     }
 
     /**
-     * @param string $openid
+     * @param  string  $openid
      * @return AuthClient
      * @throws InvalidArgumentException
      */
@@ -73,8 +73,8 @@ class WechatService extends BaseObject
     }
 
     /**
-     * @param string $userId
-     * @param string $openid
+     * @param  string  $userId
+     * @param  string  $openid
      * @return AuthClient
      * @throws \yii\db\Exception
      */
