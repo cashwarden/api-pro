@@ -39,7 +39,7 @@
     "exileed/yii2-monolog2": "^2.0",
     "yiisoft/yii2": "~2.0.14",
     "yiier/yii2-hashids": "^3.0",
-    "w7corp/easywechat": "^6.4"
+    "overtrue/wechat": "^5.0"
   },
   "require-dev": {
     "yiisoft/yii2-debug": "~2.1.0",
