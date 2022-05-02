@@ -15,6 +15,7 @@ use app\core\exceptions\UserNotProException;
 use app\core\models\User;
 use app\core\requests\MemberFormRequest;
 use app\core\services\UserProService;
+use app\core\services\UserService;
 use app\core\traits\ServiceTrait;
 use Yii;
 use yii\base\Exception;
@@ -51,7 +52,7 @@ class MemberController extends ActiveController
 
         $params = $this->formatParams(Yii::$app->request->queryParams);
         $dataProvider = $searchModel->search(['SearchModel' => $params]);
-        $dataProvider->query->andWhere(['id' => $this->userService->getCurrentMemberIds()]);
+        $dataProvider->query->andWhere(['id' => UserService::getCurrentMemberIds()]);
         return $dataProvider;
     }
 
@@ -94,6 +95,7 @@ class MemberController extends ActiveController
         if (!$user = User::find()->where(['id' => $id, 'parent_id' => $parent->id])->one()) {
             throw new ForbiddenHttpException('您无权操作该用户');
         }
+        $this->checkAccess($this->action->id, $parent);
         $params = Yii::$app->request->bodyParams;
         $model = new MemberFormRequest();
         $model->id = $id;
@@ -111,7 +113,7 @@ class MemberController extends ActiveController
      */
     public function checkAccess($action, $model = null, $params = [])
     {
-        if ($action == 'create') {
+        if (in_array($action, ['create', 'update', 'delete'])) {
             if ($model->parent_id) {
                 throw new ForbiddenHttpException(
                     t('app', 'You can not create a user under the user')

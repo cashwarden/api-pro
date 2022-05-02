@@ -45,4 +45,5 @@ return [
     'wechatToken' => env('WECHAT_TOKEN'),
     'superAdminUserId' => env('SUPER_ADMIN_USER_ID'),
     'userChildCount' => env('USER_CHILD_COUNT', 2),
+    'memberIds' => [],
 ];

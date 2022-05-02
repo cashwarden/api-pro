@@ -26,7 +26,7 @@ use yiier\helpers\Setup;
 class BudgetService extends BaseObject
 {
     /**
-     * @param BudgetConfig $budgetConfig
+     * @param  BudgetConfig  $budgetConfig
      * @throws Exception
      */
     public static function createUpdateBudgetConfigAfter(BudgetConfig $budgetConfig): void
@@ -100,7 +100,7 @@ class BudgetService extends BaseObject
 
 
     /**
-     * @param BudgetConfig $budgetConfig
+     * @param  BudgetConfig  $budgetConfig
      * @throws Exception
      */
     public static function calculationAmount(BudgetConfig $budgetConfig): void
@@ -159,8 +159,8 @@ class BudgetService extends BaseObject
 
 
     /**
-     * @param int $ledgerId
-     * @param string $datetime
+     * @param  int  $ledgerId
+     * @param  string  $datetime
      * @throws Exception
      */
     public static function updateBudgetActualAmount(int $ledgerId, string $datetime)
@@ -175,7 +175,7 @@ class BudgetService extends BaseObject
     }
 
     /**
-     * @param int $id
+     * @param  int  $id
      * @return BudgetConfig
      * @throws NotFoundHttpException
      * @throws Exception
@@ -194,13 +194,14 @@ class BudgetService extends BaseObject
     }
 
     /**
-     * @param int $id
+     * @param  int  $id
      * @return BudgetConfig
      * @throws NotFoundHttpException
      */
     public function findCurrentOne(int $id): BudgetConfig
     {
-        if (!$model = BudgetConfig::find()->where(['id' => $id, 'user_id' => \Yii::$app->user->id])->one()) {
+        $userIds = UserService::getCurrentMemberIds();
+        if (!$model = BudgetConfig::find()->where(['id' => $id, 'user_id' => $userIds])->one()) {
             throw new NotFoundHttpException('No data found');
         }
         return $model;

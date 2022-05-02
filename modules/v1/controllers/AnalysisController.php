@@ -11,6 +11,8 @@
 namespace app\modules\v1\controllers;
 
 use app\core\exceptions\InvalidArgumentException;
+use app\core\models\Ledger;
+use app\core\services\UserService;
 use app\core\traits\ServiceTrait;
 use app\core\types\AnalysisGroupDateType;
 
@@ -32,21 +34,38 @@ class AnalysisController extends ActiveController
     /**
      * @return array
      * @throws InvalidArgumentException
+     * @throws \app\core\exceptions\UserNotProException
+     * @throws \yii\web\ForbiddenHttpException
      */
     public function actionCategory(): array
     {
         $params = \Yii::$app->request->queryParams;
+        $this->checkAccess($this->action->id, null, $params);
         return $this->analysisService->byCategory($params);
     }
 
     /**
      * @return array
      * @throws InvalidArgumentException
+     * @throws \app\core\exceptions\UserNotProException
+     * @throws \yii\web\ForbiddenHttpException
      */
     public function actionDate(): array
     {
         $params = \Yii::$app->request->queryParams;
         $groupByDateType = request('group_type') ?: AnalysisGroupDateType::DAY;
+        $this->checkAccess($this->action->id, null, $params);
         return $this->analysisService->byDate($params, AnalysisGroupDateType::getValue($groupByDateType));
+    }
+
+    public function checkAccess($action, $model = null, $params = [])
+    {
+        if (!isset($params['ledger_id'])) {
+            throw new InvalidArgumentException('ledger_id is required');
+        }
+        $model = Ledger::findOne($params['ledger_id']);
+        if ($model && !in_array($model->user_id, UserService::getCurrentMemberIds())) {
+            throw new InvalidArgumentException('You are not allowed to perform this action.');
+        }
     }
 }

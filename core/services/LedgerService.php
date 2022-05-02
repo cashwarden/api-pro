@@ -11,7 +11,6 @@
 namespace app\core\services;
 
 use app\core\exceptions\InternalException;
-use app\core\exceptions\InvalidArgumentException;
 use app\core\helpers\RuleControlHelper;
 use app\core\models\Account;
 use app\core\models\Budget;
@@ -25,7 +24,6 @@ use app\core\models\Rule;
 use app\core\models\Tag;
 use app\core\models\Transaction;
 use app\core\models\WishList;
-use app\core\requests\LedgerInvitingMember;
 use app\core\types\ColorType;
 use app\core\types\LedgerMemberRule;
 use app\core\types\LedgerMemberStatus;
@@ -35,8 +33,6 @@ use Yii;
 use yii\db\Exception as DBException;
 use yii\helpers\ArrayHelper;
 use yii\web\ForbiddenHttpException;
-use yii\web\NotFoundHttpException;
-use yiier\graylog\Log;
 use yiier\helpers\ModelHelper;
 use yiier\helpers\Setup;
 
@@ -119,13 +115,13 @@ class LedgerService
     }
 
     /**
-     * @param  int  $userId
      * @return array|\yii\db\ActiveRecord|null
      */
-    public static function getDefaultLedger(int $userId)
+    public static function getDefaultLedger()
     {
+        $userIds = UserService::getCurrentMemberIds();
         return Ledger::find()
-            ->where(['user_id' => $userId])
+            ->where(['user_id' => $userIds])
             ->orderBy(['default' => SORT_DESC, 'id' => SORT_ASC])
             ->one();
     }
@@ -212,34 +208,13 @@ class LedgerService
     }
 
     /**
-     * @param  LedgerInvitingMember  $model
-     * @return bool
-     * @throws InternalException
-     */
-    public function invitingMember(LedgerInvitingMember $model): bool
-    {
-        try {
-            $ledgerMember = new LedgerMember();
-            $ledgerMember->load($model->attributes, '');
-            $ledgerMember->status = LedgerMemberStatus::getName(LedgerMemberStatus::WAITING);
-            if (!$ledgerMember->save()) {
-                throw new \yii\db\Exception(Setup::errorMessage($ledgerMember->firstErrors));
-            }
-        } catch (\Exception $e) {
-            Log::error('邀请用户到账本失败', [['ledger_id' => $model->attributes], (string) $e]);
-            throw new InternalException($e->getMessage());
-        }
-        return true;
-    }
-
-    /**
      * @return array
      */
     public function getLedgersCategories(): array
     {
         $rows = [];
         /** @var Ledger[] $items */
-        $items = Ledger::find()->where(['user_id' => Yii::$app->user->id])->all();
+        $items = Ledger::find()->where(['user_id' => UserService::getCurrentMemberIds()])->all();
         foreach ($items as $item) {
             $array = ArrayHelper::toArray($item->categories);
             $categories = ArrayHelper::index($array, null, 'transaction_type');
@@ -252,49 +227,5 @@ class LedgerService
             array_push($rows, $row);
         }
         return $rows;
-    }
-
-
-    /**
-     * @param  string  $token
-     * @return Ledger
-     * @throws NotFoundHttpException
-     */
-    public function getLedgerByToken(string $token): Ledger
-    {
-        $id = Yii::$app->hashids->decode($token);
-        if (!$model = Ledger::find()->where(['id' => $id, 'type' => [LedgerType::SHARE, LedgerType::AA]])->one()) {
-            throw new NotFoundHttpException();
-        }
-
-        return $model;
-    }
-
-    /**
-     * @param  string  $token
-     * @return bool
-     * @throws DBException
-     * @throws InvalidArgumentException
-     * @throws NotFoundHttpException
-     */
-    public function joinLedgerByToken(string $token): bool
-    {
-        $userId = Yii::$app->user->id;
-        $ledger = $this->getLedgerByToken($token);
-        $ledgerMember = LedgerMember::find()->where(['ledger_id' => $ledger->id, 'user_id' => $userId])->one();
-        if ($ledgerMember) {
-            throw new InvalidArgumentException(
-                Yii::t('app', 'You have successfully joined this account, please do not repeat the process.')
-            );
-        }
-        $model = new LedgerMember();
-        $model->ledger_id = $ledger->id;
-        $model->user_id = $userId;
-        $model->rule = LedgerMemberRule::getName(LedgerMemberRule::VIEWER);
-        $model->status = LedgerMemberStatus::getName(LedgerMemberStatus::NORMAL);
-        if (!$model->save()) {
-            throw new \yii\db\Exception(Setup::errorMessage($model->firstErrors));
-        }
-        return true;
     }
 }

@@ -10,17 +10,12 @@
 
 namespace app\modules\v1\controllers;
 
-use app\core\exceptions\InternalException;
-use app\core\exceptions\InvalidArgumentException;
 use app\core\models\Recurrence;
 use app\core\requests\UpdateStatus;
 use app\core\traits\ServiceTrait;
 use app\core\types\RecurrenceFrequency;
 use app\core\types\RecurrenceStatus;
 use Yii;
-use yii\base\InvalidConfigException;
-use yii\db\Exception;
-use yii\web\NotFoundHttpException;
 
 /**
  * Recurrence controller for the `v1` module.
@@ -32,23 +27,18 @@ class RecurrenceController extends ActiveController
     public $modelClass = Recurrence::class;
     public array $partialMatchAttributes = ['name'];
 
-    /**
-     * @param int $id
-     * @return Recurrence
-     * @throws Exception
-     * @throws InvalidArgumentException
-     * @throws NotFoundHttpException
-     * @throws InvalidConfigException
-     * @throws InternalException
-     */
+
     public function actionUpdateStatus(int $id): Recurrence
     {
         $params = Yii::$app->request->bodyParams;
+        $recurrence = $this->recurrenceService->findCurrentOne($id);
+        $this->checkAccess($this->action->id, $recurrence);
+
         $model = new UpdateStatus(RecurrenceStatus::names());
         /** @var UpdateStatus $model */
         $model = $this->validate($model, $params);
 
-        return $this->recurrenceService->updateStatus($id, $model->status);
+        return $this->recurrenceService->updateStatus($recurrence, $model->status);
     }
 
 

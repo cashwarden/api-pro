@@ -10,7 +10,6 @@
 
 namespace app\modules\v1\controllers;
 
-use app\core\exceptions\InvalidArgumentException;
 use app\core\models\Rule;
 use app\core\requests\UpdateStatus;
 use app\core\traits\ServiceTrait;
@@ -31,7 +30,7 @@ class RuleController extends ActiveController
     public array $partialMatchAttributes = ['name'];
 
     /**
-     * @param int $id
+     * @param  int  $id
      * @return Rule
      * @throws Exception
      * @throws NotFoundHttpException
@@ -41,20 +40,26 @@ class RuleController extends ActiveController
         return $this->ruleService->copy($id);
     }
 
+
     /**
-     * @param int $id
+     * @param  int  $id
      * @return Rule
      * @throws Exception
-     * @throws InvalidArgumentException
-     * @throws \app\core\exceptions\InternalException|NotFoundHttpException
+     * @throws NotFoundHttpException
+     * @throws \app\core\exceptions\InternalException
+     * @throws \app\core\exceptions\InvalidArgumentException
+     * @throws \app\core\exceptions\UserNotProException
+     * @throws \yii\web\ForbiddenHttpException
      */
     public function actionUpdateStatus(int $id): Rule
     {
         $params = Yii::$app->request->bodyParams;
+        $role = $this->ruleService->findCurrentOne($id);
+        $this->checkAccess($this->action->id, $role);
         $model = new UpdateStatus(RuleStatus::names());
         /** @var UpdateStatus $model */
         $model = $this->validate($model, $params);
 
-        return $this->ruleService->updateStatus($id, $model->status);
+        return $this->ruleService->updateStatus($role, $model->status);
     }
 }

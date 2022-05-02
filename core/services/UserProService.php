@@ -39,12 +39,12 @@ class UserProService
 {
     use ServiceTrait;
 
-    public static function isPro(int $userId = 0): bool
+    public static function isPro(): bool
     {
-        $userId = $userId ?: Yii::$app->user->id;
+        $userIds = UserService::getCurrentMemberIds();
         // todo 缓存
         return UserProRecord::find()
-            ->where(['user_id' => $userId, 'status' => UserProRecordStatus::PAID])
+            ->where(['user_id' => $userIds, 'status' => UserProRecordStatus::PAID])
             ->andWhere(['>=', 'ended_at', Carbon::now()->toDateTimeString()])
             ->orderBy(['ended_at' => SORT_DESC])
             ->exists();

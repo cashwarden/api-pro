@@ -56,11 +56,6 @@ return [
 
     'GET <module>/ledgers/types' => '<module>/ledger/types',
     'GET <module>/ledgers/categories' => '<module>/ledger/categories',
-    "GET <module>/ledgers/token/<token:\w+>" => '<module>/ledger/view-by-token',
-    "POST <module>/ledgers/join/<token:\w+>" => '<module>/ledger/join-by-token',
-    'POST <module>/ledger/members' => '<module>/ledger/inviting-member',
-    'GET <module>/ledger/members' => '<module>/ledger-member/index',
-    "PUT <module>/ledger/members/<id:\d+>" => '<module>/ledger-member/update',
 
     "POST <module>/budget-configs/<id:\d+>/copy" => '<module>/budget-config/copy',
 

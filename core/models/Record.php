@@ -224,9 +224,9 @@ class Record extends ActiveRecord
      * @return bool
      * @throws CannotOperateException
      */
-    public function beforeDelete()
+    public function beforeDelete(): bool
     {
-        if (RecurrenceService::countByTransactionId($this->transaction_id, $this->user_id)) {
+        if (RecurrenceService::countByTransactionId($this->transaction_id)) {
             throw new CannotOperateException(Yii::t('app', 'Cannot be deleted because it has been used.'));
         }
         return parent::beforeDelete();

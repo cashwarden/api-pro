@@ -21,7 +21,6 @@ use app\core\types\TransactionType;
 use Yii;
 use yii\base\BaseObject;
 use yii\base\InvalidConfigException;
-use yii\web\ForbiddenHttpException;
 use yiier\helpers\ArrayHelper;
 use yiier\helpers\DateHelper;
 use yiier\helpers\Setup;
@@ -32,8 +31,8 @@ use yiier\helpers\Setup;
 class AnalysisService extends BaseObject
 {
     /**
-     * @param array $items
-     * @param array $params
+     * @param  array  $items
+     * @param  array  $params
      * @return array
      * @throws \Exception
      */
@@ -85,11 +84,10 @@ class AnalysisService extends BaseObject
     }
 
     /**
-     * @param array $date
-     * @param int $transactionType
-     * @param null $ledgerId
+     * @param  array  $date
+     * @param  int  $transactionType
+     * @param  null  $ledgerId
      * @return array
-     * @throws ForbiddenHttpException
      */
     public function getCategoryStatisticalData(array $date, int $transactionType, $ledgerId = null): array
     {
@@ -99,13 +97,7 @@ class AnalysisService extends BaseObject
             $conditions = ['between', 'date', $date[0], $date[1]];
         }
 
-        $baseConditions = ['user_id' => Yii::$app->user->id];
-        if ($ledgerId) {
-            LedgerService::checkAccess($ledgerId);
-            $baseConditions = ['user_id' => LedgerService::getLedgerMemberUserIds($ledgerId), 'ledger_id' => $ledgerId];
-        }
-
-        $baseConditions = $baseConditions + ['transaction_type' => $transactionType];
+        $baseConditions = ['user_id' => UserService::getCurrentMemberIds(), 'transaction_type' => $transactionType];
         $categories = Category::find()->where($baseConditions)->asArray()->all();
 
         $totalCent = Record::find()
@@ -116,7 +108,7 @@ class AnalysisService extends BaseObject
         if (!$totalCent) {
             return [];
         }
-        foreach ($categories as $key => $category) {
+        foreach ($categories as $category) {
             $sumCent = Record::find()
                 ->where($baseConditions)
                 ->andWhere(['category_id' => $category['id'], 'exclude_from_stats' => false])
@@ -139,24 +131,24 @@ class AnalysisService extends BaseObject
     }
 
     /**
-     * @param string $dateStr
-     * @param int $transactionType
-     * @param null $ledgerId
+     * @param  string  $dateStr
+     * @param  int  $transactionType
+     * @param  null  $ledgerId
      * @return array
-     * @throws ForbiddenHttpException
      * @throws InvalidConfigException
      */
-    public function getRecordStatisticalData(string $dateStr, int $transactionType, $ledgerId = null)
+    public function getRecordStatisticalData(string $dateStr, int $transactionType, $ledgerId = null): array
     {
         $dates = AnalysisDateType::getEveryDayByMonth($dateStr);
 
-        $baseConditions = ['user_id' => Yii::$app->user->id];
+        $baseConditions = [
+            'user_id' => UserService::getCurrentMemberIds(),
+            'transaction_type' => $transactionType,
+            'exclude_from_stats' => false,
+        ];
         if ($ledgerId) {
-            LedgerService::checkAccess($ledgerId);
-            $baseConditions = ['user_id' => LedgerService::getLedgerMemberUserIds($ledgerId), 'ledger_id' => $ledgerId];
+            $baseConditions = array_merge($baseConditions, ['ledger_id' => $ledgerId]);
         }
-
-        $baseConditions = $baseConditions + ['transaction_type' => $transactionType, 'exclude_from_stats' => false];
 
         $items = [];
         foreach ($dates as $key => $date) {
@@ -211,7 +203,7 @@ class AnalysisService extends BaseObject
     }
 
     /**
-     * @param array $params
+     * @param  array  $params
      * @return array
      * @throws InvalidArgumentException
      * @throws \Exception
@@ -219,11 +211,11 @@ class AnalysisService extends BaseObject
     public function byCategory(array $params): array
     {
         $items = [];
+        $userIds = UserService::getCurrentMemberIds();
         if ($ledgerId = data_get($params, 'ledger_id')) {
-            LedgerService::checkAccess($ledgerId);
             $categoriesMap = CategoryService::getMapByLedgerId($ledgerId);
         } else {
-            $categoriesMap = CategoryService::getMapByUserId();
+            throw new InvalidArgumentException('ledger_id is required');
         }
         foreach ([TransactionType::EXPENSE, TransactionType::INCOME] as $type) {
             $data = $this->getBaseQuery($params)
@@ -256,8 +248,8 @@ class AnalysisService extends BaseObject
     }
 
     /**
-     * @param array $params
-     * @param string $format
+     * @param  array  $params
+     * @param  string  $format
      * @return array
      * @throws InvalidArgumentException
      * @throws \Exception
@@ -297,7 +289,7 @@ class AnalysisService extends BaseObject
 
 
     /**
-     * @param array $params
+     * @param  array  $params
      * @return \yii\db\ActiveQuery
      * @throws \Exception
      */

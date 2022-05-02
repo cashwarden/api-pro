@@ -71,7 +71,7 @@ class UserController extends ActiveController
             return [
                 'user' => $user,
                 'token' => $token,
-                'default_ledger' => LedgerService::getDefaultLedger($user->id),
+                'default_ledger' => LedgerService::getDefaultLedger(),
             ];
         });
     }
@@ -95,7 +95,7 @@ class UserController extends ActiveController
         return [
             'user' => $user,
             'token' => (string) $token,
-            'default_ledger' => LedgerService::getDefaultLedger($user->id),
+            'default_ledger' => LedgerService::getDefaultLedger(),
         ];
     }
 
@@ -106,7 +106,7 @@ class UserController extends ActiveController
         return [
             'user' => $user,
             'token' => (string) $token,
-            'default_ledger' => LedgerService::getDefaultLedger($user->id),
+            'default_ledger' => LedgerService::getDefaultLedger(),
         ];
     }
 
@@ -229,8 +229,8 @@ class UserController extends ActiveController
         $token = $this->userService->getToken();
         return [
             'user' => $user,
-            'token' => (string) $token,
-            'default_ledger' => LedgerService::getDefaultLedger($user->id),
+            'token' => $token,
+            'default_ledger' => LedgerService::getDefaultLedger(),
         ];
     }
 

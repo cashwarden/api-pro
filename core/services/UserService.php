@@ -438,12 +438,18 @@ class UserService
         throw new InternalException('删除失败');
     }
 
-    public function getCurrentMemberIds(): array
+    public static function getCurrentMemberIds(): array
     {
+        if (params('memberIds')) {
+            return params('memberIds');
+        }
+
         $userId = Yii::$app->user->id;
         $userIds = User::find()->select('id')->where(['parent_id' => $userId])->column();
         $userIds = array_merge($userIds, [$userId]);
-        return array_unique($userIds);
+        $userIds = array_unique($userIds);
+        Yii::$app->params['memberIds'] = $userIds;
+        return $userIds;
     }
 
     /**

@@ -225,7 +225,7 @@ class TransactionService extends BaseObject
 
     /**
      * @param  string  $desc
-     * @param  int|null  $source
+     * @param  int|null  $chatId
      * @return Transaction|Account
      * @throws InternalException
      * @throws \Throwable
@@ -483,7 +483,7 @@ class TransactionService extends BaseObject
     {
         $has = Tag::find()
             ->select('name')
-            ->where(['user_id' => Yii::$app->user->id, 'name' => $tags, 'ledger_id' => $ledgerId])
+            ->where(['user_id' => UserService::getCurrentMemberIds(), 'name' => $tags, 'ledger_id' => $ledgerId])
             ->column();
         /** @var TagService $tagService */
         $tagService = Yii::createObject(TagService::class);
@@ -535,8 +535,7 @@ class TransactionService extends BaseObject
      */
     public function getAccountIdByDesc(): int
     {
-        $userId = Yii::$app->user->id;
-        return (int) data_get(AccountService::getDefaultAccount($userId), 'id', 0);
+        return (int) data_get(AccountService::getDefaultAccount(), 'id', 0);
     }
 
     /**
@@ -545,8 +544,7 @@ class TransactionService extends BaseObject
      */
     public function getLedgerIdByDesc(): int
     {
-        $userId = Yii::$app->user->id;
-        return (int) data_get(LedgerService::getDefaultLedger($userId), 'id', 0);
+        return (int) data_get(LedgerService::getDefaultLedger(), 'id', 0);
     }
 
     /**
@@ -638,16 +636,10 @@ class TransactionService extends BaseObject
     }
 
 
-    /**
-     * @param  string  $tag
-     * @param  int  $ledgerId
-     * @param  int  $userId
-     * @return bool|int|string|null
-     */
-    public static function countTransactionByTag(string $tag, int $ledgerId, int $userId)
+    public static function countTransactionByTag(string $tag, int $ledgerId, array $userIds)
     {
         return Transaction::find()
-            ->where(['user_id' => $userId, 'ledger_id' => $ledgerId])
+            ->where(['user_id' => $userIds, 'ledger_id' => $ledgerId])
             ->andWhere(new Expression('FIND_IN_SET(:tag, tags)'))->addParams([':tag' => $tag])
             ->count();
     }
@@ -733,10 +725,9 @@ class TransactionService extends BaseObject
      */
     public function getIdsBySearch(array $params): array
     {
-        $baseConditions = ['user_id' => Yii::$app->user->id];
+        $baseConditions = ['user_id' => UserService::getCurrentMemberIds()];
         if ($ledgerId = data_get($params, 'ledger_id')) {
-            LedgerService::checkAccess($ledgerId);
-            $baseConditions = ['user_id' => LedgerService::getLedgerMemberUserIds($ledgerId), 'ledger_id' => $ledgerId];
+            $baseConditions = array_merge($baseConditions, ['ledger_id' => $ledgerId]);
         }
 
         $query = Transaction::find()->andWhere($baseConditions);
@@ -766,10 +757,8 @@ class TransactionService extends BaseObject
     public function getIdsByXunSearch(array $params): array
     {
         $query = Search::find();
-        $userIds = [Yii::$app->user->id];
+        $userIds = UserService::getCurrentMemberIds();
         if ($ledgerId = data_get($params, 'ledger_id')) {
-            LedgerService::checkAccess($ledgerId);
-            $userIds = LedgerService::getLedgerMemberUserIds($ledgerId);
             $query->andWhere(['ledger_id' => $ledgerId]);
         }
 

@@ -39,6 +39,7 @@ use yii\web\IdentityInterface;
  *
  * @property-write string $password
  * @property-read null|\app\core\models\UserProRecord $pro
+ * @property array $memberIds
  * @property-read string $authKey
  */
 class User extends ActiveRecord implements IdentityInterface
@@ -227,6 +228,14 @@ class User extends ActiveRecord implements IdentityInterface
             ->andWhere(['<=', 'created_at', Carbon::now()->toDateTimeString()])
             ->orderBy(['ended_at' => SORT_DESC])
             ->one();
+    }
+
+    public function getMemberIds(): array
+    {
+        $userId = Yii::$app->user->id;
+        $userIds = self::find()->select('id')->where(['parent_id' => $userId])->column();
+        $userIds = array_merge($userIds, [$userId]);
+        return array_unique($userIds);
     }
 
     /**

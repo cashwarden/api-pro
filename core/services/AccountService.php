@@ -54,7 +54,7 @@ class AccountService
     }
 
     /**
-     * @param Account $account
+     * @param  Account  $account
      * @return Account
      * @throws InternalException
      */
@@ -77,29 +77,27 @@ class AccountService
 
 
     /**
-     * @param int $id
-     * @param array|int $userIds
+     * @param  int  $id
      * @return Account|ActiveRecord|null
      */
-    public static function findOne(int $id, $userIds = null)
+    public static function findOne(int $id)
     {
-        $userIds = $userIds ?: Yii::$app->user->id;
-        return Account::find()->where(['id' => $id, 'user_id' => $userIds])->one();
+        return Account::find()->where(['id' => $id])->one();
     }
 
-    public static function getDefaultAccount(int $userId = 0): array
+    public static function getDefaultAccount(): array
     {
-        $userId = $userId ?: Yii::$app->user->id;
+        $userIds = UserService::getCurrentMemberIds();
         return Account::find()
-            ->where(['user_id' => $userId])
+            ->where(['user_id' => $userIds])
             ->orderBy(['default' => SORT_DESC, 'id' => SORT_ASC])
             ->asArray()
             ->one();
     }
 
     /**
-     * @param int $accountId
-     * @param array $userIds
+     * @param  int  $accountId
+     * @param  array  $userIds
      * @return bool
      * @throws \yii\db\Exception
      */
@@ -122,7 +120,7 @@ class AccountService
 
 
     /**
-     * @param int $accountId
+     * @param  int  $accountId
      * @return int
      */
     public static function getCalculateCurrencyBalanceCent(int $accountId): int
@@ -143,7 +141,7 @@ class AccountService
     }
 
     /**
-     * @param int $accountId
+     * @param  int  $accountId
      * @return int
      * @throws Exception
      */
@@ -193,8 +191,8 @@ class AccountService
     }
 
     /**
-     * @param Account $model
-     * @param string $endDate
+     * @param  Account  $model
+     * @param  string  $endDate
      * @return array
      * @throws InvalidConfigException
      * @throws Exception
@@ -232,8 +230,8 @@ class AccountService
 
 
     /**
-     * @param string $desc
-     * @param int|null $excludeAccountId
+     * @param  string  $desc
+     * @param  int|null  $excludeAccountId
      * @return int
      */
     public function getAccountIdByDesc(string $desc, ?int $excludeAccountId = null): int
