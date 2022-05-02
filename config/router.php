@@ -86,6 +86,7 @@ return [
             'v1/ledger',
             'v1/currency',
             'v1/wish-list',
+            'v1/member',
         ],
     ],
     // '<module>/<controller:\w+>/<action:\w+>/<id:\d+>' => '<module>/<controller>/<action>',

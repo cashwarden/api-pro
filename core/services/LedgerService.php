@@ -47,7 +47,7 @@ class LedgerService
      * @param  int  $permission
      * @throws ForbiddenHttpException
      */
-    public static function checkAccess(int $ledgerId, $permission = RuleControlHelper::VIEW)
+    public static function checkAccess(int $ledgerId, int $permission = RuleControlHelper::VIEW)
     {
         $userId = Yii::$app->user->id;
         $userPermission = LedgerMember::find()

@@ -66,18 +66,13 @@ class LoggerBehavior extends Behavior
         }
     }
 
-    public function beforeAction()
+    public function beforeAction(): string
     {
         return Yii::$app->requestId->id;
     }
 
 
-    /**
-     * @param  array  $params
-     * @param  array  $ignoredHeaderKeys
-     * @return array
-     */
-    protected function headerFilter(array $params, array $ignoredHeaderKeys)
+    protected function headerFilter(array $params, array $ignoredHeaderKeys): array
     {
         foreach ($params as $key => $item) {
             if ($key && in_array($key, $ignoredHeaderKeys)) {
@@ -87,14 +82,7 @@ class LoggerBehavior extends Behavior
         return $params;
     }
 
-    /**
-     * @param $params array
-     * @param  array  $ignoredKeys
-     * @param  array  $hideKeys
-     * @param  array  $halfHideKeys
-     * @return string|int|array
-     */
-    protected function paramsFilter(array $params, array $ignoredKeys, array $hideKeys, array $halfHideKeys)
+    protected function paramsFilter(array $params, array $ignoredKeys, array $hideKeys, array $halfHideKeys): array
     {
         if (!$hideKeys && !$halfHideKeys && !$ignoredKeys) {
             return $params;
@@ -115,21 +103,13 @@ class LoggerBehavior extends Behavior
         return $params;
     }
 
-    /**
-     * @param  string  $value
-     * @return string
-     */
-    protected function paramReplace(string $value)
+    protected function paramReplace(string $value): string
     {
         return str_repeat('*', strlen($value));
     }
 
 
-    /**
-     * @param $value
-     * @return string
-     */
-    protected function paramPartialHiddenReplace(string $value)
+    protected function paramPartialHiddenReplace(string $value): string
     {
         $valueLength = strlen($value);
         if ($valueLength > 2) {

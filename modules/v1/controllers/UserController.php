@@ -70,7 +70,7 @@ class UserController extends ActiveController
             $token = $this->userService->getToken();
             return [
                 'user' => $user,
-                'token' => (string) $token,
+                'token' => $token,
                 'default_ledger' => LedgerService::getDefaultLedger($user->id),
             ];
         });
@@ -172,7 +172,7 @@ class UserController extends ActiveController
 
 
     /**
-     * @param string $type
+     * @param  string  $type
      * @return array
      * @throws InvalidArgumentException
      * @throws \Throwable

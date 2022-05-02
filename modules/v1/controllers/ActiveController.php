@@ -126,15 +126,12 @@ class ActiveController extends \yii\rest\ActiveController
     }
 
 
-    protected function formatParams(array $params)
+    protected function formatParams(array $params): array
     {
         return $params;
     }
 
-    /**
-     * @return int
-     */
-    protected function getPageSize()
+    protected function getPageSize(): int
     {
         if ($pageSize = (int) request('pageSize')) {
             if ($pageSize < self::MAX_PAGE_SIZE) {
@@ -165,7 +162,7 @@ class ActiveController extends \yii\rest\ActiveController
      * @param  string  $action
      * @param  null  $model
      * @param  array  $params
-     * @throws ForbiddenHttpException|UserNotProException
+     * @throws ForbiddenHttpException|UserNotProException|InvalidArgumentException
      */
     public function checkAccess($action, $model = null, $params = [])
     {

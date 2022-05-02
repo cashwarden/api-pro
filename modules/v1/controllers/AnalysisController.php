@@ -21,7 +21,7 @@ class AnalysisController extends ActiveController
     public $modelClass = '';
     public array $noAuthActions = [];
 
-    public function actions()
+    public function actions(): array
     {
         $actions = parent::actions();
         // 注销系统自带的实现方法
