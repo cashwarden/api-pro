@@ -4,6 +4,10 @@ on: [ pull_request ]
 jobs:
   php-cs-fixer:
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        php-versions: [ '8.0' ]
     steps:
       - name: Checkout branch
         uses: actions/checkout@v3
