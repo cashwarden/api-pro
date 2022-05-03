@@ -18,14 +18,14 @@ jobs:
 
       - name: Set WORK_DIR to test
         if: endsWith(github.ref, '/test')
-        run:
+        run: |
           echo "WORK_DIR=/home/www/test-cashwarden-api-pro" >> $GITHUB_ENV
           echo "HOST=test-api.cashwarden.com" >> $GITHUB_ENV
 
       - name: Set WORK_DIR to stage
         if: endsWith(github.ref, '/stage')
-        run:
-          echo "WORK_DIR=/home/www/stage-cashwarden-api-pro" >> $GITHUB_ENV
+        run: |
+          echo "WORK_DIR=/home/www/stage-cashwarden-api-pro" >> $GITHUB_ENV &&
           echo "HOST=stage-api.cashwarden.com" >> $GITHUB_ENV
 
       - name: Set WORK_DIR to production
