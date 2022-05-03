@@ -69,7 +69,7 @@ jobs:
           flags: 'g'
 
       - name: Generate deployment package
-        run: mkdir -p $WORK_DIR/deployment && zip -r $WORK_DIR/deployment/deploy.zip . -x ".git/*"
+        run: mkdir -p deployment && zip -r deployment/deploy.zip . -x ".git/*"
 
       - name: Generate File Name
         id: file-name
@@ -82,7 +82,7 @@ jobs:
         uses: burnett01/rsync-deployments@5.2
         with:
           switches: -avuz
-          path: $WORK_DIR/deployment/
+          path: deployment/
           remote_path: ${{ env.WORK_DIR }}
           remote_host: ${{ env.HOST }}
           remote_user: ${{ secrets.SSH_USER }}
