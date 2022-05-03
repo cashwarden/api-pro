@@ -91,12 +91,12 @@ jobs:
       - name: Unzip deployment
         uses: appleboy/ssh-action@master
         with:
-          host: ${{ secrets.HOST }}
+          host: ${{ env.HOST }}
           username: ${{ secrets.SSH_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
-            whoami
             ls -al
+            unzip -o ${{ env.WORK_DIR }}/deploy.zip -d ${{ env.WORK_DIR }} && rm -rf ${{ env.WORK_DIR }}/deploy.zip
 
       - name: Slack Workflow Notification
         uses: Gamesight/slack-workflow-status@master
