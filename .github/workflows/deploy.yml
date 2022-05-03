@@ -35,7 +35,7 @@ jobs:
           echo "HOST=api.cashwarden.com" >> $GITHUB_ENV
 
       - name: Checkout branch
-        uses: actions/checkout@v1
+        uses: actions/checkout@v3
         with:
           fetch-depth: 1
 
@@ -95,7 +95,8 @@ jobs:
           username: ${{ secrets.SSH_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
-            ls -al
+            ls -la ${{ env.WORK_DIR }}
+            cd ${{ env.WORK_DIR }} && php yii migrate/up --interactive=0
             unzip -o ${{ env.WORK_DIR }}/deploy.zip -d ${{ env.WORK_DIR }} && rm -rf ${{ env.WORK_DIR }}/deploy.zip
 
       - name: Slack Workflow Notification
