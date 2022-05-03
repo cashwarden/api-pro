@@ -87,7 +87,7 @@ jobs:
           remote_host: ${{ env.HOST }}
           remote_user: ${{ secrets.SSH_USER }}
           remote_key: ${{ secrets.SSH_PRIVATE_KEY }}
-          # rsh: unzip -o deploy.zip -d ${{ env.WORK_DIR }}
+          rsh: unzip -o ${{ env.WORK_DIR }}/deploy.zip -d ${{ env.WORK_DIR }} && rm -rf ${{ env.WORK_DIR }}/deploy.zip
 
       - name: Slack Workflow Notification
         uses: Gamesight/slack-workflow-status@master
