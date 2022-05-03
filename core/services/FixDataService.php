@@ -14,6 +14,7 @@ use app\core\exceptions\InvalidArgumentException;
 use app\core\models\Account;
 use app\core\models\Category;
 use app\core\models\Ledger;
+use app\core\models\LedgerMember;
 use app\core\models\Record;
 use app\core\models\Rule;
 use app\core\models\Tag;
@@ -215,6 +216,25 @@ class FixDataService
             if (!ModelHelper::saveAll(Category::tableName(), $rows)) {
                 throw new DBException('Init Category fail');
             }
+        }
+    }
+
+    public static function fixUserParent()
+    {
+        $ledgers = Ledger::find()->where(['type' => LedgerType::SHARE])->all();
+        foreach ($ledgers as $ledger) {
+            $childUserId = LedgerMember::find()
+                ->select('user_id')
+                ->where(['ledger_id' => $ledger->id])
+                ->andWhere(['!=', 'user_id', $ledger->user_id])
+                ->column();
+            if (!$childUserId) {
+                continue;
+            }
+            $t = __FUNCTION__ . ': ' . $ledger->user_id . ': ' . implode(',', $childUserId);
+            dump($t);
+            \Yii::warning($t);
+            User::updateAll(['parent_id' => $ledger->user_id], ['id' => $childUserId]);
         }
     }
 }
