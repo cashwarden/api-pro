@@ -66,7 +66,7 @@ class LoggerBehavior extends Behavior
         }
     }
 
-    public function beforeAction(): string
+    public function beforeAction(): ?string
     {
         return Yii::$app->requestId->id;
     }

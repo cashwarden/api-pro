@@ -56,10 +56,9 @@ class AnalysisService extends BaseObject
         if (count($date) == 2) {
             $conditions = ['between', 'date', $date[0], $date[1]];
         }
-        $baseConditions = ['user_id' => Yii::$app->user->id];
+        $baseConditions = ['user_id' => UserService::getCurrentMemberIds()];
         if ($ledgerId = data_get($params, 'ledger_id')) {
-            LedgerService::checkAccess($ledgerId);
-            $baseConditions = ['user_id' => LedgerService::getLedgerMemberUserIds($ledgerId), 'ledger_id' => $ledgerId];
+            $baseConditions += ['ledger_id' => $ledgerId];
         }
 
         $types = [TransactionType::EXPENSE, TransactionType::INCOME];
@@ -295,10 +294,9 @@ class AnalysisService extends BaseObject
      */
     protected function getBaseQuery(array $params): \yii\db\ActiveQuery
     {
-        $baseConditions = ['user_id' => Yii::$app->user->id];
+        $baseConditions = ['user_id' => UserService::getCurrentMemberIds()];
         if ($ledgerId = data_get($params, 'ledger_id')) {
-            LedgerService::checkAccess($ledgerId);
-            $baseConditions = ['user_id' => LedgerService::getLedgerMemberUserIds($ledgerId), 'ledger_id' => $ledgerId];
+            $baseConditions += ['ledger_id' => $ledgerId];
         }
 
         $condition = [

@@ -106,7 +106,7 @@ class BudgetService extends BaseObject
     public static function calculationAmount(BudgetConfig $budgetConfig): void
     {
         $ledgerId = $budgetConfig->ledger_id;
-        $baseConditions = ['user_id' => LedgerService::getLedgerMemberUserIds($ledgerId), 'ledger_id' => $ledgerId];
+        $baseConditions = ['user_id' => UserService::getCurrentMemberIds(), 'ledger_id' => $ledgerId];
         $endDate = Transaction::find()->where($baseConditions)->max('date');
         if (!$endDate) {
             return;

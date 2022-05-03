@@ -16,7 +16,6 @@ use app\core\models\Account;
 use app\core\models\BudgetConfig;
 use app\core\models\Currency;
 use app\core\models\Ledger;
-use app\core\models\LedgerMember;
 use app\core\models\Recurrence;
 use app\core\models\Rule;
 use app\core\models\User;
@@ -105,7 +104,6 @@ class UserProService
                 }
                 break;
             case BudgetConfig::class:
-            case LedgerMember::class:
             case Currency::class:
             case WishList::class:
                 throw new UserNotProException();

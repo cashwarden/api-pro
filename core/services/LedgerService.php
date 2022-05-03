@@ -11,13 +11,11 @@
 namespace app\core\services;
 
 use app\core\exceptions\InternalException;
-use app\core\helpers\RuleControlHelper;
 use app\core\models\Account;
 use app\core\models\Budget;
 use app\core\models\BudgetConfig;
 use app\core\models\Category;
 use app\core\models\Ledger;
-use app\core\models\LedgerMember;
 use app\core\models\Record;
 use app\core\models\Recurrence;
 use app\core\models\Rule;
@@ -25,95 +23,14 @@ use app\core\models\Tag;
 use app\core\models\Transaction;
 use app\core\models\WishList;
 use app\core\types\ColorType;
-use app\core\types\LedgerMemberRule;
-use app\core\types\LedgerMemberStatus;
-use app\core\types\LedgerType;
 use app\core\types\TransactionType;
 use Yii;
 use yii\db\Exception as DBException;
 use yii\helpers\ArrayHelper;
-use yii\web\ForbiddenHttpException;
 use yiier\helpers\ModelHelper;
-use yiier\helpers\Setup;
 
 class LedgerService
 {
-    /**
-     * @param  int  $ledgerId
-     * @param  int  $permission
-     * @throws ForbiddenHttpException
-     */
-    public static function checkAccess(int $ledgerId, int $permission = RuleControlHelper::VIEW)
-    {
-        $userId = Yii::$app->user->id;
-        $userPermission = LedgerMember::find()
-            ->select('permission')
-            ->where(['user_id' => $userId, 'ledger_id' => $ledgerId])
-            ->scalar();
-        if (!RuleControlHelper::can($userPermission, $permission)) {
-            throw new ForbiddenHttpException(
-                Yii::t('app', 'You do not have permission to operate.')
-            );
-        }
-    }
-
-    public static function checkAccessOnType(int $ledgerId, int $userId, string $action)
-    {
-        $ledger = Ledger::find()->where(['id' => $ledgerId])->asArray()->one();
-        if ((LedgerType::SHARE != $ledger['type']) && (Yii::$app->user->id != $userId)) {
-            throw new ForbiddenHttpException(
-                Yii::t('app', 'You can only ' . $action . ' data that you\'ve created.')
-            );
-        }
-    }
-
-    /**
-     * @param  int  $ledgerId
-     * @return array
-     */
-    public static function getLedgerMemberUserIds(int $ledgerId): array
-    {
-        $userIds = LedgerMember::find()
-            ->select('user_id')
-            ->where(['ledger_id' => $ledgerId, 'status' => [LedgerMemberStatus::NORMAL, LedgerMemberStatus::ARCHIVED]])
-            ->column();
-        return array_map('intval', $userIds);
-    }
-
-    /**
-     * @param  int  $ledgerId
-     * @return array
-     */
-    public static function getLedgerMemberUserIdsByType(int $ledgerId): array
-    {
-        $ledger = Ledger::find()->where(['id' => $ledgerId])->asArray()->one();
-        if (LedgerType::SHARE == $ledger['type']) {
-            $userIds = LedgerMember::find()
-                ->select('user_id')
-                ->where([
-                    'ledger_id' => $ledgerId,
-                    'status' => [LedgerMemberStatus::NORMAL, LedgerMemberStatus::ARCHIVED],
-                ])
-                ->column();
-            return array_map('intval', $userIds);
-        }
-        return [(int) Yii::$app->user->id];
-    }
-
-    /**
-     * @param  int  $userId
-     * @return array
-     */
-    public static function getLedgerIds(int $userId = 0): array
-    {
-        $userId = $userId ?: Yii::$app->user->id;
-        $ledgerIds = LedgerMember::find()
-            ->select('ledger_id')
-            ->where(['user_id' => $userId, 'status' => [LedgerMemberStatus::NORMAL, LedgerMemberStatus::ARCHIVED]])
-            ->column();
-        return array_map('intval', $ledgerIds);
-    }
-
     /**
      * @return array|\yii\db\ActiveRecord|null
      */
@@ -134,14 +51,6 @@ class LedgerService
     public static function createLedgerAfter(Ledger $ledger): bool
     {
         try {
-            $model = new LedgerMember();
-            $model->ledger_id = $ledger->id;
-            $model->user_id = $ledger->user_id;
-            $model->rule = LedgerMemberRule::getName(LedgerMemberRule::OWNER);
-            $model->status = LedgerMemberStatus::getName(LedgerMemberStatus::NORMAL);
-            if (!$model->save()) {
-                throw new \yii\db\Exception(Setup::errorMessage($model->firstErrors));
-            }
             $items = [
                 [
                     'name' => Yii::t('app', 'Other expenses'),
@@ -193,7 +102,6 @@ class LedgerService
 
     public static function afterDelete(int $ledgerId)
     {
-        LedgerMember::deleteAll(['ledger_id' => $ledgerId]);
         Category::deleteAll(['ledger_id' => $ledgerId]);
         $budgetConfigIds = BudgetConfig::find()->where(['ledger_id' => $ledgerId])->column();
         Budget::deleteAll(['budget_config_id' => $budgetConfigIds]);
