@@ -443,11 +443,14 @@ class UserService
         if (params('memberIds')) {
             return params('memberIds');
         }
-
-        $userId = Yii::$app->user->id;
-        $userIds = User::find()->select('id')->where(['parent_id' => $userId])->column();
-        $userIds = array_merge($userIds, [$userId]);
-        $userIds = array_unique($userIds);
+        /** @var User $user */
+        $user = Yii::$app->user->identity;
+        if (!$user->parent_id) {
+            return [$user->id];
+        }
+        $userIds = User::find()->select('id')->where(['parent_id' => $user->parent_id])->column();
+        $userIds = array_merge($userIds, [$user->id, $user->parent_id]);
+        $userIds = array_map('intval', array_unique($userIds));
         Yii::$app->params['memberIds'] = $userIds;
         return $userIds;
     }
