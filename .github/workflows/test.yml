@@ -1,10 +1,7 @@
 # GitHub Action for Yii Framework with MySQL
 name: Testing
-on:
-  push:
-    branches: [ master ]
-  pull_request:
-    branches: [ master ]
+on: [ push, pull_request ]
+
 jobs:
   yii:
     name: Yii2 (PHP ${{ matrix.php-versions }})
@@ -12,8 +9,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        php-versions: [ '7.4' ]
-        # php-versions: ['7.2', '7.3', '7.4']
+        php-versions: [ 8.0 ]
+
     steps:
       - name: Checkout
         uses: actions/checkout@v2
