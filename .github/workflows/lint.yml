@@ -32,5 +32,5 @@ jobs:
           composer install --no-progress --prefer-dist
       - name: Run GrumPHP
         run: |
-        php -v
-        ./vendor/bin/grumphp run
+          php -v
+          ./vendor/bin/grumphp run
