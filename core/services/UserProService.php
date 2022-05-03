@@ -16,9 +16,9 @@ use app\core\models\Account;
 use app\core\models\BudgetConfig;
 use app\core\models\Currency;
 use app\core\models\Ledger;
-use app\core\models\LedgerMember;
 use app\core\models\Recurrence;
 use app\core\models\Rule;
+use app\core\models\User;
 use app\core\models\UserProRecord;
 use app\core\models\WishList;
 use app\core\traits\ServiceTrait;
@@ -38,12 +38,12 @@ class UserProService
 {
     use ServiceTrait;
 
-    public static function isPro(int $userId = 0): bool
+    public static function isPro(): bool
     {
-        $userId = $userId ?: Yii::$app->user->id;
+        $userIds = UserService::getCurrentMemberIds();
         // todo 缓存
         return UserProRecord::find()
-            ->where(['user_id' => $userId, 'status' => UserProRecordStatus::PAID])
+            ->where(['user_id' => $userIds, 'status' => UserProRecordStatus::PAID])
             ->andWhere(['>=', 'ended_at', Carbon::now()->toDateTimeString()])
             ->orderBy(['ended_at' => SORT_DESC])
             ->exists();
@@ -51,11 +51,12 @@ class UserProService
 
 
     /**
-     * @param string $modelClass
-     * @param string $action
-     * @param null $model
+     * @param  string  $modelClass
+     * @param  string  $action
+     * @param  null  $model
      * @return bool
      * @throws UserNotProException|\app\core\exceptions\InvalidArgumentException
+     * @throws Exception
      */
     public static function checkAccess(string $modelClass, string $action, $model = null): bool
     {
@@ -96,8 +97,13 @@ class UserProService
                     throw new UserNotProException();
                 }
                 break;
+            case User::class:
+                $count = User::find()->where(['parent_id' => Yii::$app->user->id])->count('id');
+                if ($action == 'create' && $count >= params('userChildCount')) {
+                    throw new UserNotProException();
+                }
+                break;
             case BudgetConfig::class:
-            case LedgerMember::class:
             case Currency::class:
             case WishList::class:
                 throw new UserNotProException();
@@ -133,8 +139,8 @@ class UserProService
     }
 
     /**
-     * @param int $userId
-     * @param string $endedAt
+     * @param  int  $userId
+     * @param  string  $endedAt
      * @return UserProRecord
      * @throws DBException
      */
@@ -168,9 +174,9 @@ class UserProService
     }
 
     /**
-     * @param string $outSn
-     * @param array $conditions
-     * @param array $post
+     * @param  string  $outSn
+     * @param  array  $conditions
+     * @param  array  $post
      * @return bool
      * @throws PayException|Exception
      */

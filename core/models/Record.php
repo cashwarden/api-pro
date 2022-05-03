@@ -13,8 +13,8 @@ namespace app\core\models;
 use app\core\exceptions\CannotOperateException;
 use app\core\jobs\UpdateBudgetJob;
 use app\core\services\AccountService;
-use app\core\services\LedgerService;
 use app\core\services\RecurrenceService;
+use app\core\services\UserService;
 use app\core\types\DirectionType;
 use app\core\types\RecordSource;
 use app\core\types\ReimbursementStatus;
@@ -177,7 +177,7 @@ class Record extends ActiveRecord
     }
 
     /**
-     * @param bool $insert
+     * @param  bool  $insert
      * @return bool
      * @throws \Throwable
      */
@@ -191,7 +191,7 @@ class Record extends ActiveRecord
                     $this->amount_cent = $this->currency_amount_cent;
                 }
                 // $this->amount_cent = $this->currency_amount_cent;
-                    // todo 计算汇率
+                // todo 计算汇率
             }
             return true;
         }
@@ -200,8 +200,8 @@ class Record extends ActiveRecord
 
 
     /**
-     * @param bool $insert
-     * @param array $changedAttributes
+     * @param  bool  $insert
+     * @param  array  $changedAttributes
      * @throws \yii\db\Exception|\Throwable
      */
     public function afterSave($insert, $changedAttributes)
@@ -211,7 +211,7 @@ class Record extends ActiveRecord
         $accountId = data_get($changedAttributes, 'account_id');
         $reimbursementStatus = data_get($changedAttributes, 'reimbursement_status');
         if ($this->transaction_id && ($amountCent || $insert || $accountId || $reimbursementStatus)) {
-            $userIds = LedgerService::getLedgerMemberUserIdsByType($this->ledger_id);
+            $userIds = UserService::getCurrentMemberIds();
             // Exclude balance adjustment transaction type
             AccountService::updateAccountBalance($this->account_id, $userIds);
             if ($accountId && $accountId !== $this->account_id) {
@@ -224,9 +224,9 @@ class Record extends ActiveRecord
      * @return bool
      * @throws CannotOperateException
      */
-    public function beforeDelete()
+    public function beforeDelete(): bool
     {
-        if (RecurrenceService::countByTransactionId($this->transaction_id, $this->user_id)) {
+        if (RecurrenceService::countByTransactionId($this->transaction_id)) {
             throw new CannotOperateException(Yii::t('app', 'Cannot be deleted because it has been used.'));
         }
         return parent::beforeDelete();
@@ -252,8 +252,10 @@ class Record extends ActiveRecord
             }
             Yii::$app->queue->push(new UpdateBudgetJob(['ledgerId' => $this->ledger_id, 'datetime' => $this->date]));
         }
-        $userIds = $this->ledger_id ? LedgerService::getLedgerMemberUserIdsByType($this->ledger_id) : [$this->user_id];
-        $this->account_id ? AccountService::updateAccountBalance($this->account_id, $userIds) : null;
+        $userIds = UserService::getCurrentMemberIds();
+        if ($this->account_id) {
+            AccountService::updateAccountBalance($this->account_id, $userIds);
+        }
     }
 
     /**

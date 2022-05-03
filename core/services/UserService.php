@@ -19,6 +19,7 @@ use app\core\models\Category;
 use app\core\models\Ledger;
 use app\core\models\User;
 use app\core\requests\JoinRequest;
+use app\core\requests\MemberFormRequest;
 use app\core\requests\PasswordResetRequest;
 use app\core\traits\ServiceTrait;
 use app\core\types\AccountType;
@@ -27,6 +28,7 @@ use app\core\types\AuthClientType;
 use app\core\types\ColorType;
 use app\core\types\LedgerType;
 use app\core\types\TransactionType;
+use app\core\types\UserRole;
 use app\core\types\UserSettingKeys;
 use app\core\types\UserStatus;
 use bizley\jwt\Jwt;
@@ -434,5 +436,39 @@ class UserService
             return $this->getAuthClients();
         }
         throw new InternalException('删除失败');
+    }
+
+    public static function getCurrentMemberIds(): array
+    {
+        if (params('memberIds')) {
+            return params('memberIds');
+        }
+
+        $userId = Yii::$app->user->id;
+        $userIds = User::find()->select('id')->where(['parent_id' => $userId])->column();
+        $userIds = array_merge($userIds, [$userId]);
+        $userIds = array_unique($userIds);
+        Yii::$app->params['memberIds'] = $userIds;
+        return $userIds;
+    }
+
+    /**
+     * @throws \yii\base\Exception
+     * @throws DBException
+     * @throws InvalidArgumentException
+     */
+    public function createUpdateMember(MemberFormRequest $data, User $user, User $parent): User
+    {
+        $user->load($data->attributes, '');
+        $user->setPassword($data->password);
+        $user->generateAuthKey();
+        $user->status = $user->status ?: UserStatus::UNACTIVATED;
+        $user->role = UserRole::toEnumValue($data->role);
+        $user->parent_id = $parent->id;
+        $user->base_currency_code = $parent->base_currency_code;
+        if (!$user->save()) {
+            throw new DBException(Setup::errorMessage($user->firstErrors));
+        }
+        return $user;
     }
 }

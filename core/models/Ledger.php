@@ -34,7 +34,6 @@ use yiier\helpers\DateHelper;
  * @property string|null $created_at
  * @property string|null $updated_at
  *
- * @property-read LedgerMember[] $ledgerMembers
  * @property-read Category[] $categories
  */
 class Ledger extends \yii\db\ActiveRecord
@@ -117,7 +116,7 @@ class Ledger extends \yii\db\ActiveRecord
 
 
     /**
-     * @param bool $insert
+     * @param  bool  $insert
      * @return bool
      * @throws \app\core\exceptions\InvalidArgumentException
      */
@@ -138,8 +137,8 @@ class Ledger extends \yii\db\ActiveRecord
     }
 
     /**
-     * @param bool $insert
-     * @param array $changedAttributes
+     * @param  bool  $insert
+     * @param  array  $changedAttributes
      * @throws \yii\db\Exception|\Throwable
      */
     public function afterSave($insert, $changedAttributes)
@@ -174,11 +173,6 @@ class Ledger extends \yii\db\ActiveRecord
     public function getCategories()
     {
         return $this->hasMany(Category::class, ['ledger_id' => 'id']);
-    }
-
-    public function getLedgerMembers()
-    {
-        return $this->hasMany(LedgerMember::class, ['ledger_id' => 'id']);
     }
 
 

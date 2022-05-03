@@ -12,10 +12,8 @@ namespace app\modules\v1\controllers;
 
 use app\core\exceptions\InternalException;
 use app\core\exceptions\InvalidArgumentException;
-use app\core\helpers\RuleControlHelper;
 use app\core\models\Record;
 use app\core\requests\UpdateStatus;
-use app\core\services\LedgerService;
 use app\core\traits\ServiceTrait;
 use app\core\types\AnalysisDateType;
 use app\core\types\ExcludeFromStats;
@@ -76,7 +74,7 @@ class RecordController extends ActiveController
     }
 
     /**
-     * @param array $params
+     * @param  array  $params
      * @return array
      * @throws Exception
      */
@@ -154,19 +152,20 @@ class RecordController extends ActiveController
     }
 
     /**
-     * @param string $key
-     * @param int $id
+     * @param  string  $key
+     * @param  int  $id
      * @return bool
      * @throws ForbiddenHttpException
      * @throws InternalException
      * @throws InvalidArgumentException
      * @throws \yii\db\Exception
+     * @throws \app\core\exceptions\UserNotProException
      */
     public function actionUpdateStatus(string $key, int $id): bool
     {
         $params = Yii::$app->request->bodyParams;
         $record = Record::findOne($id);
-        $this->checkAccess('update', $record);
+        $this->checkAccess($this->action->id, $record);
         switch ($key) {
             case 'reimbursement_status':
                 $statusClass = new ReimbursementStatus();
@@ -193,27 +192,5 @@ class RecordController extends ActiveController
             throw new \yii\db\Exception(Setup::errorMessage($record->firstErrors));
         }
         return true;
-    }
-
-    /**
-     * @param string $action
-     * @param null $model
-     * @param array $params
-     * @throws ForbiddenHttpException
-     */
-    public function checkAccess($action, $model = null, $params = [])
-    {
-        if (in_array($action, ['delete', 'update'])) {
-            if ($model->ledger_id) {
-                LedgerService::checkAccessOnType($model->ledger_id, $model->user_id, $action);
-                LedgerService::checkAccess($model->ledger_id, RuleControlHelper::EDIT);
-            } else {
-                if ($model->user_id !== \Yii::$app->user->id) {
-                    throw new ForbiddenHttpException(
-                        t('app', 'You can only ' . $action . ' data that you\'ve created.')
-                    );
-                }
-            }
-        }
     }
 }

@@ -11,20 +11,16 @@
 namespace app\modules\v1\controllers;
 
 use app\core\helpers\DateHelper;
-use app\core\helpers\SearchHelper;
 use app\core\models\Account;
 use app\core\services\AccountService;
-use app\core\services\LedgerService;
+use app\core\services\UserService;
 use app\core\traits\ServiceTrait;
 use app\core\types\AccountStatus;
 use app\core\types\AccountType;
 use Exception;
 use Yii;
 use yii\base\InvalidConfigException;
-use yii\data\ActiveDataProvider;
-use yii\db\ActiveRecord;
 use yii\web\NotFoundHttpException;
-use yiier\helpers\SearchModel;
 use yiier\helpers\Setup;
 
 /**
@@ -68,7 +64,7 @@ class AccountController extends ActiveController
     }
 
     /**
-     * @param int $id
+     * @param  int  $id
      * @return Account
      * @throws NotFoundHttpException
      * @throws Exception
@@ -91,7 +87,7 @@ class AccountController extends ActiveController
     }
 
     /**
-     * @param int $id
+     * @param  int  $id
      * @return array
      * @throws NotFoundHttpException|InvalidConfigException
      */
@@ -99,6 +95,9 @@ class AccountController extends ActiveController
     {
         if (!$model = AccountService::findOne($id)) {
             throw new NotFoundHttpException();
+        }
+        if (!in_array($model->user_id, UserService::getCurrentMemberIds())) {
+            throw new InvalidConfigException('You are not allowed to access this account');
         }
         $endDate = DateHelper::toDate('-1 month');
         return $this->accountService->balancesTrend($model, $endDate);
@@ -109,7 +108,7 @@ class AccountController extends ActiveController
      * @return array
      * @throws Exception
      */
-    public function actionTypes()
+    public function actionTypes(): array
     {
         $items = [];
         $texts = AccountType::texts();
@@ -124,62 +123,28 @@ class AccountController extends ActiveController
      */
     public function actionOverview(): array
     {
+        $userIds = UserService::getCurrentMemberIds();
         $balanceCentSum = Account::find()
-            ->where(['user_id' => Yii::$app->user->id, 'exclude_from_stats' => false])
+            ->where(['user_id' => $userIds, 'exclude_from_stats' => false])
             ->sum('balance_cent');
         $items['net_asset'] = $balanceCentSum ? Setup::toYuan($balanceCentSum) : 0;
 
         $balanceCentSum = Account::find()
-            ->where(['user_id' => Yii::$app->user->id, 'exclude_from_stats' => false])
+            ->where(['user_id' => $userIds, 'exclude_from_stats' => false])
             ->andWhere(['>', 'balance_cent', 0])
             ->sum('balance_cent');
         $items['total_assets'] = $balanceCentSum ? Setup::toYuan($balanceCentSum) : 0;
 
         $balanceCentSum = Account::find()
-            ->where(['user_id' => Yii::$app->user->id, 'exclude_from_stats' => false])
+            ->where(['user_id' => $userIds, 'exclude_from_stats' => false])
             ->andWhere(['<', 'balance_cent', 0])
             ->sum('balance_cent');
         $items['liabilities'] = $balanceCentSum ? Setup::toYuan($balanceCentSum) : 0;
 
         $items['count'] = Account::find()
-            ->where(['user_id' => Yii::$app->user->id, 'exclude_from_stats' => false])
+            ->where(['user_id' => $userIds, 'exclude_from_stats' => false])
             ->count('id');
 
         return $items;
-    }
-
-    /**
-     * @return ActiveDataProvider
-     * @throws \Exception
-     */
-    public function prepareDataProvider()
-    {
-        /** @var ActiveRecord $modelClass */
-        $modelClass = $this->modelClass;
-        $searchModel = new SearchModel([
-            'defaultOrder' => $this->defaultOrder,
-            'model' => $modelClass,
-            'scenario' => 'default',
-            'partialMatchAttributes' => $this->partialMatchAttributes,
-            'pageSize' => $this->getPageSize(),
-        ]);
-
-        $params = $this->formatParams(Yii::$app->request->queryParams);
-        foreach ($this->stringToIntAttributes as $attribute => $className) {
-            if ($type = data_get($params, $attribute)) {
-                $params[$attribute] = SearchHelper::stringToInt($type, $className);
-            }
-        }
-        unset($params['sort']);
-        $userIds = Yii::$app->user->id;
-        if ($ledgerId = data_get($params, 'ledger_id')) {
-            LedgerService::checkAccess($ledgerId);
-            $userIds = LedgerService::getLedgerMemberUserIdsByType($ledgerId);
-        }
-        $dataProvider = $searchModel->search(['SearchModel' => $params]);
-
-        $dataProvider->query->andWhere(['user_id' => $userIds]);
-
-        return $dataProvider;
     }
 }

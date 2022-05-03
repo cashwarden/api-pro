@@ -25,7 +25,7 @@ class TagService
     }
 
     /**
-     * @param array $data
+     * @param  array  $data
      * @return Tag
      * @throws Exception
      */
@@ -41,35 +41,33 @@ class TagService
     }
 
     /**
-     * @param array $tags
-     * @param int $ledgerId
-     * @param int $userId
+     * @param  array  $tags
+     * @param  int  $ledgerId
      * @throws \yii\base\InvalidConfigException
      */
-    public static function updateCounters(array $tags, int $ledgerId, int $userId = 0)
+    public static function updateCounters(array $tags, int $ledgerId)
     {
-        $userId = $userId ?: Yii::$app->user->id;
+        $userIds = UserService::getCurrentMemberIds();
         foreach ($tags as $tag) {
-            $count = TransactionService::countTransactionByTag($tag, $ledgerId, $userId);
+            $count = TransactionService::countTransactionByTag($tag, $ledgerId, $userIds);
             Tag::updateAll(
                 ['count' => $count, 'updated_at' => Yii::$app->formatter->asDatetime('now')],
-                ['ledger_id' => $ledgerId, 'user_id' => $userId, 'name' => $tag]
+                ['ledger_id' => $ledgerId, 'user_id' => $userIds, 'name' => $tag]
             );
         }
     }
 
     /**
-     * @param string $oldName
-     * @param string $newName
-     * @param int $ledgerId
-     * @param int $userId
+     * @param  string  $oldName
+     * @param  string  $newName
+     * @param  int  $ledgerId
      * @throws \yii\base\InvalidConfigException
      */
-    public static function updateTagName(string $oldName, string $newName, int $ledgerId, int $userId = 0)
+    public static function updateTagName(string $oldName, string $newName, int $ledgerId)
     {
-        $userId = $userId ?: Yii::$app->user->id;
+        $userIds = UserService::getCurrentMemberIds();
         $items = Transaction::find()
-            ->where(['user_id' => $userId, 'ledger_id' => $ledgerId])
+            ->where(['user_id' => $userIds, 'ledger_id' => $ledgerId])
             ->andWhere(new Expression('FIND_IN_SET(:tag, tags)'))->addParams([':tag' => $oldName])
             ->asArray()
             ->all();

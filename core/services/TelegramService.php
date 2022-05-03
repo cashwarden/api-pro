@@ -115,10 +115,7 @@ class TelegramService extends BaseObject
 
         if ($transaction->date) {
             $t = Carbon::parse($transaction->date);
-            $dateRange = [
-                $t->toDateString(),
-                $t->endOfDay()->toDateTimeString(),
-            ];
+            $dateRange = [$t->toDateString(), $t->endOfDay()->toDateTimeString()];
             $query->andWhere(['between', 'date', $dateRange[0], $dateRange[1]]);
         } else {
             $query->andFilterWhere(['category_id' => $transaction->category_id]);
@@ -211,16 +208,15 @@ class TelegramService extends BaseObject
     {
         $userId = $userId ?: Yii::$app->user->id;
         if (!$chatId) {
-            $telegram = AuthClient::find()->select('data')->where([
-                'user_id' => $userId,
-                'type' => AuthClientType::TELEGRAM,
-            ])->scalar();
+            $telegram = AuthClient::find()
+                ->select('data')
+                ->where(['user_id' => $userId, 'type' => AuthClientType::TELEGRAM])
+                ->scalar();
             if (!$telegram) {
                 return;
             }
             $telegram = Json::decode($telegram);
-            $chatId = $telegram['chat']['id'];
-            if (!$chatId) {
+            if (!$chatId = $telegram['chat']['id']) {
                 return;
             }
         }

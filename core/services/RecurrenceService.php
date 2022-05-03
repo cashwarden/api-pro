@@ -30,46 +30,43 @@ class RecurrenceService extends BaseObject
     use SendRequestTrait;
     use ServiceTrait;
 
+
     /**
-     * @param int $id
-     * @param string $status
-     * @return Recurrence
      * @throws Exception
      * @throws InvalidConfigException
-     * @throws NotFoundHttpException
      * @throws InvalidArgumentException
      */
-    public function updateStatus(int $id, string $status): Recurrence
+    public function updateStatus(Recurrence $recurrence, string $status): Recurrence
     {
-        $model = $this->findCurrentOne($id);
-        $model->load($model->toArray(), '');
+        $recurrence->load($recurrence->toArray(), '');
         if (RecurrenceStatus::ACTIVE == RecurrenceStatus::toEnumValue($status)) {
-            $model->started_at = strtotime($model->started_at) > time() ? $model->started_at : 'now';
+            $recurrence->started_at = strtotime($recurrence->started_at) > time() ? $recurrence->started_at : 'now';
         }
-        $model->started_at = Yii::$app->formatter->asDate($model->started_at);
-        $model->status = $status;
-        if (!$model->save()) {
-            throw new Exception(Setup::errorMessage($model->firstErrors));
+        $recurrence->started_at = Yii::$app->formatter->asDate($recurrence->started_at);
+        $recurrence->status = $status;
+        if (!$recurrence->save()) {
+            throw new Exception(Setup::errorMessage($recurrence->firstErrors));
         }
-        return $model;
+        return $recurrence;
     }
 
 
     /**
-     * @param int $id
+     * @param  int  $id
      * @return Recurrence|object
      * @throws NotFoundHttpException
      */
     public function findCurrentOne(int $id): Recurrence
     {
-        if (!$model = Recurrence::find()->where(['id' => $id, 'user_id' => \Yii::$app->user->id])->one()) {
+        $userIds = UserService::getCurrentMemberIds();
+        if (!$model = Recurrence::find()->where(['id' => $id, 'user_id' => $userIds])->one()) {
             throw new NotFoundHttpException('No data found');
         }
         return $model;
     }
 
     /**
-     * @param Recurrence $recurrence
+     * @param  Recurrence  $recurrence
      * @return string|null
      * @throws InvalidConfigException
      * @throws \Exception
@@ -113,19 +110,16 @@ class RecurrenceService extends BaseObject
     }
 
     /**
-     * @param int $transactionId
-     * @param int $userId
+     * @param  int  $transactionId
      * @return bool|int|string|null
      */
-    public static function countByTransactionId(int $transactionId, int $userId)
+    public static function countByTransactionId(int $transactionId)
     {
-        return Recurrence::find()
-            ->where(['user_id' => $userId, 'transaction_id' => $transactionId])
-            ->count();
+        return Recurrence::find()->where(['transaction_id' => $transactionId])->count();
     }
 
     /**
-     * @param array $ids
+     * @param  array  $ids
      * @throws InvalidConfigException
      * @throws ThirdPartyServiceErrorException
      */
@@ -147,7 +141,7 @@ class RecurrenceService extends BaseObject
     }
 
     /**
-     * @param array $ids
+     * @param  array  $ids
      * @throws InvalidConfigException
      * @throws ThirdPartyServiceErrorException
      */
@@ -159,7 +153,7 @@ class RecurrenceService extends BaseObject
             ->asArray()
             ->all();
         $nextWorkday = HolidayHelper::getNextWorkday();
-        foreach ($items as $key => $item) {
+        foreach ($items as $item) {
             Recurrence::updateAll(
                 ['execution_date' => $nextWorkday, 'updated_at' => Yii::$app->formatter->asDatetime('now')],
                 ['id' => $item['id']]

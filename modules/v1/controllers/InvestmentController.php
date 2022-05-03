@@ -14,6 +14,7 @@ use app\core\exceptions\UserNotProException;
 use app\core\models\Account;
 use app\core\models\Record;
 use app\core\services\UserProService;
+use app\core\services\UserService;
 use app\core\traits\ServiceTrait;
 use app\core\types\AccountType;
 use app\core\types\DirectionType;
@@ -36,7 +37,7 @@ class InvestmentController extends ActiveController
     {
         $this->checkAccess('');
         $baseConditions = [
-            'user_id' => Yii::$app->user->id,
+            'user_id' => UserService::getCurrentMemberIds(),
             'type' => AccountType::INVESTMENT_ACCOUNT,
             'exclude_from_stats' => false,
         ];
@@ -77,9 +78,9 @@ class InvestmentController extends ActiveController
 
 
     /**
-     * @param string $action
-     * @param null $model
-     * @param array $params
+     * @param  string  $action
+     * @param  null  $model
+     * @param  array  $params
      * @throws UnauthorizedHttpException
      * @throws UserNotProException
      */
