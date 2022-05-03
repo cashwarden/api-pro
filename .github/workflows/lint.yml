@@ -10,8 +10,11 @@ jobs:
         with:
           ref: ${{ github.head_ref }}
 
-      - name: Run php-cs-fixer
-        uses: OskarStark/php-cs-fixer-ga@v2
+      - name: Install
+        run: composer install
+
+      - name: Run Gump
+        run: ./vendor/bin/gumpphp run
 
       - uses: stefanzweifel/git-auto-commit-action@v4
         with:
