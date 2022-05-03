@@ -13,8 +13,8 @@ jobs:
       - name: Install
         run: composer install
 
-      - name: Run Gump
-        run: ./vendor/bin/gumpphp run
+      - name: Run PHP-CS-Fixer
+        run: ./vendor/bin/php-cs-fixer fix
 
       - uses: stefanzweifel/git-auto-commit-action@v4
         with:
