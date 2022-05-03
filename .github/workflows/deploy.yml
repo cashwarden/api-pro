@@ -1,0 +1,96 @@
+name: Deploy to Server
+
+on:
+  push:
+    branches: [ master, stage, test ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node-version: [ 12.x ]
+
+    steps:
+
+      - name: Inject slug/short variables
+        uses: rlespinasse/github-slug-action@v3.x
+
+      - name: Set WORK_DIR to test
+        if: endsWith(github.ref, '/test')
+        run:
+          echo "WORK_DIR=/home/www/test-cashwarden-api-pro" >> $GITHUB_ENV
+          echo "HOST=test-api.cashwarden.com" >> $GITHUB_ENV
+
+      - name: Set WORK_DIR to stage
+        if: endsWith(github.ref, '/stage')
+        run:
+          echo "WORK_DIR=/home/www/stage-cashwarden-api-pro" >> $GITHUB_ENV
+          echo "HOST=stage-api.cashwarden.com" >> $GITHUB_ENV
+
+      - name: Set WORK_DIR to production
+        if: endsWith(github.ref, '/master')
+        run: |
+          echo "WORK_DIR=/home/www/cashwarden-api-pro" >> $GITHUB_ENV
+          echo "HOST=api.cashwarden.com" >> $GITHUB_ENV
+
+      - name: Checkout branch
+        uses: actions/checkout@v1
+        with:
+          fetch-depth: 1
+
+      - name: Cache node modules
+        uses: actions/cache@v1
+        with:
+          path: ~/.composer
+          key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.json') }}
+          restore-keys: |
+            ${{ runner.os }}-composer-
+      - name: Installing PHP
+        uses: shivammathur/setup-php@master
+        with:
+          php-version: 8.0
+          extensions: mbstring, xdebug, fileinfo, redis, gd, zip, bcmath
+
+      - name: Composer dependencies
+        run: composer install --no-ansi --no-interaction --no-scripts --no-suggest --no-progress --prefer-dist
+
+      - name: Get timestamp
+        uses: gerred/actions/current-time@master
+        id: current-time
+
+      - name: Run string replace
+        uses: frabert/replace-string-action@master
+        id: format-time
+        with:
+          pattern: '[:\.]+'
+          string: "${{ steps.current-time.outputs.time }}"
+          replace-with: '-'
+          flags: 'g'
+
+      - name: Generate deployment package
+        run: zip -r deploy.zip . -x ".git/*"
+
+      - name: Generate File Name
+        id: file-name
+        run: echo '::set-output name=name::$(echo deploy-${{ env.GITHUB_REPOSITORY_SLUG_URL	}}-${{ env.GITHUB_REF_SLUG_URL }}-${{ steps.format-time.outputs.replaced }}.zip)'
+
+      - name: Debug Files
+        run: ls -la
+
+      - name: Copy folder content recursively to remote
+        uses: burnett01/rsync-deployments@5.2
+        with:
+          switches: -avuz
+          path: deploy.zip
+          remote_path: ${{ env.WORK_DIR }}
+          remote_host: ${{ env.HOST }}
+          remote_user: ${{ secrets.SSH_USER }}
+          remote_key: ${{ secrets.SSH_PRIVATE_KEY }}
+          rsh: unzip -o deploy.zip -d ${{ env.WORK_DIR }}
+
+      - name: Slack Workflow Notification
+        uses: Gamesight/slack-workflow-status@master
+        with:
+          repo_token: ${{secrets.GITHUB_TOKEN}}
+          slack_webhook_url: ${{secrets.SLACK_WEBHOOK_URL}}
