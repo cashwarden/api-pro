@@ -12,6 +12,7 @@ namespace app\modules\backend\models;
 
 use app\core\models\User;
 use app\core\services\UserService;
+use app\core\types\UserRole;
 use Yii;
 use yii\base\Model;
 
@@ -47,8 +48,8 @@ class LoginForm extends Model
      * Validates the password.
      * This method serves as the inline validation for password.
      *
-     * @param string $attribute the attribute currently being validated
-     * @param array $params the additional name-value pairs given in the rule
+     * @param  string  $attribute  the attribute currently being validated
+     * @param  array  $params  the additional name-value pairs given in the rule
      */
     public function validatePassword($attribute, $params)
     {
@@ -57,8 +58,8 @@ class LoginForm extends Model
 
             if (!$user || !$user->validatePassword($this->password)) {
                 $this->addError($attribute, Yii::t('app', 'Incorrect username or password.'));
-            } elseif ($user->id != params('superAdminUserId')) {
-                $this->addError($attribute, '没有权限操作');
+            } elseif ($user->role === UserRole::ROLE_DISABLED) {
+                $this->addError($attribute, Yii::t('app', 'Your account is disabled.'));
             }
         }
     }
