@@ -1,6 +1,10 @@
 # GitHub Action for Yii Framework with MySQL
 name: Testing
-on: [ push, pull_request ]
+on:
+  push:
+    branches: [ master, test, stage ]
+  pull_request:
+    branches: [ master, test, stage ]
 
 jobs:
   yii:
