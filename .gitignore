@@ -23,8 +23,6 @@ composer.phar
 
 # phpunit itself is not needed
 phpunit.phar
-# local phpunit config
-/phpunit.xml
 
 tests/_output/*
 tests/_support/_generated
@@ -37,3 +35,4 @@ tests/_support/_generated
 .env.testing
 
 .php_cs.cache
+.phpunit.result.cache

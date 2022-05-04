@@ -39,22 +39,12 @@
     "exileed/yii2-monolog2": "^2.0",
     "yiisoft/yii2": "~2.0.14",
     "yiier/yii2-hashids": "^3.0",
-    "overtrue/wechat": "^5.0"
+    "overtrue/wechat": "^5.0",
+    "phpunit/phpunit": "^9.5"
   },
   "require-dev": {
     "yiisoft/yii2-debug": "~2.1.0",
     "yiisoft/yii2-gii": "~2.1.0",
-    "yiisoft/yii2-faker": "~2.0.0",
-    "codeception/codeception": "^4.0",
-    "codeception/verify": "~0.5.0 || ~1.1.0",
-    "codeception/specify": "~0.4.6",
-    "symfony/browser-kit": ">=2.7 <=4.2.4",
-    "codeception/module-filesystem": "^1.0.0",
-    "codeception/module-yii2": "^1.0.0",
-    "codeception/module-asserts": "^1.0.0",
-    "codeception/module-rest": "^1.0.0",
-    "codeception/module-phpbrowser": "^1.0.0",
-    "squizlabs/php_codesniffer": "^3.5.5",
     "plumthedev/yii2-php-cs-fixer-config": "^1.2",
     "phpro/grumphp": "^1.11",
     "mis/yii2-ide-helper": "^1.0"
@@ -70,6 +60,11 @@
       "vendor/yiier/yii2-helpers/src/GlobalFunctions.php",
       "vendor/yiier/yii2-helpers/src/SupportFunctions.php"
     ]
+  },
+  "autoload-dev": {
+    "psr-4": {
+      "tests\\": "tests/"
+    }
   },
   "scripts": {
     "post-install-cmd": [
