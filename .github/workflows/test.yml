@@ -59,7 +59,7 @@ jobs:
       - name: Run Tests
         run: |
           php yii migrate --interactive=0
-          nohup php yii serve > yii.log 2>&1 &
+          nohup php -S localhost:8080 > yii.log 2>&1 &
           cat yii.log
           curl -s http://localhost:8080/health-check  -H 'Content-Type: application/json'
           ./vendor/bin/phpunit --coverage-text --coverage-clover=coverage.clover
