@@ -359,8 +359,8 @@ class TransactionService extends BaseObject
         $model->category_id = $categoryId ?: $this->getDataByDesc(
             $rules,
             'then_category_id',
-            function () use ($transactionType) {
-                return (int) data_get(CategoryService::getDefaultCategory($transactionType), 'id', 0);
+            function () use ($model, $transactionType) {
+                return (int) data_get(CategoryService::getDefaultCategory($transactionType, $model->ledger_id), 'id', 0);
             }
         );
 
@@ -673,17 +673,18 @@ class TransactionService extends BaseObject
     }
 
     /**
+     * @param  int  $ledgerId
      * @return array
      * @throws Exception
      */
-    public function exportData(): array
+    public function exportData(int $ledgerId): array
     {
         $data = [];
-        $categoriesMap = CategoryService::getMapByUserId();
+        $categoriesMap = CategoryService::getMapByLedgerId($ledgerId);
         $accountsMap = AccountService::getCurrentMap();
         $types = TransactionType::texts();
         $items = Transaction::find()
-            ->where(['user_id' => Yii::$app->user->id])
+            ->where(['user_id' => UserService::getCurrentMemberIds(), 'ledger_id' => $ledgerId])
             ->orderBy(['date' => SORT_DESC])
             ->asArray()
             ->all();
