@@ -130,7 +130,7 @@ class ActiveController extends \yii\rest\ActiveController
     protected function getPageSize(): int
     {
         if ($pageSize = (int) request('pageSize')) {
-            if ($pageSize < self::MAX_PAGE_SIZE) {
+            if ($pageSize <= self::MAX_PAGE_SIZE) {
                 return $pageSize;
             }
             return self::MAX_PAGE_SIZE;
