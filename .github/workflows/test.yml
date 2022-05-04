@@ -62,5 +62,7 @@ jobs:
           nohup php yii serve > yii.log 2>&1 &
           ps aux | grep yii
           netstat -nalp | grep -w "LISTEN"
-          curl -sS http://localhost:8084/health-check
+          curl -sS http://localhost:8084
+          curl -sS http://localhost:3306
+          curl -sS http://localhost:22
           ./vendor/bin/phpunit --coverage-text --coverage-clover=coverage.clover
