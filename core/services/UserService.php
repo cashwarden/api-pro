@@ -461,8 +461,10 @@ class UserService
     public function createUpdateMember(MemberFormRequest $data, User $user, User $parent): User
     {
         $user->load($data->attributes, '');
-        $user->setPassword($data->password);
-        $user->generateAuthKey();
+        if ($data->password) {
+            $user->setPassword($data->password);
+            $user->generateAuthKey();
+        }
         $user->status = $user->status ?: UserStatus::UNACTIVATED;
         $user->role = UserRole::toEnumValue($data->role);
         $user->parent_id = $parent->id;

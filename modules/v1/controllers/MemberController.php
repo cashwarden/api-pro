@@ -70,7 +70,9 @@ class MemberController extends ActiveController
         $this->checkAccess($this->action->id, $parent);
         $params = Yii::$app->request->bodyParams;
         /** @var MemberFormRequest $data */
-        $data = $this->validate(new MemberFormRequest(), $params);
+        $form = new MemberFormRequest();
+        $form->setScenario('create');
+        $data = $this->validate($form, $params);
         $user = new User();
         $user = $this->userService->createUpdateMember($data, $user, $parent);
         if (params('verificationEmail')) {
@@ -98,10 +100,10 @@ class MemberController extends ActiveController
         }
         $this->checkAccess($this->action->id, $parent);
         $params = Yii::$app->request->bodyParams;
-        $model = new MemberFormRequest();
-        $model->id = $id;
+        $form = new MemberFormRequest();
+        $form->id = $id;
         /** @var MemberFormRequest $data */
-        $data = $this->validate($model, $params);
+        $data = $this->validate($form, $params);
         return $this->userService->createUpdateMember($data, $user, $parent);
     }
 

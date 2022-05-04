@@ -54,7 +54,7 @@ class MemberFormRequest extends \yii\base\Model
             ],
             ['email', 'email'],
 
-            ['password', 'required'],
+            ['password', 'required', 'on' => 'create'],
             ['password', 'string', 'min' => 6],
 
             [
