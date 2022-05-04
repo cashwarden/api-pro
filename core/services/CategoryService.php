@@ -17,7 +17,7 @@ use yii\helpers\ArrayHelper;
 
 class CategoryService
 {
-    public static function getDefaultCategory(int $transactionType, int $ledgerId): Category
+    public static function getDefaultCategory(int $transactionType, int $ledgerId): array
     {
         $userIds = UserService::getCurrentMemberIds();
         return Category::find()
