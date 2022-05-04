@@ -18,7 +18,7 @@ class MemberFormRequest extends \yii\base\Model
     public $id;
     public ?string $username;
     public ?string $email;
-    public ?string $password;
+    public $password;
     public ?string $role;
 
     /**
