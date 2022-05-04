@@ -61,5 +61,7 @@ jobs:
           php yii migrate --interactive=0
           nohup php yii serve > yii.log 2>&1 &
           ps aux | grep yii
+          lsof -i :80
+          lsof -i :8080
           curl -sS http://localhost/health-check
           ./vendor/bin/phpunit --coverage-text --coverage-clover=coverage.clover
