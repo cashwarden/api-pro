@@ -250,7 +250,6 @@ class User extends ActiveRecord implements IdentityInterface
             $fields['password_reset_token'],
             $fields['id'],
             $fields['parent_id'],
-            $fields['created_at'],
             $fields['updated_at'],
         );
 
