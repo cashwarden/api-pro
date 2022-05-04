@@ -23,7 +23,7 @@ class FixController extends Controller
 
     public function actionUserParent()
     {
-        FixDataService::fixUserParent();
+        FixDataService::fixChildUserData();
         $this->stdout("操作成功\n");
     }
 }
