@@ -19,7 +19,7 @@ class TestCase extends BaseTestCase
 
     public function setUp(): void
     {
-        $this->http = new Client(['base_uri' => 'https://localhost:8080']);
+        $this->http = new Client(['base_uri' => 'http://localhost:8080']);
     }
 
     public function tearDown(): void
