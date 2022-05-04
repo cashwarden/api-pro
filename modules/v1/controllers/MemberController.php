@@ -103,7 +103,7 @@ class MemberController extends ActiveController
         $form = new MemberFormRequest();
         $form->id = $id;
         /** @var MemberFormRequest $data */
-        $data = $this->validate($form, $params);
+        $data = $this->validate($form, array_merge($user->attributes, $params));
         return $this->userService->createUpdateMember($data, $user, $parent);
     }
 
