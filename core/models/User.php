@@ -248,7 +248,6 @@ class User extends ActiveRecord implements IdentityInterface
             $fields['auth_key'],
             $fields['password_hash'],
             $fields['password_reset_token'],
-            $fields['id'],
             $fields['parent_id'],
             $fields['updated_at'],
         );
