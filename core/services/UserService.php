@@ -445,11 +445,9 @@ class UserService
         }
         /** @var User $user */
         $user = Yii::$app->user->identity;
-        if (!$user->parent_id) {
-            return [$user->id];
-        }
-        $userIds = User::find()->select('id')->where(['parent_id' => $user->parent_id])->column();
-        $userIds = array_merge($userIds, [$user->id, $user->parent_id]);
+        $parentId = $user->parent_id ?: $user->id;
+        $userIds = User::find()->select('id')->where(['parent_id' => $parentId])->column();
+        $userIds = array_merge($userIds, [$parentId]);
         $userIds = array_map('intval', array_unique($userIds));
         Yii::$app->params['memberIds'] = $userIds;
         return $userIds;
