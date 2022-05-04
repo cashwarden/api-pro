@@ -16,10 +16,10 @@ use app\core\types\UserRole;
 class MemberFormRequest extends \yii\base\Model
 {
     public $id;
-    public ?string $username;
-    public ?string $email;
+    public $username;
+    public $email;
     public $password;
-    public ?string $role;
+    public $role;
 
     /**
      * @inheritdoc
