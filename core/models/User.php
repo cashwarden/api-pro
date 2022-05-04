@@ -255,6 +255,10 @@ class User extends ActiveRecord implements IdentityInterface
         $fields['status'] = function (self $model) {
             return UserStatus::getName($model->status);
         };
+        $fields['role'] = function (self $model) {
+            return UserRole::names()[$model->role];
+        };
+
         $fields['role_name'] = function (self $model) {
             return UserRole::texts()[$model->role];
         };
