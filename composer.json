@@ -47,7 +47,8 @@
     "plumthedev/yii2-php-cs-fixer-config": "^1.2",
     "phpro/grumphp": "^1.11",
     "mis/yii2-ide-helper": "^1.0",
-    "phpunit/phpunit": "^9.5"
+    "phpunit/phpunit": "^9.5",
+    "mockery/mockery": "^1.5"
   },
   "config": {
     "process-timeout": 1800,

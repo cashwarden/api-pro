@@ -21,11 +21,13 @@ class AuthenticationTest extends TestCase
      */
     public function testBasicTest()
     {
-        $response = $this->http->post('/v1/join', [
-            'name' => 'test',
-            'email' => 'test@mail.com',
-            'password' => 'test',
-            'base_currency_code' => 'USD',
+        $response = $this->client->post('/v1/join', [
+            'json' => [
+                'name' => 'test',
+                'email' => 'test@mail.com',
+                'password' => 'test',
+                'base_currency_code' => 'USD',
+            ],
         ]);
         $this->assertEquals(200, $response->getStatusCode());
     }

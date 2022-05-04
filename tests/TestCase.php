@@ -15,15 +15,18 @@ use PHPUnit\Framework\TestCase as BaseTestCase;
 
 class TestCase extends BaseTestCase
 {
-    protected ?Client $http;
+    protected ?Client $client;
 
     public function setUp(): void
     {
-        $this->http = new Client(['base_uri' => 'http://localhost:8080']);
+        $this->client = new Client([
+            'base_uri' => 'http://localhost:8080',
+            'timeout' => 5.0,
+        ]);
     }
 
     public function tearDown(): void
     {
-        $this->http = null;
+        $this->client = null;
     }
 }
