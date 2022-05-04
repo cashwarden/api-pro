@@ -231,7 +231,7 @@ class Account extends \yii\db\ActiveRecord
 
     public function extraFields()
     {
-        return ['incomeSum'];
+        return ['incomeSum', 'user'];
     }
 
     /**
