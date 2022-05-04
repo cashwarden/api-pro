@@ -12,7 +12,6 @@ namespace app\modules\backend\models;
 
 use app\core\models\User;
 use app\core\services\UserService;
-use app\core\types\UserRole;
 use Yii;
 use yii\base\Model;
 
@@ -58,8 +57,8 @@ class LoginForm extends Model
 
             if (!$user || !$user->validatePassword($this->password)) {
                 $this->addError($attribute, Yii::t('app', 'Incorrect username or password.'));
-            } elseif ($user->role === UserRole::ROLE_DISABLED) {
-                $this->addError($attribute, Yii::t('app', 'Your account is disabled.'));
+            } elseif ($user->id != params('superAdminUserId')) {
+                $this->addError($attribute, '没有权限操作');
             }
         }
     }
