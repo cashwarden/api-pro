@@ -61,7 +61,7 @@ class AccountService
     public function createUpdate(Account $account): Account
     {
         try {
-            $account->user_id = Yii::$app->user->id;
+            $account->user_id = $account->user_id ?: Yii::$app->user->id;
             if (!$account->save()) {
                 throw new \yii\db\Exception(Setup::errorMessage($account->firstErrors));
             }
@@ -103,7 +103,7 @@ class AccountService
      */
     public static function updateAccountBalance(int $accountId, array $userIds): bool
     {
-        if (!$model = self::findOne($accountId, $userIds)) {
+        if (!$model = Account::find()->where(['id' => $accountId, 'user_id' => $userIds])->one()) {
             throw new \yii\db\Exception(Yii::t('app', 'Not found account.'));
         }
         $model->load($model->toArray(), '');
