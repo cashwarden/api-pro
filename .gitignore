@@ -36,3 +36,4 @@ tests/_support/_generated
 
 .php_cs.cache
 .phpunit.result.cache
+yii.log
