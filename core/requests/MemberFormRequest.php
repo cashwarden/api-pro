@@ -28,7 +28,7 @@ class MemberFormRequest extends \yii\base\Model
     {
         return [
             [['username', 'email'], 'trim'],
-            [['username', 'email'], 'required'],
+            [['username', 'email'], 'required', 'on' => 'create'],
             [
                 'username',
                 'unique',
