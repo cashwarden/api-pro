@@ -17,7 +17,7 @@
   },
   "minimum-stability": "stable",
   "require": {
-    "php": ">=7.4",
+    "php": ">=8.0",
     "yiisoft/yii2-swiftmailer": "~2.0.0 || ~2.1.0",
     "yiithings/yii2-dotenv": "^1.0",
     "bizley/jwt": "^3.0",
@@ -39,15 +39,15 @@
     "exileed/yii2-monolog2": "^2.0",
     "yiisoft/yii2": "~2.0.14",
     "yiier/yii2-hashids": "^3.0",
-    "overtrue/wechat": "^5.0",
-    "phpunit/phpunit": "^9.5"
+    "overtrue/wechat": "^5.0"
   },
   "require-dev": {
     "yiisoft/yii2-debug": "~2.1.0",
     "yiisoft/yii2-gii": "~2.1.0",
     "plumthedev/yii2-php-cs-fixer-config": "^1.2",
     "phpro/grumphp": "^1.11",
-    "mis/yii2-ide-helper": "^1.0"
+    "mis/yii2-ide-helper": "^1.0",
+    "phpunit/phpunit": "^9.5"
   },
   "config": {
     "process-timeout": 1800,

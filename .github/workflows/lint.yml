@@ -1,18 +1,19 @@
 name: Lint
-on: [ push, pull_request ]
+on: [ pull_request ]
 
 jobs:
-  grumphp:
-    name: Run GrumPHP
+  php-cs-fixer:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
-        uses: actions/checkout@v2
+      - name: Checkout branch
+        uses: actions/checkout@v3
+        with:
+          ref: ${{ github.head_ref }}
 
-      - name: Setup PHP
+      - name: Setup PHP, with composer and extensions
         uses: shivammathur/setup-php@v2
         with:
-          php-version: 7.4
+          php-version: 8.0
 
       - name: Get composer cache directory
         id: composercache
@@ -31,4 +32,6 @@ jobs:
         run: |
           composer install --no-progress --prefer-dist
       - name: Run GrumPHP
-        run: ./vendor/bin/grumphp run
+        run: |
+          php -v
+          ./vendor/bin/grumphp run
