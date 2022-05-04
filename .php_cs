@@ -28,7 +28,7 @@ $csConfig->mergeRules([
 
 // CS Finder setup
 $csConfigFinder = $csConfig->getFinder();
-$csConfigFinder->setYiiAppExclude(['_ide_helper.php']);
+$csConfigFinder->notPath('_ide_helper.php');
 $csConfigFinder->in(__DIR__); // set current project directory
 $csConfig->setFinder($csConfigFinder);
 

@@ -16,8 +16,10 @@ use app\core\exceptions\InternalException;
 use app\core\exceptions\InvalidArgumentException;
 use app\core\exceptions\UserNotProException;
 use app\core\helpers\SearchHelper;
-use app\core\services\LedgerService;
+use app\core\models\User;
 use app\core\services\UserProService;
+use app\core\services\UserService;
+use app\core\types\UserRole;
 use bizley\jwt\JwtHttpBearerAuth;
 use Yii;
 use yii\base\InvalidConfigException;
@@ -115,29 +117,20 @@ class ActiveController extends \yii\rest\ActiveController
 
         $dataProvider = $searchModel->search(['SearchModel' => $params]);
 
-        $userIds = Yii::$app->user->id;
-        if ($ledgerId = data_get($params, 'ledger_id')) {
-            LedgerService::checkAccess($ledgerId);
-            $userIds = LedgerService::getLedgerMemberUserIds($ledgerId);
-        }
-
-        $dataProvider->query->andWhere([$modelClass::tableName() . '.user_id' => $userIds]);
+        $dataProvider->query->andWhere([$modelClass::tableName() . '.user_id' => UserService::getCurrentMemberIds()]);
         return $dataProvider;
     }
 
 
-    protected function formatParams(array $params)
+    protected function formatParams(array $params): array
     {
         return $params;
     }
 
-    /**
-     * @return int
-     */
-    protected function getPageSize()
+    protected function getPageSize(): int
     {
         if ($pageSize = (int) request('pageSize')) {
-            if ($pageSize < self::MAX_PAGE_SIZE) {
+            if ($pageSize <= self::MAX_PAGE_SIZE) {
                 return $pageSize;
             }
             return self::MAX_PAGE_SIZE;
@@ -165,15 +158,24 @@ class ActiveController extends \yii\rest\ActiveController
      * @param  string  $action
      * @param  null  $model
      * @param  array  $params
-     * @throws ForbiddenHttpException|UserNotProException
+     * @throws ForbiddenHttpException|UserNotProException|InvalidArgumentException
      */
     public function checkAccess($action, $model = null, $params = [])
     {
         UserProService::checkAccess($this->modelClass, $action, $model);
-        if (in_array($action, ['delete', 'update', 'view'])) {
-            if ($model->user_id !== \Yii::$app->user->id) {
+        if (in_array($action, ['delete', 'update', 'view', 'update-status'])) {
+            if (!in_array($model->user_id, UserService::getCurrentMemberIds())) {
                 throw new ForbiddenHttpException(
                     t('app', 'You can only ' . $action . ' data that you\'ve created.')
+                );
+            }
+        }
+
+        if (in_array($action, ['delete', 'update', 'update-status', 'create'])) {
+            $userRole = User::find()->select('role')->where(['id' => Yii::$app->user->id])->scalar();
+            if (!in_array($userRole, [UserRole::ROLE_READ_WRITE, UserRole::ROLE_OWNER])) {
+                throw new ForbiddenHttpException(
+                    t('app', 'You not have permission to ' . $action . ' data.')
                 );
             }
         }

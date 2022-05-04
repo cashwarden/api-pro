@@ -47,7 +47,6 @@ class m201102_072500_add_ledger_id extends Migration
         $this->dropColumn('{{%tag}}', 'ledger_id');
         $this->dropColumn('{{%rule}}', 'ledger_id');
 
-        \app\core\models\LedgerMember::deleteAll();
         \app\core\models\Ledger::deleteAll();
         return true;
     }

@@ -14,9 +14,8 @@ use app\core\exceptions\InvalidArgumentException;
 use app\core\helpers\CurrencyConverter;
 use app\core\models\Currency;
 use app\core\models\Ledger;
-use app\core\services\LedgerService;
+use app\core\services\UserService;
 use app\core\types\CurrencyType;
-use Yii;
 use yiier\graylog\Log;
 
 /**
@@ -27,8 +26,8 @@ class CurrencyController extends ActiveController
     public $modelClass = Currency::class;
 
     /**
-     * @param string $from
-     * @param string $to
+     * @param  string  $from
+     * @param  string  $to
      * @return array
      * @throws InvalidArgumentException
      * @throws \GuzzleHttp\Exception\GuzzleException
@@ -70,11 +69,8 @@ class CurrencyController extends ActiveController
     {
         $items = [];
         $names = CurrencyType::names();
-        $userIds = Yii::$app->user->id;
-        if ($ledgerId = data_get(Yii::$app->request->queryParams, 'ledger_id')) {
-            LedgerService::checkAccess($ledgerId);
-            $userIds = LedgerService::getLedgerMemberUserIds($ledgerId);
-        }
+        $userIds = UserService::getCurrentMemberIds();
+        $ledgerId = request('ledger_id');
         $baseCode = Ledger::find()->select('base_currency_code')
             ->where(['id' => $ledgerId, 'user_id' => $userIds])
             ->scalar();

@@ -11,6 +11,7 @@
 namespace app\core\models;
 
 use app\core\types\UserProRecordStatus;
+use app\core\types\UserRole;
 use app\core\types\UserStatus;
 use Carbon\Carbon;
 use Lcobucci\JWT\Token\Plain;
@@ -23,19 +24,22 @@ use yii\web\IdentityInterface;
  * This is the model class for table "{{%user}}".
  *
  * @property int $id
+ * @property int|null $parent_id
  * @property string $username
  * @property string|null $avatar
+ * @property string $email
  * @property string $auth_key
  * @property string $password_hash
  * @property string|null $password_reset_token
- * @property string|null $email
- * @property int|null $status 状态：1正常 0冻结
+ * @property int|null $status
+ * @property int|null $role
  * @property string $base_currency_code
- * @property int|null $created_at
- * @property int|null $updated_at
+ * @property string|null $created_at
+ * @property string|null $updated_at
  *
  * @property-write string $password
  * @property-read null|\app\core\models\UserProRecord $pro
+ * @property array $memberIds
  * @property-read string $authKey
  */
 class User extends ActiveRecord implements IdentityInterface
@@ -74,6 +78,7 @@ class User extends ActiveRecord implements IdentityInterface
     {
         return [
             ['status', 'default', 'value' => UserStatus::ACTIVE],
+            ['email', 'string', 'max' => 255],
             ['status', 'in', 'range' => [UserStatus::ACTIVE, UserStatus::UNACTIVATED]],
             [['username'], 'string', 'max' => 60],
         ];
@@ -225,6 +230,14 @@ class User extends ActiveRecord implements IdentityInterface
             ->one();
     }
 
+    public function getMemberIds(): array
+    {
+        $userId = Yii::$app->user->id;
+        $userIds = self::find()->select('id')->where(['parent_id' => $userId])->column();
+        $userIds = array_merge($userIds, [$userId]);
+        return array_unique($userIds);
+    }
+
     /**
      * @return array
      */
@@ -235,13 +248,19 @@ class User extends ActiveRecord implements IdentityInterface
             $fields['auth_key'],
             $fields['password_hash'],
             $fields['password_reset_token'],
-            $fields['id'],
-            $fields['created_at'],
+            $fields['parent_id'],
             $fields['updated_at'],
         );
 
         $fields['status'] = function (self $model) {
             return UserStatus::getName($model->status);
+        };
+        $fields['role'] = function (self $model) {
+            return UserRole::names()[$model->role];
+        };
+
+        $fields['role_name'] = function (self $model) {
+            return UserRole::texts()[$model->role];
         };
 
         $fields['avatar'] = function (self $model) {

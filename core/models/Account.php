@@ -47,6 +47,7 @@ use yiier\validators\MoneyValidator;
  * @property string|null $created_at
  * @property string|null $updated_at
  *
+ * @property-read null|float|int $incomeSum
  * @property-read User $user
  */
 class Account extends \yii\db\ActiveRecord
@@ -170,7 +171,7 @@ class Account extends \yii\db\ActiveRecord
 
 
     /**
-     * @param bool $insert
+     * @param  bool  $insert
      * @return bool
      * @throws InvalidArgumentException|\Throwable
      */
@@ -203,8 +204,8 @@ class Account extends \yii\db\ActiveRecord
     }
 
     /**
-     * @param bool $insert
-     * @param array $changedAttributes
+     * @param  bool  $insert
+     * @param  array  $changedAttributes
      * @throws \yii\db\Exception
      * @throws \Exception
      */
@@ -233,7 +234,10 @@ class Account extends \yii\db\ActiveRecord
         return ['incomeSum'];
     }
 
-    public function getIncomeSum()
+    /**
+     * @throws \Exception
+     */
+    public function getIncomeSum(): float|int|null
     {
         return Setup::toYuan(AccountService::getCalculateIncomeSumCent($this->id));
     }

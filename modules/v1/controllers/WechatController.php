@@ -51,8 +51,8 @@ class WechatController extends ActiveController
 
         return [
             'user' => $user,
-            'token' => (string) $token,
-            'default_ledger' => LedgerService::getDefaultLedger($authClient->user_id),
+            'token' => $token,
+            'default_ledger' => LedgerService::getDefaultLedger(),
         ];
     }
 

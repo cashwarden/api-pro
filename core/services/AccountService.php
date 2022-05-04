@@ -32,7 +32,7 @@ class AccountService
 {
     public static function afterDelete(Account $account)
     {
-        $baseConditions = ['user_id' => Yii::$app->user->id];
+        $baseConditions = ['user_id' => UserService::getCurrentMemberIds()];
         Record::deleteAll($baseConditions + ['account_id' => $account->id]);
 
         $transactionIds = Transaction::find()
@@ -54,14 +54,14 @@ class AccountService
     }
 
     /**
-     * @param Account $account
+     * @param  Account  $account
      * @return Account
      * @throws InternalException
      */
     public function createUpdate(Account $account): Account
     {
         try {
-            $account->user_id = Yii::$app->user->id;
+            $account->user_id = $account->user_id ?: Yii::$app->user->id;
             if (!$account->save()) {
                 throw new \yii\db\Exception(Setup::errorMessage($account->firstErrors));
             }
@@ -77,35 +77,33 @@ class AccountService
 
 
     /**
-     * @param int $id
-     * @param array|int $userIds
+     * @param  int  $id
      * @return Account|ActiveRecord|null
      */
-    public static function findOne(int $id, $userIds = null)
+    public static function findOne(int $id)
     {
-        $userIds = $userIds ?: Yii::$app->user->id;
-        return Account::find()->where(['id' => $id, 'user_id' => $userIds])->one();
+        return Account::find()->where(['id' => $id])->one();
     }
 
-    public static function getDefaultAccount(int $userId = 0): array
+    public static function getDefaultAccount(): array
     {
-        $userId = $userId ?: Yii::$app->user->id;
+        $userIds = UserService::getCurrentMemberIds();
         return Account::find()
-            ->where(['user_id' => $userId])
+            ->where(['user_id' => $userIds])
             ->orderBy(['default' => SORT_DESC, 'id' => SORT_ASC])
             ->asArray()
             ->one();
     }
 
     /**
-     * @param int $accountId
-     * @param array $userIds
+     * @param  int  $accountId
+     * @param  array  $userIds
      * @return bool
      * @throws \yii\db\Exception
      */
     public static function updateAccountBalance(int $accountId, array $userIds): bool
     {
-        if (!$model = self::findOne($accountId, $userIds)) {
+        if (!$model = Account::find()->where(['id' => $accountId, 'user_id' => $userIds])->one()) {
             throw new \yii\db\Exception(Yii::t('app', 'Not found account.'));
         }
         $model->load($model->toArray(), '');
@@ -122,7 +120,7 @@ class AccountService
 
 
     /**
-     * @param int $accountId
+     * @param  int  $accountId
      * @return int
      */
     public static function getCalculateCurrencyBalanceCent(int $accountId): int
@@ -143,7 +141,7 @@ class AccountService
     }
 
     /**
-     * @param int $accountId
+     * @param  int  $accountId
      * @return int
      * @throws Exception
      */
@@ -188,13 +186,13 @@ class AccountService
      */
     public static function getCurrentMap(): array
     {
-        $accounts = Account::find()->where(['user_id' => Yii::$app->user->id])->asArray()->all();
+        $accounts = Account::find()->where(['user_id' => UserService::getCurrentMemberIds()])->asArray()->all();
         return ArrayHelper::map($accounts, 'id', 'name');
     }
 
     /**
-     * @param Account $model
-     * @param string $endDate
+     * @param  Account  $model
+     * @param  string  $endDate
      * @return array
      * @throws InvalidConfigException
      * @throws Exception
@@ -232,8 +230,8 @@ class AccountService
 
 
     /**
-     * @param string $desc
-     * @param int|null $excludeAccountId
+     * @param  string  $desc
+     * @param  int|null  $excludeAccountId
      * @return int
      */
     public function getAccountIdByDesc(string $desc, ?int $excludeAccountId = null): int
@@ -255,7 +253,7 @@ class AccountService
     public static function getHasKeywordAccounts(): array
     {
         return Account::find()
-            ->where(['user_id' => \Yii::$app->user->id, 'status' => AccountStatus::ACTIVE])
+            ->where(['user_id' => UserService::getCurrentMemberIds(), 'status' => AccountStatus::ACTIVE])
             ->andWhere(['<>', 'keywords', ''])
             ->orderBy(['sort' => SORT_ASC, 'id' => SORT_DESC])
             ->all();

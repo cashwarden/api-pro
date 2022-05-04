@@ -52,7 +52,7 @@ class MailerService
     }
 
     /**
-     * @param string $welcomeSubject
+     * @param  string  $welcomeSubject
      */
     public function setWelcomeSubject(string $welcomeSubject)
     {
@@ -71,7 +71,7 @@ class MailerService
     }
 
     /**
-     * @param string $confirmationSubject
+     * @param  string  $confirmationSubject
      */
     public function setConfirmationSubject(string $confirmationSubject)
     {
@@ -90,7 +90,7 @@ class MailerService
     }
 
     /**
-     * @param string $passwordResetSubject
+     * @param  string  $passwordResetSubject
      */
     public function setPasswordResetSubject(string $passwordResetSubject)
     {
@@ -100,12 +100,12 @@ class MailerService
     /**
      * Sends an email to a user after registration.
      *
-     * @param User $user
+     * @param  User  $user
      *
      * @return bool
      * @throws InvalidConfigException
      */
-    public function sendWelcomeMessage(User $user)
+    public function sendWelcomeMessage(User $user): bool
     {
         return $this->sendMessage($user->email, $this->getWelcomeSubject(), 'welcome', ['user' => $user]);
     }
@@ -113,11 +113,11 @@ class MailerService
     /**
      * 验证邮箱邮件.
      *
-     * @param User $user
+     * @param  User  $user
      * @return bool
      * @throws InvalidConfigException|Exception
      */
-    public function sendConfirmationMessage(User $user)
+    public function sendConfirmationMessage(User $user): bool
     {
         $this->getUserService()->setPasswordResetToken($user);
         $resetURL = params('frontendURL') . '#/passport/confirm-email?token=' . $user->password_reset_token;
@@ -128,11 +128,11 @@ class MailerService
     /**
      * 忘记密码邮件.
      *
-     * @param User $user
+     * @param  User  $user
      * @return bool
      * @throws InvalidConfigException
      */
-    public function sendPasswordResetMessage(User $user)
+    public function sendPasswordResetMessage(User $user): bool
     {
         $email = $user->email;
         $resetURL = params('frontendURL') . '#/passport/password-reset?token=' . $user->password_reset_token;
@@ -142,14 +142,14 @@ class MailerService
 
 
     /**
-     * @param string $to
-     * @param string $subject
-     * @param null $view
-     * @param array $params
+     * @param  string  $to
+     * @param  string  $subject
+     * @param  null  $view
+     * @param  array  $params
      * @return bool
      * @throws InvalidConfigException
      */
-    protected function sendMessage(string $to, string $subject, $view = null, $params = [])
+    protected function sendMessage(string $to, string $subject, $view = null, array $params = []): bool
     {
         $this->initMailer();
         /** @var \yii\mail\BaseMailer $mailer */

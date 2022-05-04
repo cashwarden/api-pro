@@ -14,6 +14,7 @@ use app\core\exceptions\InvalidArgumentException;
 use app\core\models\Account;
 use app\core\models\Category;
 use app\core\models\Ledger;
+use app\core\models\LedgerMember;
 use app\core\models\Record;
 use app\core\models\Rule;
 use app\core\models\Tag;
@@ -22,6 +23,7 @@ use app\core\models\User;
 use app\core\types\ColorType;
 use app\core\types\LedgerType;
 use app\core\types\TransactionType;
+use app\core\types\UserRole;
 use Yii;
 use yii\db\Exception as DBException;
 use yiier\helpers\ModelHelper;
@@ -215,6 +217,30 @@ class FixDataService
             if (!ModelHelper::saveAll(Category::tableName(), $rows)) {
                 throw new DBException('Init Category fail');
             }
+        }
+    }
+
+    public static function fixChildUserData()
+    {
+        $ledgers = Ledger::find()->where(['type' => LedgerType::SHARE])->all();
+        foreach ($ledgers as $ledger) {
+            $childUserId = LedgerMember::find()
+                ->select('user_id')
+                ->where(['ledger_id' => $ledger->id])
+                ->andWhere(['!=', 'user_id', $ledger->user_id])
+                ->column();
+            if (!$childUserId) {
+                continue;
+            }
+            $t = __FUNCTION__ . ': ' . $ledger->user_id . ': ' . implode(',', $childUserId);
+            dump($t);
+            \Yii::warning($t);
+            User::updateAll(
+                ['parent_id' => $ledger->user_id, 'role' => UserRole::ROLE_READ_WRITE],
+                ['id' => $childUserId]
+            );
+            Account::updateAll(['default' => Account::NO_DEFAULT], ['user_id' => $childUserId]);
+            Ledger::updateAll(['default' => false], ['user_id' => $childUserId]);
         }
     }
 }

@@ -13,7 +13,9 @@ namespace app\core\models;
 use app\core\exceptions\CannotOperateException;
 use app\core\services\TagService;
 use app\core\services\TransactionService;
+use app\core\services\UserService;
 use app\core\types\ColorType;
+use app\core\validators\LedgerIdValidator;
 use Yii;
 use yii\behaviors\TimestampBehavior;
 use yiier\helpers\DateHelper;
@@ -64,13 +66,7 @@ class Tag extends \yii\db\ActiveRecord
             [['ledger_id', 'user_id', 'count'], 'integer'],
             [['color'], 'string', 'max' => 7],
             [['name'], 'string', 'max' => 60],
-            [
-                'ledger_id',
-                'exist',
-                'targetClass' => Ledger::class,
-                'filter' => ['user_id' => Yii::$app->user->id],
-                'targetAttribute' => 'id',
-            ],
+            ['ledger_id', LedgerIdValidator::class],
             [
                 'name',
                 'unique',
@@ -107,7 +103,7 @@ class Tag extends \yii\db\ActiveRecord
     }
 
     /**
-     * @param bool $insert
+     * @param  bool  $insert
      * @return bool
      */
     public function beforeSave($insert)
@@ -123,8 +119,8 @@ class Tag extends \yii\db\ActiveRecord
     }
 
     /**
-     * @param bool $insert
-     * @param array $changedAttributes
+     * @param  bool  $insert
+     * @param  array  $changedAttributes
      * @throws \yii\db\Exception|\Throwable
      */
     public function afterSave($insert, $changedAttributes)
@@ -142,7 +138,8 @@ class Tag extends \yii\db\ActiveRecord
      */
     public function beforeDelete()
     {
-        if (TransactionService::countTransactionByTag($this->name, $this->ledger_id, $this->user_id)) {
+        $userIds = UserService::getCurrentMemberIds();
+        if (TransactionService::countTransactionByTag($this->name, $this->ledger_id, $userIds)) {
             throw new CannotOperateException(Yii::t('app', 'Cannot be deleted because it has been used.'));
         }
         return parent::beforeDelete();

@@ -12,6 +12,7 @@ namespace app\core\models;
 
 use app\core\exceptions\InvalidArgumentException;
 use app\core\types\CurrencyType;
+use app\core\validators\LedgerIdValidator;
 use Yii;
 use yii\behaviors\TimestampBehavior;
 use yiier\helpers\DateHelper;
@@ -65,13 +66,7 @@ class Currency extends \yii\db\ActiveRecord
         return [
             [['user_id', 'ledger_id', 'currency_code_from', 'currency_code_to'], 'required'],
             [['user_id', 'ledger_id', 'rate', 'status'], 'integer'],
-            [
-                'ledger_id',
-                'exist',
-                'targetClass' => Ledger::class,
-                'filter' => ['user_id' => Yii::$app->user->id],
-                'targetAttribute' => 'id',
-            ],
+            ['ledger_id', LedgerIdValidator::class],
             [['currency_code_from', 'currency_code_to'], 'in', 'range' => CurrencyType::currentUseCodes()],
             ['currency_code_from', 'compare', 'compareAttribute' => 'currency_code_to', 'operator' => '!='],
             [

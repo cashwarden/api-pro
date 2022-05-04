@@ -11,6 +11,7 @@
 namespace app\core\models;
 
 use app\core\types\WishListStatus;
+use app\core\validators\LedgerIdValidator;
 use Yii;
 use yii\behaviors\TimestampBehavior;
 use yiier\helpers\DateHelper;
@@ -75,12 +76,7 @@ class WishList extends \yii\db\ActiveRecord
         return [
             [['ledger_id', 'name', 'currency_amount', 'currency_code'], 'required'],
             [['user_id', 'ledger_id', 'amount_cent', 'currency_amount_cent'], 'integer'],
-            [
-                'ledger_id',
-                'exist',
-                'targetClass' => LedgerMember::class,
-                'filter' => ['user_id' => Yii::$app->user->id],
-            ],
+            ['ledger_id', LedgerIdValidator::class],
             [['amount', 'currency_amount'], MoneyValidator::class], //todo message
             ['status', 'in', 'range' => WishListStatus::names()],
             [['remark'], 'string'],
@@ -90,7 +86,7 @@ class WishList extends \yii\db\ActiveRecord
     }
 
     /**
-     * @param bool $insert
+     * @param  bool  $insert
      * @return bool
      * @throws \Throwable
      * @throws \app\core\exceptions\InvalidArgumentException

@@ -20,4 +20,10 @@ class FixController extends Controller
         FixDataService::fixLedgerCategory();
         $this->stdout("操作成功\n");
     }
+
+    public function actionUserParent()
+    {
+        FixDataService::fixChildUserData();
+        $this->stdout("操作成功\n");
+    }
 }

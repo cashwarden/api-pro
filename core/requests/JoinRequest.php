@@ -15,15 +15,15 @@ use app\core\types\CurrencyType;
 
 class JoinRequest extends \yii\base\Model
 {
-    public $username;
-    public $email;
-    public $password;
-    public $base_currency_code;
+    public string $username;
+    public string $email;
+    public string $password;
+    public string $base_currency_code;
 
     /**
      * @inheritdoc
      */
-    public function rules()
+    public function rules(): array
     {
         return [
             [['username', 'email'], 'trim'],
@@ -46,7 +46,7 @@ class JoinRequest extends \yii\base\Model
     /**
      * @inheritdoc
      */
-    public function attributeLabels()
+    public function attributeLabels(): array
     {
         return [
             'username' => t('app', 'Username'),

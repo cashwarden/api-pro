@@ -56,11 +56,6 @@ return [
 
     'GET <module>/ledgers/types' => '<module>/ledger/types',
     'GET <module>/ledgers/categories' => '<module>/ledger/categories',
-    "GET <module>/ledgers/token/<token:\w+>" => '<module>/ledger/view-by-token',
-    "POST <module>/ledgers/join/<token:\w+>" => '<module>/ledger/join-by-token',
-    'POST <module>/ledger/members' => '<module>/ledger/inviting-member',
-    'GET <module>/ledger/members' => '<module>/ledger-member/index',
-    "PUT <module>/ledger/members/<id:\d+>" => '<module>/ledger-member/update',
 
     "POST <module>/budget-configs/<id:\d+>/copy" => '<module>/budget-config/copy',
 
@@ -71,6 +66,8 @@ return [
     "GET <module>/currencies/rate/<from:\w+>/<to:\w+>" => '<module>/currency/rate',
     'GET <module>/currencies/codes' => '<module>/currency/codes',
     'GET <module>/currencies/can-use-codes' => '<module>/currency/can-use-codes',
+
+    'GET <module>/members/types' => '<module>/member/types',
 
     [
         'class' => 'yii\rest\UrlRule',
@@ -86,6 +83,7 @@ return [
             'v1/ledger',
             'v1/currency',
             'v1/wish-list',
+            'v1/member',
         ],
     ],
     // '<module>/<controller:\w+>/<action:\w+>/<id:\d+>' => '<module>/<controller>/<action>',

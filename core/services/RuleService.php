@@ -20,7 +20,7 @@ use yiier\helpers\Setup;
 class RuleService
 {
     /**
-     * @param int $id
+     * @param  int  $id
      * @return Rule
      * @throws NotFoundHttpException
      * @throws Exception
@@ -38,33 +38,29 @@ class RuleService
         return Rule::findOne($rule->id);
     }
 
+
     /**
-     * @param int $id
-     * @param string $status
-     * @return Rule
      * @throws Exception
-     * @throws NotFoundHttpException
      */
-    public function updateStatus(int $id, string $status): Rule
+    public function updateStatus(Rule $rule, string $status): Rule
     {
-        $model = $this->findCurrentOne($id);
-        $model->load($model->toArray(), '');
-        $model->status = $status;
-        if (!$model->save(false)) {
-            throw new Exception(Setup::errorMessage($model->firstErrors));
+        $rule->load($rule->toArray(), '');
+        $rule->status = $status;
+        if (!$rule->save(false)) {
+            throw new Exception(Setup::errorMessage($rule->firstErrors));
         }
-        return $model;
+        return $rule;
     }
 
 
     /**
-     * @param string $desc
+     * @param  string  $desc
      * @return Rule[]
      */
     public function getRulesByDesc(string $desc): array
     {
         $models = Rule::find()
-            ->where(['user_id' => \Yii::$app->user->id, 'status' => RuleStatus::ACTIVE])
+            ->where(['user_id' => UserService::getCurrentMemberIds(), 'status' => RuleStatus::ACTIVE])
             ->orderBy(['sort' => SORT_ASC, 'id' => SORT_DESC])
             ->all();
         $rules = [];
@@ -79,13 +75,14 @@ class RuleService
     }
 
     /**
-     * @param int $id
+     * @param  int  $id
      * @return Rule
      * @throws NotFoundHttpException
      */
     public function findCurrentOne(int $id): Rule
     {
-        if (!$model = Rule::find()->where(['id' => $id, 'user_id' => \Yii::$app->user->id])->one()) {
+        $userIds = UserService::getCurrentMemberIds();
+        if (!$model = Rule::find()->where(['id' => $id, 'user_id' => $userIds])->one()) {
             throw new NotFoundHttpException('No data found');
         }
         return $model;
