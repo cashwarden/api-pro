@@ -60,5 +60,4 @@ jobs:
         run: |
           php yii migrate --interactive=0
           nohup php yii serve > yii.log 2>&1 &
-          curl -s http://localhost:8080/health-check  -H 'Content-Type: application/json'
           ./vendor/bin/phpunit --coverage-text --coverage-clover=coverage.clover
