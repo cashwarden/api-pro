@@ -171,7 +171,7 @@ class ActiveController extends \yii\rest\ActiveController
             }
         }
 
-        if (in_array($action, ['delete', 'update', 'update-status'])) {
+        if (in_array($action, ['delete', 'update', 'update-status', 'create'])) {
             $userRole = User::find()->select('role')->where(['id' => $model->user_id])->scalar();
             if (!in_array($userRole, [UserRole::ROLE_READ_WRITE, UserRole::ROLE_OWNER])) {
                 throw new ForbiddenHttpException(
