@@ -18,7 +18,6 @@ use app\core\models\Currency;
 use app\core\models\Ledger;
 use app\core\models\Recurrence;
 use app\core\models\Rule;
-use app\core\models\User;
 use app\core\models\UserProRecord;
 use app\core\models\WishList;
 use app\core\traits\ServiceTrait;
@@ -94,12 +93,6 @@ class UserProService
             case Rule::class:
                 $count = Rule::find()->where($baseConditions)->count('id');
                 if ($action == 'create' && $count >= params('userRuleTotal')) {
-                    throw new UserNotProException();
-                }
-                break;
-            case User::class:
-                $count = User::find()->where(['parent_id' => Yii::$app->user->id])->count('id');
-                if ($action == 'create' && $count >= params('userChildCount')) {
                     throw new UserNotProException();
                 }
                 break;

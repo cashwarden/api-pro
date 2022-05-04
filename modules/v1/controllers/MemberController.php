@@ -138,7 +138,9 @@ class MemberController extends ActiveController
                     t('app', 'You can not create a user under the user')
                 );
             }
+            if (!UserProService::isPro()) {
+                throw new UserNotProException();
+            }
         }
-        UserProService::checkAccess($this->modelClass, $action, $model);
     }
 }
