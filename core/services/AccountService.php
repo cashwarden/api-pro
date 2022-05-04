@@ -32,7 +32,7 @@ class AccountService
 {
     public static function afterDelete(Account $account)
     {
-        $baseConditions = ['user_id' => Yii::$app->user->id];
+        $baseConditions = ['user_id' => UserService::getCurrentMemberIds()];
         Record::deleteAll($baseConditions + ['account_id' => $account->id]);
 
         $transactionIds = Transaction::find()
@@ -253,7 +253,7 @@ class AccountService
     public static function getHasKeywordAccounts(): array
     {
         return Account::find()
-            ->where(['user_id' => \Yii::$app->user->id, 'status' => AccountStatus::ACTIVE])
+            ->where(['user_id' => UserService::getCurrentMemberIds(), 'status' => AccountStatus::ACTIVE])
             ->andWhere(['<>', 'keywords', ''])
             ->orderBy(['sort' => SORT_ASC, 'id' => SORT_DESC])
             ->all();
