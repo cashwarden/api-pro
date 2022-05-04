@@ -186,7 +186,7 @@ class AccountService
      */
     public static function getCurrentMap(): array
     {
-        $accounts = Account::find()->where(['user_id' => Yii::$app->user->id])->asArray()->all();
+        $accounts = Account::find()->where(['user_id' => UserService::getCurrentMemberIds()])->asArray()->all();
         return ArrayHelper::map($accounts, 'id', 'name');
     }
 
