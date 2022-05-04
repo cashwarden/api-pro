@@ -62,8 +62,8 @@ class MemberFormRequest extends \yii\base\Model
                 'in',
                 'range' => [
                     UserRole::names()[UserRole::ROLE_DISABLED],
-                    UserRole::names()[UserRole::ROLE_READER],
-                    UserRole::names()[UserRole::ROLE_WRITER],
+                    UserRole::names()[UserRole::ROLE_READ_ONLY],
+                    UserRole::names()[UserRole::ROLE_READ_WRITE],
                 ],
             ],
         ];

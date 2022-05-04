@@ -235,7 +235,10 @@ class FixDataService
             $t = __FUNCTION__ . ': ' . $ledger->user_id . ': ' . implode(',', $childUserId);
             dump($t);
             \Yii::warning($t);
-            User::updateAll(['parent_id' => $ledger->user_id, 'role' => UserRole::ROLE_WRITER], ['id' => $childUserId]);
+            User::updateAll(
+                ['parent_id' => $ledger->user_id, 'role' => UserRole::ROLE_READ_WRITE],
+                ['id' => $childUserId]
+            );
             Account::updateAll(['default' => Account::NO_DEFAULT], ['user_id' => $childUserId]);
             Ledger::updateAll(['default' => false], ['user_id' => $childUserId]);
         }
