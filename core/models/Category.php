@@ -15,6 +15,7 @@ use app\core\exceptions\InvalidArgumentException;
 use app\core\services\TransactionService;
 use app\core\types\ColorType;
 use app\core\types\TransactionType;
+use app\core\validators\LedgerIdValidator;
 use Yii;
 use yii\behaviors\TimestampBehavior;
 use yiier\helpers\DateHelper;
@@ -77,13 +78,7 @@ class Category extends \yii\db\ActiveRecord
             ['color', 'in', 'range' => ColorType::items()],
             ['default', 'boolean', 'trueValue' => true, 'falseValue' => false, 'strict' => true],
             [['keywords'], ArrayValidator::class],
-            [
-                'ledger_id',
-                'exist',
-                'targetClass' => Ledger::class,
-                'filter' => ['user_id' => Yii::$app->user->id],
-                'targetAttribute' => 'id',
-            ],
+            ['ledger_id', LedgerIdValidator::class],
             [
                 'name',
                 'unique',
@@ -126,7 +121,7 @@ class Category extends \yii\db\ActiveRecord
 
 
     /**
-     * @param bool $insert
+     * @param  bool  $insert
      * @return bool
      * @throws InvalidArgumentException
      */
@@ -145,8 +140,8 @@ class Category extends \yii\db\ActiveRecord
     }
 
     /**
-     * @param bool $insert
-     * @param array $changedAttributes
+     * @param  bool  $insert
+     * @param  array  $changedAttributes
      * @throws \Exception
      */
     public function afterSave($insert, $changedAttributes)

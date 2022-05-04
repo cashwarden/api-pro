@@ -16,6 +16,7 @@ use app\core\types\BaseStatus;
 use app\core\types\BudgetPeriod;
 use app\core\types\BudgetStatus;
 use app\core\types\TransactionType;
+use app\core\validators\LedgerIdValidator;
 use Carbon\Carbon;
 use Yii;
 use yii\base\InvalidConfigException;
@@ -111,13 +112,7 @@ class BudgetConfig extends \yii\db\ActiveRecord
                     TransactionType::getName(TransactionType::INCOME),
                 ],
             ],
-            [
-                'ledger_id',
-                'exist',
-                'targetClass' => Ledger::class,
-                'filter' => ['user_id' => Yii::$app->user->id],
-                'targetAttribute' => 'id',
-            ],
+            ['ledger_id', LedgerIdValidator::class],
             ['category_ids', ArrayValidator::class], // todo 其他验证
             [['user_id', 'ledger_id', 'amount_cent', 'init_amount_cent'], 'integer'],
             ['rollover', 'boolean', 'trueValue' => true, 'falseValue' => false, 'strict' => true],
@@ -138,7 +133,7 @@ class BudgetConfig extends \yii\db\ActiveRecord
     }
 
     /**
-     * @param bool $insert
+     * @param  bool  $insert
      * @return bool
      * @throws InvalidArgumentException|InvalidConfigException
      */
@@ -182,8 +177,8 @@ class BudgetConfig extends \yii\db\ActiveRecord
     }
 
     /**
-     * @param bool $insert
-     * @param array $changedAttributes
+     * @param  bool  $insert
+     * @param  array  $changedAttributes
      * @throws \yii\db\Exception|\Throwable
      */
     public function afterSave($insert, $changedAttributes)

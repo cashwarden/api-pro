@@ -15,6 +15,7 @@ use app\core\types\ReimbursementStatus;
 use app\core\types\RuleStatus;
 use app\core\types\TransactionStatus;
 use app\core\types\TransactionType;
+use app\core\validators\LedgerIdValidator;
 use Yii;
 use yii\behaviors\TimestampBehavior;
 use yiier\helpers\DateHelper;
@@ -87,13 +88,7 @@ class Rule extends \yii\db\ActiveRecord
                 ['user_id', 'ledger_id', 'then_category_id', 'then_from_account_id', 'then_to_account_id', 'sort'],
                 'integer',
             ],
-            [
-                'ledger_id',
-                'exist',
-                'targetClass' => Ledger::class,
-                'filter' => ['user_id' => Yii::$app->user->id],
-                'targetAttribute' => 'id',
-            ],
+            ['ledger_id', LedgerIdValidator::class],
             ['status', 'in', 'range' => RuleStatus::names()],
             ['then_transaction_type', 'in', 'range' => TransactionType::names()],
             ['then_reimbursement_status', 'in', 'range' => ReimbursementStatus::names()],
@@ -134,7 +129,7 @@ class Rule extends \yii\db\ActiveRecord
     }
 
     /**
-     * @param bool $insert
+     * @param  bool  $insert
      * @return bool
      * @throws InvalidArgumentException
      */
