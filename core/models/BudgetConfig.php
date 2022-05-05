@@ -46,6 +46,7 @@ use yiier\validators\MoneyValidator;
  * @property int|null $rollover 结转
  * @property string|null $created_at
  * @property string|null $updated_at
+ * @property-read User $user
  * @property-read array $budgetProgress
  */
 class BudgetConfig extends \yii\db\ActiveRecord
@@ -248,6 +249,12 @@ class BudgetConfig extends \yii\db\ActiveRecord
             'progress' => $budgetAmountCent ? bcmul(bcdiv($actualAmountCent, $budgetAmountCent, 4), 100, 1) : 100,
         ];
     }
+
+    public function getUser()
+    {
+        return $this->hasOne(User::class, ['id' => 'user_id']);
+    }
+
 
     /**
      * @return array
