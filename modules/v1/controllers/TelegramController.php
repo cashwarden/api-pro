@@ -76,7 +76,7 @@ class TelegramController extends ActiveController
                     );
                     \Yii::$app->user->setIdentity($user);
                     $t = $message->getText();
-                    if (strpos($t, '@') !== false) {
+                    if (!str_starts_with($t, '@')) {
                         $model = $this->transactionService->createBaseTransactionByDesc($t);
                         $keyboard = $this->telegramService->getRecordsMarkup($model);
                         $text = $this->telegramService->getRecordsTextByTransaction($model);
