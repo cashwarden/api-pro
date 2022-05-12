@@ -360,7 +360,10 @@ class TransactionService extends BaseObject
             $rules,
             'then_category_id',
             function () use ($model, $transactionType) {
-                return (int) data_get(CategoryService::getDefaultCategory($transactionType, $model->ledger_id), 'id', 0);
+                if (!$defaultCategory = CategoryService::getDefaultCategory($transactionType, $model->ledger_id)) {
+                    throw new CannotOperateException(Yii::t('app', 'Default category not found.'));
+                }
+                return $defaultCategory['id'];
             }
         );
 
