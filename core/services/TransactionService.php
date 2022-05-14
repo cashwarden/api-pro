@@ -231,10 +231,10 @@ class TransactionService extends BaseObject
      * @throws InternalException
      * @throws \Throwable
      */
-    public function createByDesc(string $desc, int $chatId = null)
+    public function createByDesc(string $desc, int $chatId = null): Account|Transaction
     {
         try {
-            if (str_contains($desc, '余额') || str_contains($desc, '=')) {
+            if (ArrayHelper::strPosArr($desc, ['余额', '=']) !== false) {
                 if (!UserProService::isPro()) {
                     throw new UserNotProException();
                 }
