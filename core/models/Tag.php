@@ -15,6 +15,7 @@ use app\core\services\TagService;
 use app\core\services\TransactionService;
 use app\core\services\UserService;
 use app\core\types\ColorType;
+use app\core\validators\LedgerIdValidator;
 use Yii;
 use yii\behaviors\TimestampBehavior;
 use yiier\helpers\DateHelper;
@@ -65,13 +66,7 @@ class Tag extends \yii\db\ActiveRecord
             [['ledger_id', 'user_id', 'count'], 'integer'],
             [['color'], 'string', 'max' => 7],
             [['name'], 'string', 'max' => 60],
-            [
-                'ledger_id',
-                'exist',
-                'targetClass' => Ledger::class,
-                'filter' => ['user_id' => Yii::$app->user->id],
-                'targetAttribute' => 'id',
-            ],
+            ['ledger_id', LedgerIdValidator::class],
             [
                 'name',
                 'unique',

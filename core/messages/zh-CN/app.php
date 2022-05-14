@@ -111,4 +111,5 @@ return [
     'You do not have permission to operate.' => '您没有权限操作。',
     'Not found account.' => '账户未找到。',
     'Cannot delete the default ledger.' => '不能删除默认账本。',
+    'Default category not found.' => '默认分类没找到。',
 ];

@@ -37,6 +37,7 @@ use yii\db\Expression;
 use yii\web\NotFoundHttpException;
 use yiier\graylog\Log;
 use yiier\helpers\Setup;
+use yiier\helpers\StringHelper;
 
 /**
  * @property-read int $ledgerIdByDesc
@@ -230,10 +231,10 @@ class TransactionService extends BaseObject
      * @throws InternalException
      * @throws \Throwable
      */
-    public function createByDesc(string $desc, int $chatId = null)
+    public function createByDesc(string $desc, int $chatId = null): Account|Transaction
     {
         try {
-            if (strpos($desc, '余额') !== false) {
+            if (ArrayHelper::strPosArr($desc, ['余额', '=']) !== false) {
                 if (!UserProService::isPro()) {
                     throw new UserNotProException();
                 }
@@ -297,6 +298,10 @@ class TransactionService extends BaseObject
     {
         $model = new Transaction();
         $model->description = $desc;
+        $remark = StringHelper::between($desc, '(', ')');
+        $model->remark = $remark ?: StringHelper::between($desc, '（', '）');
+        $desc = $model->remark ? str_replace(["（{$model->remark}）", "({$model->remark})"], '', $desc) : $desc;
+        $model->description = $desc;
         $model->user_id = Yii::$app->user->id;
         $rules = $this->getRuleService()->getRulesByDesc($desc);
         $model->ledger_id = $this->getDataByDesc(
@@ -359,8 +364,11 @@ class TransactionService extends BaseObject
         $model->category_id = $categoryId ?: $this->getDataByDesc(
             $rules,
             'then_category_id',
-            function () use ($transactionType) {
-                return (int) data_get(CategoryService::getDefaultCategory($transactionType), 'id', 0);
+            function () use ($model, $transactionType) {
+                if (!$defaultCategory = CategoryService::getDefaultCategory($transactionType, $model->ledger_id)) {
+                    throw new CannotOperateException(Yii::t('app', 'Default category not found.'));
+                }
+                return $defaultCategory['id'];
             }
         );
 
@@ -673,17 +681,18 @@ class TransactionService extends BaseObject
     }
 
     /**
+     * @param  int  $ledgerId
      * @return array
      * @throws Exception
      */
-    public function exportData(): array
+    public function exportData(int $ledgerId): array
     {
         $data = [];
-        $categoriesMap = CategoryService::getMapByUserId();
+        $categoriesMap = CategoryService::getMapByLedgerId($ledgerId);
         $accountsMap = AccountService::getCurrentMap();
         $types = TransactionType::texts();
         $items = Transaction::find()
-            ->where(['user_id' => Yii::$app->user->id])
+            ->where(['user_id' => UserService::getCurrentMemberIds(), 'ledger_id' => $ledgerId])
             ->orderBy(['date' => SORT_DESC])
             ->asArray()
             ->all();

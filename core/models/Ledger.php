@@ -34,6 +34,7 @@ use yiier\helpers\DateHelper;
  * @property string|null $created_at
  * @property string|null $updated_at
  *
+ * @property-read User $user
  * @property-read Category[] $categories
  */
 class Ledger extends \yii\db\ActiveRecord
@@ -175,6 +176,15 @@ class Ledger extends \yii\db\ActiveRecord
         return $this->hasMany(Category::class, ['ledger_id' => 'id']);
     }
 
+    public function getUser()
+    {
+        return $this->hasOne(User::class, ['id' => 'user_id']);
+    }
+
+    public function extraFields()
+    {
+        return ['user'];
+    }
 
     /**
      * @return array

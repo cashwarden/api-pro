@@ -11,6 +11,7 @@
 namespace app\core\requests;
 
 use app\core\services\UserService;
+use app\core\types\UserRole;
 use Yii;
 
 class LoginRequest extends \yii\base\Model
@@ -39,6 +40,8 @@ class LoginRequest extends \yii\base\Model
             $user = UserService::getUserByUsernameOrEmail($this->username);
             if (!$user || !$user->validatePassword($this->password)) {
                 $this->addError($attribute, Yii::t('app', 'Incorrect username or password.'));
+            } elseif ($user->role === UserRole::ROLE_DISABLED) {
+                $this->addError($attribute, Yii::t('app', 'Your account is disabled.'));
             }
 
             Yii::$app->user->setIdentity($user);

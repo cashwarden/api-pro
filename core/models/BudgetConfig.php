@@ -16,6 +16,7 @@ use app\core\types\BaseStatus;
 use app\core\types\BudgetPeriod;
 use app\core\types\BudgetStatus;
 use app\core\types\TransactionType;
+use app\core\validators\LedgerIdValidator;
 use Carbon\Carbon;
 use Yii;
 use yii\base\InvalidConfigException;
@@ -45,6 +46,7 @@ use yiier\validators\MoneyValidator;
  * @property int|null $rollover 结转
  * @property string|null $created_at
  * @property string|null $updated_at
+ * @property-read User $user
  * @property-read array $budgetProgress
  */
 class BudgetConfig extends \yii\db\ActiveRecord
@@ -111,13 +113,7 @@ class BudgetConfig extends \yii\db\ActiveRecord
                     TransactionType::getName(TransactionType::INCOME),
                 ],
             ],
-            [
-                'ledger_id',
-                'exist',
-                'targetClass' => Ledger::class,
-                'filter' => ['user_id' => Yii::$app->user->id],
-                'targetAttribute' => 'id',
-            ],
+            ['ledger_id', LedgerIdValidator::class],
             ['category_ids', ArrayValidator::class], // todo 其他验证
             [['user_id', 'ledger_id', 'amount_cent', 'init_amount_cent'], 'integer'],
             ['rollover', 'boolean', 'trueValue' => true, 'falseValue' => false, 'strict' => true],
@@ -138,7 +134,7 @@ class BudgetConfig extends \yii\db\ActiveRecord
     }
 
     /**
-     * @param bool $insert
+     * @param  bool  $insert
      * @return bool
      * @throws InvalidArgumentException|InvalidConfigException
      */
@@ -182,8 +178,8 @@ class BudgetConfig extends \yii\db\ActiveRecord
     }
 
     /**
-     * @param bool $insert
-     * @param array $changedAttributes
+     * @param  bool  $insert
+     * @param  array  $changedAttributes
      * @throws \yii\db\Exception|\Throwable
      */
     public function afterSave($insert, $changedAttributes)
@@ -253,6 +249,12 @@ class BudgetConfig extends \yii\db\ActiveRecord
             'progress' => $budgetAmountCent ? bcmul(bcdiv($actualAmountCent, $budgetAmountCent, 4), 100, 1) : 100,
         ];
     }
+
+    public function getUser()
+    {
+        return $this->hasOne(User::class, ['id' => 'user_id']);
+    }
+
 
     /**
      * @return array

@@ -15,16 +15,16 @@ use Yii;
 final class UserRole extends BaseType
 {
     const ROLE_OWNER = 50;
-    const ROLE_WRITER = 30;
-    const ROLE_READER = 20;
+    const ROLE_READ_WRITE = 30;
+    const ROLE_READ_ONLY = 20;
     const ROLE_DISABLED = 10;
 
     public static function texts(): array
     {
         return [
             self::ROLE_OWNER => Yii::t('app', 'Owner'),
-            self::ROLE_WRITER => Yii::t('app', 'Writer'),
-            self::ROLE_READER => Yii::t('app', 'Reader'),
+            self::ROLE_READ_WRITE => Yii::t('app', 'Read/Write'),
+            self::ROLE_READ_ONLY => Yii::t('app', 'Read Only'),
             self::ROLE_DISABLED => Yii::t('app', 'Disabled'),
         ];
     }
@@ -33,8 +33,8 @@ final class UserRole extends BaseType
     {
         return [
             self::ROLE_OWNER => 'owner',
-            self::ROLE_WRITER => 'writer',
-            self::ROLE_READER => 'reader',
+            self::ROLE_READ_WRITE => 'read_write',
+            self::ROLE_READ_ONLY => 'read_only',
             self::ROLE_DISABLED => 'disabled',
         ];
     }

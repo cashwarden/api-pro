@@ -159,11 +159,7 @@ class SiteController extends Controller
                             'link' => '/analysis/index',
                             'icon' => 'anticon-area-chart',
                         ],
-                        [
-                            'text' => '成员',
-                            'link' => '/ledger/member',
-                            'icon' => 'anticon-user',
-                        ],
+
                         [
                             'text' => '分类',
                             'link' => '/category/index',
@@ -201,16 +197,15 @@ class SiteController extends Controller
                             'icon' => 'anticon-wallet',
                         ],
                         [
-                            'text' => '投资',
-                            'link' => '/assets/index',
-                            'icon' => 'anticon-wallet',
-                        ],
-                        [
                             'text' => '账本',
                             'link' => '/ledger/index',
                             'icon' => 'anticon-account-book',
                         ],
-
+                        [
+                            'text' => '成员',
+                            'link' => '/member/index',
+                            'icon' => 'anticon-user',
+                        ],
                         [
                             'text' => '定时',
                             'link' => '/recurrence/index',
@@ -220,6 +215,11 @@ class SiteController extends Controller
                             'text' => '规则',
                             'link' => '/rule/index',
                             'icon' => 'anticon-group',
+                        ],
+                        [
+                            'text' => '投资',
+                            'link' => '/assets/index',
+                            'icon' => 'anticon-wallet',
                         ],
                     ],
                 ],

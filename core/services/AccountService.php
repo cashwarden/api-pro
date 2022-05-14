@@ -32,7 +32,7 @@ class AccountService
 {
     public static function afterDelete(Account $account)
     {
-        $baseConditions = ['user_id' => Yii::$app->user->id];
+        $baseConditions = ['user_id' => UserService::getCurrentMemberIds()];
         Record::deleteAll($baseConditions + ['account_id' => $account->id]);
 
         $transactionIds = Transaction::find()
@@ -61,7 +61,7 @@ class AccountService
     public function createUpdate(Account $account): Account
     {
         try {
-            $account->user_id = Yii::$app->user->id;
+            $account->user_id = $account->user_id ?: Yii::$app->user->id;
             if (!$account->save()) {
                 throw new \yii\db\Exception(Setup::errorMessage($account->firstErrors));
             }
@@ -103,7 +103,7 @@ class AccountService
      */
     public static function updateAccountBalance(int $accountId, array $userIds): bool
     {
-        if (!$model = self::findOne($accountId, $userIds)) {
+        if (!$model = Account::find()->where(['id' => $accountId, 'user_id' => $userIds])->one()) {
             throw new \yii\db\Exception(Yii::t('app', 'Not found account.'));
         }
         $model->load($model->toArray(), '');
@@ -186,7 +186,7 @@ class AccountService
      */
     public static function getCurrentMap(): array
     {
-        $accounts = Account::find()->where(['user_id' => Yii::$app->user->id])->asArray()->all();
+        $accounts = Account::find()->where(['user_id' => UserService::getCurrentMemberIds()])->asArray()->all();
         return ArrayHelper::map($accounts, 'id', 'name');
     }
 
@@ -253,7 +253,7 @@ class AccountService
     public static function getHasKeywordAccounts(): array
     {
         return Account::find()
-            ->where(['user_id' => \Yii::$app->user->id, 'status' => AccountStatus::ACTIVE])
+            ->where(['user_id' => UserService::getCurrentMemberIds(), 'status' => AccountStatus::ACTIVE])
             ->andWhere(['<>', 'keywords', ''])
             ->orderBy(['sort' => SORT_ASC, 'id' => SORT_DESC])
             ->all();

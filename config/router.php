@@ -67,6 +67,8 @@ return [
     'GET <module>/currencies/codes' => '<module>/currency/codes',
     'GET <module>/currencies/can-use-codes' => '<module>/currency/can-use-codes',
 
+    'GET <module>/members/types' => '<module>/member/types',
+
     [
         'class' => 'yii\rest\UrlRule',
         'controller' => [

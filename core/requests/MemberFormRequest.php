@@ -16,10 +16,10 @@ use app\core\types\UserRole;
 class MemberFormRequest extends \yii\base\Model
 {
     public $id;
-    public ?string $username;
-    public ?string $email;
-    public ?string $password;
-    public ?string $role;
+    public $username;
+    public $email;
+    public $password;
+    public $role;
 
     /**
      * @inheritdoc
@@ -28,7 +28,7 @@ class MemberFormRequest extends \yii\base\Model
     {
         return [
             [['username', 'email'], 'trim'],
-            [['username', 'email'], 'required'],
+            [['username', 'email'], 'required', 'on' => 'create'],
             [
                 'username',
                 'unique',
@@ -54,7 +54,7 @@ class MemberFormRequest extends \yii\base\Model
             ],
             ['email', 'email'],
 
-            ['password', 'required'],
+            ['password', 'required', 'on' => 'create'],
             ['password', 'string', 'min' => 6],
 
             [
@@ -62,8 +62,8 @@ class MemberFormRequest extends \yii\base\Model
                 'in',
                 'range' => [
                     UserRole::names()[UserRole::ROLE_DISABLED],
-                    UserRole::names()[UserRole::ROLE_READER],
-                    UserRole::names()[UserRole::ROLE_WRITER],
+                    UserRole::names()[UserRole::ROLE_READ_ONLY],
+                    UserRole::names()[UserRole::ROLE_READ_WRITE],
                 ],
             ],
         ];

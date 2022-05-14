@@ -60,7 +60,7 @@ class RuleService
     public function getRulesByDesc(string $desc): array
     {
         $models = Rule::find()
-            ->where(['user_id' => \Yii::$app->user->id, 'status' => RuleStatus::ACTIVE])
+            ->where(['user_id' => UserService::getCurrentMemberIds(), 'status' => RuleStatus::ACTIVE])
             ->orderBy(['sort' => SORT_ASC, 'id' => SORT_DESC])
             ->all();
         $rules = [];

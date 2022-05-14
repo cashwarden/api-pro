@@ -17,6 +17,7 @@ use app\core\requests\MemberFormRequest;
 use app\core\services\UserProService;
 use app\core\services\UserService;
 use app\core\traits\ServiceTrait;
+use app\core\types\UserRole;
 use Yii;
 use yii\base\Exception;
 use yii\data\ActiveDataProvider;
@@ -69,7 +70,9 @@ class MemberController extends ActiveController
         $this->checkAccess($this->action->id, $parent);
         $params = Yii::$app->request->bodyParams;
         /** @var MemberFormRequest $data */
-        $data = $this->validate(new MemberFormRequest(), $params);
+        $form = new MemberFormRequest();
+        $form->setScenario('create');
+        $data = $this->validate($form, $params);
         $user = new User();
         $user = $this->userService->createUpdateMember($data, $user, $parent);
         if (params('verificationEmail')) {
@@ -97,11 +100,27 @@ class MemberController extends ActiveController
         }
         $this->checkAccess($this->action->id, $parent);
         $params = Yii::$app->request->bodyParams;
-        $model = new MemberFormRequest();
-        $model->id = $id;
+        $form = new MemberFormRequest();
+        $form->id = $id;
         /** @var MemberFormRequest $data */
-        $data = $this->validate($model, $params);
+        $data = $this->validate($form, array_merge($user->attributes, $params));
         return $this->userService->createUpdateMember($data, $user, $parent);
+    }
+
+    /**
+     * @return array
+     * @throws \Exception
+     */
+    public function actionTypes(): array
+    {
+        $items = [];
+        $texts = UserRole::texts();
+        $names = UserRole::names();
+        unset($names[UserRole::ROLE_OWNER]);
+        foreach ($names as $key => $name) {
+            $items[] = ['type' => $name, 'name' => data_get($texts, $key)];
+        }
+        return $items;
     }
 
 
@@ -119,7 +138,9 @@ class MemberController extends ActiveController
                     t('app', 'You can not create a user under the user')
                 );
             }
+            if (!UserProService::isPro()) {
+                throw new UserNotProException();
+            }
         }
-        UserProService::checkAccess($this->modelClass, $action, $model);
     }
 }

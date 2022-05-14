@@ -438,16 +438,17 @@ class UserService
         throw new InternalException('删除失败');
     }
 
-    public static function getCurrentMemberIds(): array
+    public static function getCurrentMemberIds(?User $user = null): array
     {
         if (params('memberIds')) {
             return params('memberIds');
         }
-
-        $userId = Yii::$app->user->id;
-        $userIds = User::find()->select('id')->where(['parent_id' => $userId])->column();
-        $userIds = array_merge($userIds, [$userId]);
-        $userIds = array_unique($userIds);
+        /** @var User $user */
+        $user = $user ?: Yii::$app->user->identity;
+        $parentId = $user->parent_id ?: $user->id;
+        $userIds = User::find()->select('id')->where(['parent_id' => $parentId])->column();
+        $userIds = array_merge($userIds, [$parentId]);
+        $userIds = array_map('intval', array_unique($userIds));
         Yii::$app->params['memberIds'] = $userIds;
         return $userIds;
     }
@@ -460,8 +461,10 @@ class UserService
     public function createUpdateMember(MemberFormRequest $data, User $user, User $parent): User
     {
         $user->load($data->attributes, '');
-        $user->setPassword($data->password);
-        $user->generateAuthKey();
+        if ($data->password) {
+            $user->setPassword($data->password);
+            $user->generateAuthKey();
+        }
         $user->status = $user->status ?: UserStatus::UNACTIVATED;
         $user->role = UserRole::toEnumValue($data->role);
         $user->parent_id = $parent->id;

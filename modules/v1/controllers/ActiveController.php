@@ -130,7 +130,7 @@ class ActiveController extends \yii\rest\ActiveController
     protected function getPageSize(): int
     {
         if ($pageSize = (int) request('pageSize')) {
-            if ($pageSize < self::MAX_PAGE_SIZE) {
+            if ($pageSize <= self::MAX_PAGE_SIZE) {
                 return $pageSize;
             }
             return self::MAX_PAGE_SIZE;
@@ -171,9 +171,9 @@ class ActiveController extends \yii\rest\ActiveController
             }
         }
 
-        if (in_array($action, ['delete', 'update', 'update-status'])) {
-            $userRole = User::find()->select('role')->where(['id' => $model->user_id])->scalar();
-            if (!in_array($userRole, [UserRole::ROLE_WRITER, UserRole::ROLE_OWNER])) {
+        if (in_array($action, ['delete', 'update', 'update-status', 'create'])) {
+            $userRole = User::find()->select('role')->where(['id' => Yii::$app->user->id])->scalar();
+            if (!in_array($userRole, [UserRole::ROLE_READ_WRITE, UserRole::ROLE_OWNER])) {
                 throw new ForbiddenHttpException(
                     t('app', 'You not have permission to ' . $action . ' data.')
                 );

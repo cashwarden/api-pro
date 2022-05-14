@@ -27,6 +27,8 @@ class m220501_100920_update_user_table extends Migration
             $this->tinyInteger()->defaultValue(\app\core\types\UserRole::ROLE_OWNER)->after('status')
         );
         $this->createIndex('user_parent_id', '{{%user}}', 'parent_id');
+
+        \app\core\services\FixDataService::fixChildUserData();
     }
 
     /**

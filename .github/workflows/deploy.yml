@@ -98,6 +98,9 @@ jobs:
             ls -la ${{ env.WORK_DIR }}
             cd ${{ env.WORK_DIR }} && php yii migrate/up --interactive=0
             unzip -o ${{ env.WORK_DIR }}/deploy.zip -d ${{ env.WORK_DIR }} && rm -rf ${{ env.WORK_DIR }}/deploy.zip
+            chmod 777 -R ${{ env.WORK_DIR }}/runtime
+            chmod 777 -R ${{ env.WORK_DIR }}/web/assets
+            chmod 777 -R ${{ env.WORK_DIR }}/web/uploads
 
       - name: Slack Workflow Notification
         uses: Gamesight/slack-workflow-status@master

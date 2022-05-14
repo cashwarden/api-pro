@@ -92,6 +92,9 @@ class TransactionController extends ActiveController
      */
     public function actionExport(): array
     {
-        return $this->transactionService->exportData();
+        if (!$ledgerId = request('ledger_id')) {
+            throw new InvalidArgumentException('ledger_id is required');
+        }
+        return $this->transactionService->exportData($ledgerId);
     }
 }
