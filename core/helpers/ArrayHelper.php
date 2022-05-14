@@ -14,10 +14,10 @@ class ArrayHelper
 {
     /**
      * @param $haystack
-     * @param array|string $needle
+     * @param  array|string  $needle
      * @return false|int
      */
-    public static function strPosArr($haystack, $needle)
+    public static function strPosArr($haystack, array|string $needle): bool|int
     {
         if (!is_array($needle)) {
             $needle = [$needle];
