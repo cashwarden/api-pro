@@ -37,6 +37,7 @@ use yii\db\Expression;
 use yii\web\NotFoundHttpException;
 use yiier\graylog\Log;
 use yiier\helpers\Setup;
+use yiier\helpers\StringHelper;
 
 /**
  * @property-read int $ledgerIdByDesc
@@ -233,7 +234,7 @@ class TransactionService extends BaseObject
     public function createByDesc(string $desc, int $chatId = null)
     {
         try {
-            if (strpos($desc, '余额') !== false) {
+            if (str_contains($desc, '余额') || str_contains($desc, '=')) {
                 if (!UserProService::isPro()) {
                     throw new UserNotProException();
                 }
@@ -296,6 +297,10 @@ class TransactionService extends BaseObject
     public function createBaseTransactionByDesc(string $desc): Transaction
     {
         $model = new Transaction();
+        $model->description = $desc;
+        $remark = StringHelper::between($desc, '(', ')');
+        $model->remark = $remark ?: StringHelper::between($desc, '（', '）');
+        $desc = $model->remark ? str_replace(["（{$model->remark}）", "({$model->remark})"], '', $desc) : $desc;
         $model->description = $desc;
         $model->user_id = Yii::$app->user->id;
         $rules = $this->getRuleService()->getRulesByDesc($desc);
