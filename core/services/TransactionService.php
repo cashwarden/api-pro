@@ -298,8 +298,9 @@ class TransactionService extends BaseObject
     {
         $model = new Transaction();
         $model->description = $desc;
-        $remark = StringHelper::between('(', ')', $desc);
-        $model->remark = $remark ?: StringHelper::between('（', '）', $desc);
+        $remark = ArrayHelper::strPosArr($desc, ['(', ')']) !== false ? StringHelper::between('(', ')', $desc) : '';
+        $model->remark = ArrayHelper::strPosArr($desc, ['（', '）']) !== false && !$remark ?
+            StringHelper::between('（', '）', $desc) : $remark;
         $desc = $model->remark ? str_replace(["（{$model->remark}）", "({$model->remark})"], '', $desc) : $desc;
         $model->description = $desc;
         $model->user_id = Yii::$app->user->id;
