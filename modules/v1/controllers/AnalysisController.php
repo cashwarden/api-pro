@@ -58,6 +58,15 @@ class AnalysisController extends ActiveController
         return $this->analysisService->byDate($params, AnalysisGroupDateType::getValue($groupByDateType));
     }
 
+
+    public function actionCalendar(): array
+    {
+        $params = \Yii::$app->request->queryParams;
+        $this->checkAccess($this->action->id, null, $params);
+        $groupByDateType = request('group_type') ?: AnalysisGroupDateType::DAY;
+        return $this->analysisService->byCalendar($params, AnalysisGroupDateType::getValue($groupByDateType));
+    }
+
     public function checkAccess($action, $model = null, $params = [])
     {
         if (!isset($params['ledger_id'])) {

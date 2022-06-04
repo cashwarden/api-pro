@@ -252,7 +252,7 @@ class AnalysisService extends BaseObject
      * @throws InvalidArgumentException
      * @throws \Exception
      */
-    public function byDate(array $params, string $format)
+    public function byDate(array $params, string $format): array
     {
         $items = [];
         foreach ([TransactionType::EXPENSE, TransactionType::INCOME] as $type) {
@@ -326,5 +326,27 @@ class AnalysisService extends BaseObject
                 'account_id' => data_get($params, 'account_id'),
                 'source' => data_get($params, 'source'),
             ]);
+    }
+
+    public function byCalendar(array $params, string $format): array
+    {
+        $items = [];
+        foreach ([TransactionType::EXPENSE, TransactionType::INCOME] as $type) {
+            $data = $this->getBaseQuery($params)
+                ->select([
+                    "DATE_FORMAT(date, '{$format}') as m_date",
+                    'SUM(amount_cent) AS amount_cent',
+                ])
+                ->andWhere(['transaction_type' => $type])
+                ->groupBy('m_date')
+                ->asArray()
+                ->all();
+
+            foreach ($data as $value) {
+                $k = $value['m_date'];
+                $items[$k][TransactionType::getName($type)] = (float) Setup::toYuan($value['amount_cent']);
+            }
+        }
+        return $items;
     }
 }
