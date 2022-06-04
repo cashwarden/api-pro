@@ -11,7 +11,9 @@
 namespace app\modules\v1\controllers;
 
 use app\core\exceptions\InvalidArgumentException;
+use app\core\exceptions\UserNotProException;
 use app\core\models\Ledger;
+use app\core\services\UserProService;
 use app\core\services\UserService;
 use app\core\traits\ServiceTrait;
 use app\core\types\AnalysisGroupDateType;
@@ -56,6 +58,23 @@ class AnalysisController extends ActiveController
         $groupByDateType = request('group_type') ?: AnalysisGroupDateType::DAY;
         $this->checkAccess($this->action->id, null, $params);
         return $this->analysisService->byDate($params, AnalysisGroupDateType::getValue($groupByDateType));
+    }
+
+
+    /**
+     * @throws UserNotProException
+     * @throws InvalidArgumentException
+     * @throws \yii\web\ForbiddenHttpException
+     */
+    public function actionCalendar(): array
+    {
+        if (!UserProService::isPro()) {
+            throw new UserNotProException();
+        }
+        $params = \Yii::$app->request->queryParams;
+        $this->checkAccess($this->action->id, null, $params);
+        $groupByDateType = request('group_type') ?: AnalysisGroupDateType::DAY;
+        return $this->analysisService->byCalendar($params, AnalysisGroupDateType::getValue($groupByDateType));
     }
 
     public function checkAccess($action, $model = null, $params = [])
