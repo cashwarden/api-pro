@@ -210,11 +210,10 @@ class AnalysisService extends BaseObject
     public function byCategory(array $params): array
     {
         $items = [];
-        $userIds = UserService::getCurrentMemberIds();
         if ($ledgerId = data_get($params, 'ledger_id')) {
             $categoriesMap = CategoryService::getMapByLedgerId($ledgerId);
         } else {
-            throw new InvalidArgumentException('ledger_id is required');
+            $categoriesMap = CategoryService::getMapByUserId();
         }
         foreach ([TransactionType::EXPENSE, TransactionType::INCOME] as $type) {
             $data = $this->getBaseQuery($params)
