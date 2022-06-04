@@ -489,7 +489,7 @@ class TelegramService extends BaseObject
                 TelegramKeyword::LAST_MONTH,
                 TelegramKeyword::CURRENT_MONTH,
             ];
-            if ($msg && in_array(StringHelper::after('/', $msg->getText()), $report)) {
+            if ($msg && in_array($msg->getText(), $report)) {
                 return true;
             }
             return false;
