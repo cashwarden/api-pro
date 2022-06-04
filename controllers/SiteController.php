@@ -159,6 +159,11 @@ class SiteController extends Controller
                             'link' => '/analysis/index',
                             'icon' => 'anticon-area-chart',
                         ],
+                        [
+                            'text' => '日历图',
+                            'link' => '/calendar/index',
+                            'icon' => 'anticon-calendar',
+                        ],
 
                         [
                             'text' => '分类',
