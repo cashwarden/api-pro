@@ -474,7 +474,7 @@ class TelegramService extends BaseObject
             );
             if ($user) {
                 \Yii::$app->user->setIdentity($user);
-                $type = StringHelper::after('/', $message->getText());
+                $type = StringHelper::between('/', '@', $message->getText());
                 $text = $this->telegramService->getReportTextByType($type);
             } else {
                 $text = '请先绑定您的账号';
