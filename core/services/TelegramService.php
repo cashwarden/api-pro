@@ -483,14 +483,14 @@ class TelegramService extends BaseObject
             $bot->sendMessage($message->getChat()->getId(), $text);
         }, function (Update $message) {
             $msg = $message->getMessage();
-            Log::info('telegram_message', $message->toJson());
+            Log::info('telegram_message' . $msg->getText(), $message->toJson());
             $report = [
                 TelegramKeyword::TODAY,
                 TelegramKeyword::YESTERDAY,
                 TelegramKeyword::LAST_MONTH,
                 TelegramKeyword::CURRENT_MONTH,
             ];
-            if ($msg && in_array($msg->getText(), $report)) {
+            if (in_array(StringHelper::after('@', $msg->getText()), $report)) {
                 return true;
             }
             return false;
