@@ -84,7 +84,7 @@ class TelegramService extends BaseObject
             $bot->sendMessage($message->getChat()->getId(), $text);
         }, function (Update $message) {
             $msg = $message->getMessage();
-            if ($msg && strpos($msg->getText(), TelegramKeyword::BIND) === 0) {
+            if ($msg && str_starts_with($msg->getText(), TelegramKeyword::BIND)) {
                 return true;
             }
             return false;
@@ -474,7 +474,7 @@ class TelegramService extends BaseObject
             );
             if ($user) {
                 \Yii::$app->user->setIdentity($user);
-                $type = StringHelper::after('/', $message->getText());
+                $type = StringHelper::between('/', '@', $message->getText());
                 $text = $this->telegramService->getReportTextByType($type);
             } else {
                 $text = '请先绑定您的账号';
@@ -483,6 +483,7 @@ class TelegramService extends BaseObject
             $bot->sendMessage($message->getChat()->getId(), $text);
         }, function (Update $message) {
             $msg = $message->getMessage();
+            Log::info('telegram_message', $message->toJson());
             $report = [
                 TelegramKeyword::TODAY,
                 TelegramKeyword::YESTERDAY,
