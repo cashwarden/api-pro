@@ -164,6 +164,7 @@ class UserService
             $ledger->type = LedgerType::getName(LedgerType::GENERAL);
             $ledger->user_id = $user->id;
             $ledger->default = true;
+            $ledger->base_currency_code = $user->base_currency_code;
             if (!$ledger->save()) {
                 throw new \Exception(Setup::errorMessage($ledger->firstErrors));
             }
