@@ -14,6 +14,7 @@ namespace app\controllers;
 
 use app\core\exceptions\PayException;
 use app\core\traits\ServiceTrait;
+use app\core\types\CurrencyType;
 use Yii;
 use yii\helpers\ArrayHelper;
 use yii\rest\Controller;
@@ -138,23 +139,7 @@ class SiteController extends Controller
                 'keywords' => params('seoKeywords'),
                 'google_analytics' => params('googleAnalyticsAU'),
                 'telegram_bot_name' => params('telegramBotName'),
-                'currencies' => [
-                    ['key' => 'CNY', 'name' => '人民币'],
-                    ['key' => 'USD', 'name' => '美元'],
-                    ['key' => 'HKD', 'name' => '港币'],
-                    ['key' => 'TWB', 'name' => '台币'],
-                    ['key' => 'JPY', 'name' => '日元'],
-                    ['key' => 'EUR', 'name' => '欧元'],
-                    ['key' => 'GBP', 'name' => '英镑'],
-                    ['key' => 'CAD', 'name' => '加元'],
-                    ['key' => 'AUD', 'name' => '澳元'],
-                    ['key' => 'SGD', 'name' => '新加坡元'],
-                    ['key' => 'THB', 'name' => '泰铢'],
-                    ['key' => 'KRW', 'name' => '韩元'],
-                    ['key' => 'PHP', 'name' => '菲律宾比索'],
-                    ['key' => 'IDR', 'name' => '印尼盾'],
-                    ['key' => 'VND', 'name' => '越南盾'],
-                ],
+                'currencies' => CurrencyType::items(),
             ],
             'menu' => [
                 [
