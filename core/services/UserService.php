@@ -62,6 +62,7 @@ class UserService
             $user->setPassword($request->password);
             $user->generateAuthKey();
             $user->status = params('verificationEmail') ? UserStatus::UNACTIVATED : UserStatus::ACTIVE;
+            $user->role = UserRole::ROLE_OWNER;
             if (!$user->save()) {
                 throw new DBException(Setup::errorMessage($user->firstErrors));
             }
