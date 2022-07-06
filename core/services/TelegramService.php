@@ -25,6 +25,7 @@ use app\core\types\TelegramKeyword;
 use app\core\types\TransactionRating;
 use app\core\types\TransactionType;
 use Carbon\Carbon;
+use JetBrains\PhpStorm\Pure;
 use TelegramBot\Api\BotApi;
 use TelegramBot\Api\Client;
 use TelegramBot\Api\Exception;
@@ -84,7 +85,7 @@ class TelegramService extends BaseObject
             $bot->sendMessage($message->getChat()->getId(), $text);
         }, function (Update $message) {
             $msg = $message->getMessage();
-            if ($msg && strpos($msg->getText(), TelegramKeyword::BIND) === 0) {
+            if ($msg && str_starts_with($msg->getText(), TelegramKeyword::BIND)) {
                 return true;
             }
             return false;
@@ -101,7 +102,7 @@ class TelegramService extends BaseObject
     public function getRecordsTextByTransaction(Transaction $transaction, int $page = 0): string
     {
         $limit = 10;
-        if (strpos($transaction->description, '今天') !== false) {
+        if (str_contains($transaction->description, '今天')) {
             $transaction->date = TransactionService::getCreateRecordDate();
         }
         if ((!$transaction->ledger_id) || !($transaction->category_id || $transaction->date)) {
@@ -255,6 +256,7 @@ class TelegramService extends BaseObject
         return $text;
     }
 
+    #[Pure]
     public function getMessageTextByRecord(Record $record, string $title = '余额调整成功'): string
     {
         $text = "{$title}\n";
@@ -385,6 +387,10 @@ class TelegramService extends BaseObject
         });
     }
 
+    /**
+     * @throws Exception
+     * @throws \TelegramBot\Api\InvalidArgumentException
+     */
     private function recordDelete(CallbackQuery $message, Client $bot, array $data)
     {
         $chatId = $message->getMessage()->getChat()->getId();
@@ -408,6 +414,10 @@ class TelegramService extends BaseObject
         }
     }
 
+    /**
+     * @throws Exception
+     * @throws \TelegramBot\Api\InvalidArgumentException
+     */
     private function transactionDelete(CallbackQuery $message, Client $bot, array $data)
     {
         $chatId = $message->getMessage()->getChat()->getId();
@@ -436,6 +446,11 @@ class TelegramService extends BaseObject
         }
     }
 
+    /**
+     * @throws Exception
+     * @throws InvalidConfigException
+     * @throws \TelegramBot\Api\InvalidArgumentException
+     */
     private function findCategoryRecords(CallbackQuery $message, Client $bot, array $data)
     {
         /** @var BotApi $bot */
@@ -483,13 +498,14 @@ class TelegramService extends BaseObject
             $bot->sendMessage($message->getChat()->getId(), $text);
         }, function (Update $message) {
             $msg = $message->getMessage();
+            Log::info('telegram_message: ' . $msg->getText(), $message->toJson());
             $report = [
                 TelegramKeyword::TODAY,
                 TelegramKeyword::YESTERDAY,
                 TelegramKeyword::LAST_MONTH,
                 TelegramKeyword::CURRENT_MONTH,
             ];
-            if ($msg && in_array(StringHelper::before('@', $msg->getText()), $report)) {
+            if (in_array(StringHelper::after('@', $msg->getText()), $report)) {
                 return true;
             }
             return false;

@@ -50,12 +50,22 @@ class CategoryService
     }
 
     /**
+     * @return array
+     */
+    public static function getMapByUserId(): array
+    {
+        $userIds = UserService::getCurrentMemberIds();
+        $categories = Category::find()->where(['user_id' => $userIds])->asArray()->all();
+        return ArrayHelper::map($categories, 'id', 'name');
+    }
+
+    /**
      * @param  string  $desc
      * @param  int  $ledgerId
      * @param  int  $transactionType
      * @return int
      */
-    public function getCategoryIdByDesc(string $desc, int $ledgerId, int $transactionType)
+    public function getCategoryIdByDesc(string $desc, int $ledgerId, int $transactionType): int
     {
         $models = Category::find()
             ->where([
