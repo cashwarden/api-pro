@@ -57,12 +57,7 @@ class CurrencyController extends ActiveController
 
     public function actionCodes(): array
     {
-        $items = [];
-        $names = CurrencyType::names();
-        foreach (CurrencyType::currentUseCodes() as $currentUseCode) {
-            array_push($items, ['code' => $currentUseCode, 'name' => $names[$currentUseCode]]);
-        }
-        return $items;
+        return CurrencyType::items();
     }
 
     public function actionCanUseCodes(): array
