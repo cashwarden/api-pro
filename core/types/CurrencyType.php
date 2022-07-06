@@ -10,6 +10,8 @@
 
 namespace app\core\types;
 
+use JetBrains\PhpStorm\Pure;
+
 class CurrencyType extends BaseType
 {
     /**
@@ -64,34 +66,25 @@ class CurrencyType extends BaseType
     /** @var string 新加坡元 */
     public const SGD_KEY = 'SGD';
 
-    /** @var string 瑞典克朗 */
-    public const SEK_KEY = 'SEK';
-
     /** @var string 港币 */
     public const HKD_KEY = 'HKD';
+
+    public const TWB_KEY = 'TWB';
+    public const KRW_KEY = 'KRW';
+    public const THB_KEY = 'THB';
+    public const PHP_KEY = 'PHP';
+    public const IDR_KEY = 'IDR';
+    public const VND_KEY = 'VND';
+
 
     /**
      * 当前在使用的货币
      * @return array
      */
+    #[Pure]
     public static function currentUseCodes(): array
     {
-        return [
-            self::AUD_KEY,
-            self::CAD_KEY,
-            self::EUR_KEY,
-            self::GBP_KEY,
-            self::JPY_KEY,
-            self::MXN_KEY,
-            self::USD_KEY,
-            self::CNY_KEY,
-            self::AED_KEY,
-            self::SAR_KEY,
-            self::EGP_KEY,
-            self::SGD_KEY,
-            self::SEK_KEY,
-            self::HKD_KEY,
-        ];
+        return array_keys(self::names());
     }
 
     /**
@@ -101,20 +94,35 @@ class CurrencyType extends BaseType
     public static function names(): array
     {
         return [
+            self::CNY_KEY => '人民币',
+            self::TWB_KEY => '台币',
+            self::HKD_KEY => '港币',
+            self::USD_KEY => '美元',
             self::AUD_KEY => '澳大利亚元',
             self::CAD_KEY => '加拿大元',
             self::EUR_KEY => '欧元',
             self::GBP_KEY => '英镑',
             self::JPY_KEY => '日元',
             self::MXN_KEY => '墨西哥比索',
-            self::USD_KEY => '美元',
-            self::CNY_KEY => '人民币',
             self::AED_KEY => '阿联酋迪拉姆',
             self::SAR_KEY => '沙特里亚尔',
             self::EGP_KEY => '埃及镑',
             self::SGD_KEY => '新加坡元',
-            self::SEK_KEY => '瑞典克朗',
-            self::HKD_KEY => '港币',
+            self::THB_KEY => '泰铢',
+            self::KRW_KEY => '韩元',
+            self::PHP_KEY => '菲律宾比索',
+            self::IDR_KEY => '印尼盾',
+            self::VND_KEY => '越南盾',
         ];
+    }
+
+    public static function items(): array
+    {
+        $items = [];
+        $names = self::names();
+        foreach (self::currentUseCodes() as $currentUseCode) {
+            array_push($items, ['code' => $currentUseCode, 'name' => $names[$currentUseCode]]);
+        }
+        return $items;
     }
 }

@@ -14,6 +14,7 @@ namespace app\controllers;
 
 use app\core\exceptions\PayException;
 use app\core\traits\ServiceTrait;
+use app\core\types\CurrencyType;
 use Yii;
 use yii\helpers\ArrayHelper;
 use yii\rest\Controller;
@@ -138,6 +139,7 @@ class SiteController extends Controller
                 'keywords' => params('seoKeywords'),
                 'google_analytics' => params('googleAnalyticsAU'),
                 'telegram_bot_name' => params('telegramBotName'),
+                'currencies' => CurrencyType::items(),
             ],
             'menu' => [
                 [
