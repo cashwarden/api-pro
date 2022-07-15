@@ -304,9 +304,12 @@ class AnalysisService extends BaseObject
         ];
         $query = Transaction::find()->where($baseConditions)->andFilterWhere($condition);
         if (isset($params['keyword']) && $searchKeywords = trim($params['keyword'])) {
-            $query->andWhere(
-                "MATCH(`description`, `tags`, `remark`) AGAINST ('*$searchKeywords*' IN BOOLEAN MODE)"
-            );
+            $query->andWhere([
+                'or',
+                ['like', 'remark', $searchKeywords],
+                ['like', 'tags', $searchKeywords],
+                ['like', 'description', $searchKeywords],
+            ]);
         }
         if (($date = explode('~', data_get($params, 'date'))) && count($date) == 2) {
             $start = $date[0] . ' 00:00:00';
