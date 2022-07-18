@@ -442,17 +442,12 @@ class UserService
 
     public static function getCurrentMemberIds(?User $user = null): array
     {
-        if (params('memberIds')) {
-            return params('memberIds');
-        }
         /** @var User $user */
         $user = $user ?: Yii::$app->user->identity;
         $parentId = $user->parent_id ?: $user->id;
         $userIds = User::find()->select('id')->where(['parent_id' => $parentId])->column();
         $userIds = array_merge($userIds, [$parentId]);
-        $userIds = array_map('intval', array_unique($userIds));
-        Yii::$app->params['memberIds'] = $userIds;
-        return $userIds;
+        return array_map('intval', array_unique($userIds));
     }
 
     /**
